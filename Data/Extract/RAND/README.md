@@ -1,0 +1,1 @@
+The folder traces the processing of the orignal RAND HRS files available at [Data Download](https://ssl.isr.umich.edu/hrs/files2.php) page
