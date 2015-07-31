@@ -1,1 +1,1 @@
-The folder traces the processing of the orignal RAND HRS files available at [Data Download](https://ssl.isr.umich.edu/hrs/files2.php) page
+The folder traces the processing of the orignal RAND HRS files available at [Data Download](https://ssl.isr.umich.edu/hrs/files2.php) page. See the full description of the [RAND HRS data documentation](http://hrsonline.isr.umich.edu/modules/meta/rand/randhrsn/randhrsN.pdf)
