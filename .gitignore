@@ -67,3 +67,10 @@ Data/Derived/Unshared/*
 cache/
 */cache/
 */*/cache/
+
+data/extract/sean/*
+
+*/unshared/*
+*/*/unshared/*
+*/*/*/unshared/*
+
