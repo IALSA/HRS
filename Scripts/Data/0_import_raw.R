@@ -9,26 +9,38 @@ pathFiles <- file.path(pathDir,"data/extract/RAND/spss")
 list.files(pathFiles) # inspect participating studies
 
 ## @knitr import_raw_files
-
 filePaths <- list.files(pathFiles, full.names=T, recursive=T, pattern="sav$")
 fileNames <- basename(filePaths) # save only the last component
 
-# extract from SPSS file and place into a list object datas_raw
-# datas_raw <- list() 
+# read SPSS files, convert to RDS, save in derived
 for(i in 2:length(filePaths)){
 # for(i in 1){
-  filePath <- filePaths[[1]]
+  filePath <- filePaths[[i]]
   fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
   oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
   saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
 }
 
 
-ds <- readRDS("./data/derived/unshared/a93f2a.rds")
-dim(ds)
-names(ds)
+#collect all RDS in a list object
+pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared/RAND")
+filePathsRDS <- list.files(pathFiles, full.names=T, recursive=T, pattern="rds$")
+fileNamesRDSbase <- basename(filePathsRDS) # save only the last component
+fileNamesRDS <- gsub(".rds","",fileNamesRDSbase) # remove extention from the filename
+lsRAND <- list() # create empty list to population
+for(i in 1:length(filePathsRDS)){
+  lsRAND[[i]] <- readRDS(filePathsRDS[i])
+}
+names(lsRAND) <- fileNamesRDS
+
+str(lsRAND)
+
+# lsRAND is too big. We need a filter to screen what files should go it. 
+# See Issue 1:  https://github.com/IALSA/HRS/issues/1
 
 
+
+#### Developmental script beyond this point down ####
 
 ## @knitr names_labels
 names_labels <- function(file){
