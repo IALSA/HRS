@@ -52,9 +52,9 @@ Temporary Items
 devtools.zip
 # Protected Information; see cubuspl42's answer in http://stackoverflow.com/questions/2415873/exceptions-in-gitignore
 # Large data files 
-Data/Extract/RAND_vA/spss/*
-Data/Extract/RAND/spss/*
-Data/Derived/Unshared/*
+data/extract/RAND_vA/spss/*
+data/extract/RAND/spss/*
+data/derived/unshared/*
 
 # Dataset Exceptions
 !UtilityScripts/PackageDependencyList.csv
