@@ -12,32 +12,40 @@ list.files(pathFiles) # inspect participating studies
 filePaths <- list.files(pathFiles, full.names=T, recursive=T, pattern="sav$")
 fileNames <- basename(filePaths) # save only the last component
 
-# read SPSS files, convert to RDS, save in derived
-for(i in 2:length(filePaths)){
-# for(i in 1){
-  filePath <- filePaths[[i]]
-  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
-  oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
-  saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
+
+# read SPSS files, convert to RDS, save in derived only run the first time on new computer
+#for(i in 1:length(filePaths)){
+#for(i in 1){
+  #filePath <- filePaths[[i]]
+  #fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+  #oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+  #saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
 }
 
-
 #collect all RDS in a list object
-pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared/RAND")
+pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared//")
 filePathsRDS <- list.files(pathFiles, full.names=T, recursive=T, pattern="rds$")
 fileNamesRDSbase <- basename(filePathsRDS) # save only the last component
 fileNamesRDS <- gsub(".rds","",fileNamesRDSbase) # remove extention from the filename
 lsRAND <- list() # create empty list to population
-for(i in 1:length(filePathsRDS)){
-  lsRAND[[i]] <- readRDS(filePathsRDS[i])
-}
-names(lsRAND) <- fileNamesRDS
 
-str(lsRAND)
+#for(i in 1:length(filePathsRDS)){
+ # lsRAND[[i]] <- readRDS(filePathsRDS[i])
+#}
+#names(lsRAND) <- fileNamesRDS
+
+#str(lsRAND)
 
 # lsRAND is too big. We need a filter to screen what files should go it. 
 # See Issue 1:  https://github.com/IALSA/HRS/issues/1
 
+#Identify RAND file years with psychosocial variables
+psychosocial <- c("h04f1a","h06f2b","h08f2a","h10f4a","h12e1a")
+lsPsychosocial <- list()
+
+for(i in 1:length(psychosocial)){
+  lsPsychosocial[[i]]<- readRDS(paste0(pathFilesRDS, psychosocial[i],".rds"))
+}
 
 
 #### Developmental script beyond this point down ####
