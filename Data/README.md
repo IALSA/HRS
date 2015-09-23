@@ -19,11 +19,11 @@
 |K   | Last job | Last worked when, earnings when left|
 |L   | Job history | Earnings, hours, pension and retirement plans|
 |M   | Disability | limit housework, health problems prevent work|
-|N   | Health services and insurance| 
-|P   | Expectations|
-|Q   | Assets and income|
-|R   | Asset change|
-|RC  | Repeat cognition|
+|N   | Health services and insurance| Number of times overnight in hospital, nursing home covered by insurance|
+|P   | Expectations| Expecting inheritance, chance of moving in next two years, give financial help to child|
+|Q   | Assets and income| pension amounts, annuity amounts|
+|R   | Asset change| 
+|RC  | Repeat cognition| Word list, series seven, vocab|
 |S   | Widowhood and divorce|
 |T   | Wills, insurance and trusts|
 |U   | Asset verification | 
