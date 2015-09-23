@@ -6,6 +6,8 @@
 
 | Section  |Description   | Representative items  |
 |---|---|---|
-|A   |demographics   | id, age, nursing home  |
-|B   | demographics, marital  | married, SES, education   |
-|C   |   |   |
+|A   |Coverscreen  | id, age, nursing home  |
+|B   | Demographics  | married, SES, education   |
+|C   | Physical Health  | alcohol, diabetes, heart problems, felt depressed|
+|D   | Cognition | word recall, vocab, proxy rated cognition |
+|E   |
