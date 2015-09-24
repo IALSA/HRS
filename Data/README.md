@@ -22,13 +22,13 @@
 |N   | Health services and insurance| Number of times overnight in hospital, nursing home covered by insurance|
 |P   | Expectations| Expecting inheritance, chance of moving in next two years, give financial help to child|
 |Q   | Assets and income| pension amounts, annuity amounts|
-|R   | Asset change| 
+|R   | Asset change| year respondent sold a home, major home improvements|
 |RC  | Repeat cognition| Word list, series seven, vocab|
-|S   | Widowhood and divorce|
-|T   | Wills, insurance and trusts|
-|U   | Asset verification | 
-|V   | Modules | 
-|W   | Event history and social security|
-|Y   | Time calculations |
-|LB  | Psychosocial|
+|S   | Widowhood and divorce| sell assets associated with spouses death, expenses with divorce|
+|T   | Wills, insurance and trusts| does the respondent have a will, face value of life insurance policy|
+|U   | Asset verification | type of assets, asset reconciliation|
+|V   | Modules | experimental modules specific variables vary  by wave|
+|W   | Event history and social security| social security permit, use web for email|
+|Y   | Time calculations | only for 2004 wave, section total time| 
+|LB  | Psychosocial| Lack companionship, meet up with friends, ongoing financial strain|
 
