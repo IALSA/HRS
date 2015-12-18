@@ -16,29 +16,29 @@ demographics <- function(ds, year_letterid, year_label){
   }
   
 #   
-#  gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
-#  gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
-#  gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
-#  gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
-#  gsub(pattern = "GENDER", replacement = "gender", x = varnames)
-#  gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
-#  gsub(pattern = "RACE", replacement = "race", x = varnames)
-#  gsub(pattern = "STUDY", replacement = "study", x = varnames)
+ varnames <- gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
+ varnames <- gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
+ varnames <- gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
+ varnames <- gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
+ varnames <- gsub(pattern = "GENDER", replacement = "gender", x = varnames)
+ varnames <- gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
+ varnames <- gsub(pattern = "RACE", replacement = "race", x = varnames)
+ varnames <- gsub(pattern = "STUDY", replacement = "study", x = varnames)
 
    
   varnames[1:100]
   # rename essential variables with names for consistency
-  varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
-                    ifelse(varnames=="BIRTHYR","birthyr",
-                           ifelse(varnames=="BIRTHMO","birthmo",
-                                  ifelse(varnames=="DEGREE","degree",
-                                         ifelse(varnames=="GENDER","gender",
-                                                ifelse(varnames=="HISPANIC","hispanic",
-                                                       ifelse(varnames=="RACE","race",
-                                                              ifelse(varnames=="STUDY","study",varnames))))))))
+#   varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
+#                     ifelse(varnames=="BIRTHYR","birthyr",
+#                            ifelse(varnames=="BIRTHMO","birthmo",
+#                                   ifelse(varnames=="DEGREE","degree",
+#                                          ifelse(varnames=="GENDER","gender",
+#                                                 ifelse(varnames=="HISPANIC","hispanic",
+#                                                        ifelse(varnames=="RACE","race",
+#                                                               ifelse(varnames=="STUDY","study",varnames))))))))
 #   
   #create a list of demographic variables
-  # varnames2 <- varnames 
+  varnames2 <- varnames 
   colnames(ds)<-varnames2
   prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study")
   coverscreen<-varnames2[which(substring(varnames2,1,1)=="A")]
@@ -57,9 +57,9 @@ demographics <- function(ds, year_letterid, year_label){
   colnames(data)<-prescvars
   return(data)
 } 
-dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
+# dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
 
-physicalhealth<-function(ds,year_letterid,year_label){
+physicalhealth <- function(ds,year_letterid,year_label){
   
   #create a for loop that takes the first letter off 
   varnames<-colnames(ds)
