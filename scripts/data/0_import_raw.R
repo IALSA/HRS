@@ -2,6 +2,8 @@ options(width=160)
 rm(list=ls())
 cat("\f")
 
+library(Hmisc)
+
 ## @knitr setPaths
 
 pathDir <- getwd() # establish home directory
@@ -14,13 +16,13 @@ fileNames <- basename(filePaths) # save only the last component
 
 
 # read SPSS files, convert to RDS, save in derived only run the first time on new computer
-#for(i in 1:length(filePaths)){
-#for(i in 1){
-  #filePath <- filePaths[[i]]
-  #fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
-  #oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
-  #saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
-# }
+for(i in 1:length(filePaths)){
+for(i in 1){
+ filePath <- filePaths[[i]]
+  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+  oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+  saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
+ }}
 
 #collect all RDS in a list object
 pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared//")
