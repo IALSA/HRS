@@ -13,16 +13,16 @@ list.files(pathFiles) # inspect participating studies
 ## @knitr import_raw_files
 filePaths <- list.files(pathFiles, full.names=T, recursive=T, pattern="sav$")
 fileNames <- basename(filePaths) # save only the last component
-
+print(fileNames)
 
 # read SPSS files, convert to RDS, save in derived only run the first time on new computer
-for(i in 1:length(filePaths)){
-for(i in 1){
- filePath <- filePaths[[i]]
-  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
-  oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
-  saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
- }}
+#for(i in 1:length(filePaths)){
+#for(i in 1:length(filePaths)){
+ #filePath <- filePaths[[i]]
+ #fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+#oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+#saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
+#}}
 
 #collect all RDS in a list object
 pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared//")
@@ -33,11 +33,11 @@ lsRAND <- list() # create empty list to population
 
 psychosocial <- c("h04f1a","h06f2b","h08f2a","h10f4a","h12e1a")
 #### Development ####
-ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
-ds06 <- readRDS("./data/derived/unshared/RAND/h06f2b.rds")
-ds08 <- readRDS("./data/derived/unshared/RAND/h08f2a.rds")
-ds10 <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
-ds12 <- readRDS("./data/derived/unshared/RAND/h12e1a.rds")
+ds04 <- readRDS("./data/derived/unshared/h04f1a.rds")
+ds06 <- readRDS("./data/derived/unshared/h06f2b.rds")
+ds08 <- readRDS("./data/derived/unshared/h08f2a.rds")
+ds10 <- readRDS("./data/derived/unshared/h10f4a.rds")
+ds12 <- readRDS("./data/derived/unshared/h12e1a.rds")
 
 # str(ds04)
 # dim(ds04)

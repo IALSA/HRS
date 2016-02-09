@@ -794,7 +794,7 @@ psychosocial<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,2)=="LB")]
+  sectionvars<-varnames2[which(substring(varnames2,1,2)=="LB"||"lb")]
   section<-c(id,sectionvars)
   
   data<-ds[section]
