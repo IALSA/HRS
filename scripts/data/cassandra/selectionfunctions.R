@@ -77,8 +77,10 @@ physicalhealth <- function(ds,year_letterid,year_label){
   
   #create a list of demographic variables
   colnames(ds)<-varnames2
-  id<-c("hhidpn")
-  physhlth<-varnames2[which(substring(varnames2,1,1)=="C")]
+  id <- c("hhidpn")
+  # browser()
+  condition <- substring(varnames2,1,1)=="C" | substring(varnames2,1,1)=="c"
+  physhlth<-varnames2[which(condition)]
   physhlthvars<-c(id,physhlth)
   
   data<-ds[physhlthvars]

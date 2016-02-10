@@ -32,11 +32,11 @@ lsRAND <- list() # create empty list to population
 
 psychosocial <- c("h04f1a","h06f2b","h08f2a","h10f4a","h12e1a")
 #### Development ####
-ds04 <- readRDS("./Data/Derived/unshared/h04f1a.rds")
-ds06 <- readRDS("./Data/Derived/unshared/h06f2b.rds")
-ds08 <- readRDS("./Data/Derived/unshared/h08f2a.rds")
-ds10 <- readRDS("./Data/Derived/unshared/h10f4a.rds")
-ds12 <- readRDS("./Data/Derived/unshared/h12e1a.rds")
+ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
+ds06 <- readRDS("./data/derived/unshared/RAND/h06f2b.rds")
+ds08 <- readRDS("./data/derived/unshared/RAND/h08f2a.rds")
+ds10 <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
+ds12 <- readRDS("./data/derived/unshared/RAND/h12e1a.rds")
 
 # str(ds04)
 # dim(ds04)
@@ -98,7 +98,8 @@ head(psych04)
 
 physhlth04 <- data.table(physicalhealth(ds04,"J",".04"))
 setkey(physhlth04,hhidpn.04)
-head(physhlth04)
+# head(physhlth04)
+(nl <- names_labels(ds0=as.data.frame(physhlth04))) 
 
 hrs04<- demo04[help04]
 head(hrs04)
@@ -130,7 +131,7 @@ head(psych06)
 
 physhlth06 <- data.table(physicalhealth(ds06,"K",".06"))
 setkey(physhlth06,hhidpn.06)
-head(physhlth06)
+(nl <- names_labels(ds0=as.data.frame(physhlth06)))
 
 hrs06<- demo06[help06]
 hrs06<-hrs06[disability06]
@@ -154,13 +155,13 @@ disability08<-data.table(disability(ds08,"l",".08"))
 setkey(disability08,hhidpn.08)
 head(disability08)
 
-psych08<-data.table(psychosocial(ds08,"l",".08"))
+psych08 <- data.table(psychosocial(ds08,"l",".08"))
 setkey(psych08,hhidpn.08)
 head(psych08)
 
 physhlth08 <- data.table(physicalhealth(ds08,"l",".08"))
-setkey(physhlth08,hhidpn.08)
-head(physhlth08)
+data.table::setkey(physhlth08,hhidpn.08)
+(nl <- names_labels(ds0=as.data.frame(physhlth08)))
 
 hrs08<- demo08[help08]
 head(hrs08)
@@ -189,8 +190,8 @@ setkey(psych10,hhidpn.10)
 head(psych10)
 
 physhlth10 <- data.table(physicalhealth(ds10,"m",".10"))
-setkey(physhlth10,hhidpn.10)
-head(physhlth10)
+data.table::setkey(physhlth10,hhidpn.10)
+(nl <- names_labels(ds0=as.data.frame(physhlth10)))
 
 hrs10<- demo10[help10]
 head(hrs10)
