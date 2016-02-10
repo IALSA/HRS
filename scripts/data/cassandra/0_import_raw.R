@@ -199,7 +199,38 @@ hrs10<-hrs10[disability10]
 hrs10<-hrs10[psych10]
 hrs10<-hrs10[physhlth10]
 
+#2012
+demo12<-data.table(demographics(ds12,"n","12"))
+setkey(demo12,hhidpn.12)
+head(demo12)
 
+help12<-data.table(funlimitshelp(ds12,"n",".12"))
+setkey(help12,hhidpn.12)
+head(help12)
+tables()
 
+disability12<-data.table(disability(ds12,"n",".12"))
+setkey(disability12,hhidpn.12)
+head(disability12)
 
+psych12<-data.table(psychosocial(ds12,"n",".12"))
+setkey(psych12,hhidpn.12)
+head(psych12)
 
+physhlth12 <- data.table(physicalhealth(ds12,"n",".12"))
+data.table::setkey(physhlth12,hhidpn.12)
+(nl <- names_labels(ds0=as.data.frame(physhlth12)))
+
+hrs12<- demo12[help12]
+head(hrs12)
+hrs12<-hrs12[disability12]
+hrs12<-hrs12[psych12]
+hrs12<-hrs12[physhlth12]
+
+hrs <- hrs04[hrs06]
+hrs <- hrs[hrs08]
+hrs <- hrs[hrs10]
+hrs <- hrs[hrs12]
+
+saveRDS(hrs, paste0("./data/derived/unshared/", "hrs", ".rds"))
+write.csv(hrs,"./data/derived/unshared/hrs.csv")
