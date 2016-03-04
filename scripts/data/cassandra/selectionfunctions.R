@@ -1,3 +1,4 @@
+#ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
 demographics <- function(ds, year_letterid, year_label){
   
   #create a for loop that remove the first character from variable/column name
@@ -15,32 +16,33 @@ demographics <- function(ds, year_letterid, year_label){
     }
   }
   
-#   
- varnames <- gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
- varnames <- gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
- varnames <- gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
- varnames <- gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
- varnames <- gsub(pattern = "GENDER", replacement = "gender", x = varnames)
- varnames <- gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
- varnames <- gsub(pattern = "RACE", replacement = "race", x = varnames)
- varnames <- gsub(pattern = "STUDY", replacement = "study", x = varnames)
-
    
-  varnames[1:100]
-  # rename essential variables with names for consistency
-#   varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
-#                     ifelse(varnames=="BIRTHYR","birthyr",
-#                            ifelse(varnames=="BIRTHMO","birthmo",
-#                                   ifelse(varnames=="DEGREE","degree",
-#                                          ifelse(varnames=="GENDER","gender",
-#                                                 ifelse(varnames=="HISPANIC","hispanic",
-#                                                        ifelse(varnames=="RACE","race",
-#                                                               ifelse(varnames=="STUDY","study",varnames))))))))
-#   
+ #varnames <- gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
+ #varnames <- gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
+ #varnames <- gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
+ #varnames <- gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
+ #varnames <- gsub(pattern = "GENDER", replacement = "gender", x = varnames)
+ #varnames <- gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
+ #varnames <- gsub(pattern = "RACE", replacement = "race", x = varnames)
+ #varnames <- gsub(pattern = "STUDY", replacement = "study", x = varnames)
+ #varnames <- gsub(pattern = "PHHIDPN", replacement = "phhidpn", x = varnames)
+
+varnames[1:100]
+# rename essential variables with names for consistency
+varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
+                     ifelse(varnames=="BIRTHYR","birthyr",
+                            ifelse(varnames=="BIRTHMO","birthmo",
+                                   ifelse(varnames=="DEGREE","degree",
+                                          ifelse(varnames=="GENDER","gender",
+                                                 ifelse(varnames=="HISPANIC","hispanic",
+                                                        ifelse(varnames=="RACE","race",
+                                                               ifelse(varnames=="STUDY","study",
+                                                                      ifelse(varnames=="PHHIDPN","phhidpn",varnames)))))))))
+   
   #create a list of demographic variables
-  varnames2 <- varnames 
+  #varnames2 <- varnames 
   colnames(ds)<-varnames2
-  prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study")
+  prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study", "phhidpn")
   condition <- substring(varnames2,1,1)=="A" | substring(varnames2,1,1)=="a"
   coverscreen<-varnames2[which(condition)]
   condition <- substring(varnames2,1,1)=="B" | substring(varnames2,1,1)=="b"
@@ -59,7 +61,7 @@ demographics <- function(ds, year_letterid, year_label){
   colnames(data)<-prescvars
   return(data)
 } 
-# dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
+#dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
 
 physicalhealth <- function(ds,year_letterid,year_label){
   
@@ -818,11 +820,13 @@ psychosocial<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  condition <- substring(varnames2,1,1)=="LB" | substring(varnames2,1,1)=="lb"
+  condition <- substring(varnames2,1,2)=="LB" | substring(varnames2,1,2)=="lb"
   sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
+  
+  
   
   #add the year to the  variables
   vars<-colnames(data)

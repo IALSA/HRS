@@ -2,8 +2,10 @@ options(width=160)
 rm(list=ls())
 cat("\f")
 
+library(dplyr)
 ## @knitr setPaths
 library(data.table)
+library(Hmisc)
 
 pathDir <- getwd() # establish home directory
 pathFiles <- file.path(pathDir,"data/extract/RAND/spss")
@@ -88,6 +90,7 @@ setkey(help04,hhidpn.04)
 head(help04)
 tables()
 
+
 disability04<-data.table(disability(ds04,"J",".04"))
 setkey(disability04,hhidpn.04)
 head(disability04)
@@ -101,7 +104,7 @@ setkey(physhlth04,hhidpn.04)
 # head(physhlth04)
 (nl <- names_labels(ds0=as.data.frame(physhlth04))) 
 
-hrs04<- demo04[help04]
+hrs04<- merge(demo04, help04, by.demo04 = "hhidpn.04", by.help04 = "hhidpn.04")
 head(hrs04)
 hrs04<-hrs04[disability04]
 hrs04<-hrs04[psych04]
@@ -133,7 +136,7 @@ physhlth06 <- data.table(physicalhealth(ds06,"K",".06"))
 setkey(physhlth06,hhidpn.06)
 (nl <- names_labels(ds0=as.data.frame(physhlth06)))
 
-hrs06<- demo06[help06]
+hrs06<- merge(demo06, help06, by.demo06 = "hhidpn.06", by.help06 = "hhidpn.06")
 hrs06<-hrs06[disability06]
 hrs06<-hrs06[psych06]
 hrs06<-hrs06[physhlth06]
@@ -214,7 +217,7 @@ setkey(disability12,hhidpn.12)
 head(disability12)
 
 psych12<-data.table(psychosocial(ds12,"n",".12"))
-setkey(psych12,hhidpn.12)
+setkey(psych12,id)
 head(psych12)
 
 physhlth12 <- data.table(physicalhealth(ds12,"n",".12"))
@@ -227,10 +230,57 @@ hrs12<-hrs12[disability12]
 hrs12<-hrs12[psych12]
 hrs12<-hrs12[physhlth12]
 
-hrs <- hrs04[hrs06]
-hrs <- hrs[hrs08]
-hrs <- hrs[hrs10]
-hrs <- hrs[hrs12]
+#Data from the 2014 wave has to be handled a bit differently because
+#it is not a RAND file therefore all sections are separate and HHID and PN are not combined.
+
+#Create ds files for 2014 data 
+pathDir <- getwd() # establish home directory
+pathFiles <- file.path(pathDir,"Data/Extract/RAND/csv14")
+list.files(pathFiles) # inspect participating studies
+
+## @knitr import_raw_files
+filePaths <- list.files(pathFiles, full.names=T, recursive=T, pattern="csv$")
+fileNames <- basename(filePaths) # save only the last component
+list.files(pathFiles) # inspect participating studies
+
+# read csv files, convert to RDS, save in derived only run the first time on new computer
+for(i in 1:length(filePaths)){
+filePath <- filePaths[[i]]
+fileName <- tail(strsplit(filePath, "/|.csv")[[1]], n=1)
+oneFile <- read.csv(filePath)
+saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
+}
+
+ds14a <- readRDS("./data/derived/unshared/H14A_R.rds")
+ds14b <- readRDS("./data/derived/unshared/H14B_R.rds")
+ds14c <- readRDS("./data/derived/unshared/H14C_R.rds")
+ds14d <- readRDS("./data/derived/unshared/H14D_R.rds")
+ds14g <- readRDS("./data/derived/unshared/H14G_R.rds")
+ds14lb <- readRDS("./data/derived/unshared/H14LB_R.rds")
+ds14RC <- readRDS("./data/derived/unshared/H14RC_R.rds")
+
+
+ds14a$hhidpn <- paste0(ds14a$HHID,"0",ds14a$PN)
+ds14b$hhidpn <- paste0(ds14b$HHID,"0",ds14b$PN)
+ds14c$hhidpn <- paste0(ds14c$HHID,"0",ds14c$PN)
+ds14d$hhidpn <- paste0(ds14d$HHID,"0",ds14d$PN)
+ds14g$hhidpn <- paste0(ds14g$HHID,"0",ds14g$PN)
+ds14lb$hhidpn <- paste0(ds14lb$HHID,"0",ds14lb$PN)
+
+psych14<-data.table(psychosocial(ds14lb,"O",".14"))
+setkey(psych14,hhidpn.14)
+head(psych14)
+
+setnames(hrs04, "hhidpn.04","hhidpn")
+setnames(hrs06, "hhidpn.06", "hhidpn")
+setnames(hrs08, "hhidpn.08", "hhidpn")
+setnames(hrs10, "hhidpn.10", "hhidpn")
+setnames(hrs12, "hhidpn.12", "hhidpn")
+
+hrs <- merge(hrs04, hrs06, by = "hhidpn")
+hrs <- merge(hrs, hrs08, by = "hhidpn")
+hrs <- merge(hrs, hrs10, by = "hhidpn")
+hrs <- merge(hrs, hrs12, by = "hhidpn")
 
 saveRDS(hrs, paste0("./data/derived/unshared/", "hrs", ".rds"))
 write.csv(hrs,"./data/derived/unshared/hrs.csv")
