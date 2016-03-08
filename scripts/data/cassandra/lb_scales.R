@@ -97,6 +97,7 @@ ds1$lonemean <- ifelse(ds1$lonemiss<6, ds1$lonetot/(11-ds1$lonemiss), NA)
 summary(ds1$lonemean)
 
 
+
 ####
 
 # Final step add the year to the  variables
