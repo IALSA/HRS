@@ -2,6 +2,7 @@ options(width=160)
 rm(list=ls())
 cat("\f")
 library(data.table)
+library(plyr)
 
 pathDir <- getwd() # establish home directory
 pathFiles <- file.path(pathDir,"Data/Derived/unshared//")
@@ -25,13 +26,15 @@ ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
     }
   }
   
+  #changes all the variable names to lower case
+  names(ds) <- tolower(varnames)
+  varnames2 <- names(ds)
   #rename essential variables with names for consistency
-  varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
+  #varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
   
   #create a list of variables to include
-  colnames(ds)<-varnames2
   id<-c("hhidpn")
-  condition <- substring(varnames2,1,2)=="LB" | substring(varnames2,1,2)=="lb"
+  condition <- substring(varnames2,1,2)=="lb"
   sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
@@ -42,32 +45,17 @@ ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
 #Note that the numbering of specific items occasionally changes from year to year.
 #Loneliness scale summary
 
+
+setnames(ds1, old = c('lb019a','lb019b','lb019c','lb019d','lb019e','lb019f','lb019g','lb019h','lb019i'
+                    ,'lb019j','lb019k'), new = c('lone1','lone2','lone3','lone4','lone5','lone6','lone7',
+                    'lone8','lone9','lone10','lone11'))
+  
 #Reverse code items 20a 20b 20c and 20e (19a 19b 19c and 19e in some years)
 
-ds1$lone1[ds1$LB019A==1] <- 3
-ds1$lone1[ds1$LB019A==2]<- 2
-ds1$lone1[ds1$LB019A==3]<- 1
-
-ds1$lone2[ds1$LB019B==1] <- 3
-ds1$lone2[ds1$LB019B==2]<- 2
-ds1$lone2[ds1$LB019B==3]<- 1
-
-ds1$lone3[ds1$LB019C==1] <- 3
-ds1$lone3[ds1$LB019C==2]<- 2
-ds1$lone3[ds1$LB019C==3]<- 1
-
-ds1$lone5[ds1$LB019E==1] <- 3
-ds1$lone5[ds1$LB019E==2]<- 2
-ds1$lone5[ds1$LB019E==3]<- 1
-
-#otherwise rename loneliness scale variables for consistency
-ds1$lone4 <- ds1$LB019D
-ds1$lone6 <- ds1$LB019F
-ds1$lone7 <- ds1$LB019G
-ds1$lone8 <- ds1$LB019H
-ds1$lone9 <- ds1$LB019I
-ds1$lone10 <- ds1$LB019J
-ds1$lone11 <- ds1$LB019K
+ds1$lone1 <- plyr::mapvalues(ds1$lone1, from=c(1,2,3), to =c(3,2,1))
+ds1$lone2 <- plyr::mapvalues(ds1$lone2, from=c(1,2,3), to =c(3,2,1))
+ds1$lone3 <- plyr::mapvalues(ds1$lone3, from=c(1,2,3), to =c(3,2,1))
+ds1$lone5 <- plyr::mapvalues(ds1$lone5, from=c(1,2,3), to =c(3,2,1))
 
 
 #create variables that indicate missing numbers
@@ -87,9 +75,10 @@ m11 <- ifelse(is.na(ds1$lone11)==TRUE, 1, 0)
 ds1$lonemiss <- m1+m2+m3+m4+m5+m6+m7+m8+m9+m10+m10
 
 
-which(colnames(ds1)=="lone1")
-which(colnames(ds1)=="lone11")
-ds1$lonetot <- rowSums(ds1[388:398], na.rm=TRUE)
+s <- which(colnames(ds1)=="lone1")
+f <- which(colnames(ds1)=="lone11")
+ds1$lonetot <- rowSums(ds1[s:f], na.rm=TRUE)
+
 
 #Create the loneliness scale score only if there is less than 6 missing
 #this is as per codebook instructions.
@@ -100,27 +89,11 @@ summary(ds1$lonemean)
 #Create activity variable list
 #start by renaming the activity variables for consistency
 #Rename for 2014
-ds1$act1 <- ds1$LB001A
-ds1$act2 <- ds1$LB001B
-ds1$act3 <- ds1$LB001C
-ds1$act4 <- ds1$LB001D
-ds1$act5 <- ds1$LB001E
-ds1$act6 <- ds1$LB001F
-ds1$act7 <- ds1$LB001G
-ds1$act8 <- ds1$LB001H
-ds1$act9 <- ds1$LB001I
-ds1$act10 <- ds1$LB001J
-ds1$act11 <- ds1$LB001K
-ds1$act12 <- ds1$LB001L
-ds1$act13 <- ds1$LB001M
-ds1$act14 <- ds1$LB001N
-ds1$act15 <- ds1$LB001O
-ds1$act16 <- ds1$LB001P
-ds1$act17 <- ds1$LB001Q
-ds1$act18 <- ds1$LB001R
-ds1$act19 <- ds1$LB001S
-ds1$act20 <- ds1$LB001T
-ds1$act21 <- ds1$LB001U
+setnames(ds1, old = c("lb001a","lb001b","lb001c","lb001d","lb001e","lb001f","lb001g","lb001h","lb001i","lb001j",
+                      "lb001k","lb001l","lb001m","lb001n","lb001o","lb001p","lb001q","lb001r","lb001s","lb001t","lb001u"),
+              new = c('act1','act2','act3','act4','act5','act6','act7','act8','act9','act10','act11','act12','act13','act14'
+                      ,'act15','act16','act17','act18','act19','act20','act21'))
+
 
 #Adding variables should be consistent across years
 attr(ds1$act1,"label") <- "Q01A OFTEN CARE ADULT"
@@ -145,35 +118,28 @@ attr(ds1$act19,"label") <- "Q01S. OFTEN PLAY SPORT/EXERCISE"
 attr(ds1$act20,"label") <- "Q01T. OFTEN WALK FOR 20 MINS"
 attr(ds1$act21,"label") <- "Q01U. PARTICIPATE COMMUNITY ARTS GRP"
 
-which(colnames(ds1)=="act1")
-which(colnames(ds1)=="act21")
-ds1$ActivityTot <- rowSums(ds1[402:422], na.rm=FALSE)
+s <- which(colnames(ds1)=="act1")
+f <- which(colnames(ds1)=="act21")
+ds1$ActivityTot <- rowSums(ds1[s:f], na.rm=FALSE)
 summary(ds1$ActivityTot)
 ds1$mixAct <- ds1$act1+ds1$act2+ds1$act3+ds1$act4+ds1$act5+ds1$act6+ds1$act7+ds1$act12+ds1$act21
 ds1$cogAct <- ds1$act9+ds1$act11+ds1$act13+ds1$act14
 ds1$physAct <- ds1$act19+ds1$act20+ds1$act15 
 ds1$otherAct <- ds1$act8+ds1$act10+ds1$act16+ds1$act17+ds1$act18
 
-varnames <- names(ds1)
-print(varnames)
-
-#changes all the variable names to lower case
-names(ds1) <- tolower(varnames)
-
+summary(ds1$mixAct)
 
 ####
 
 
 #Q2 on the LB questionnaire is (in some years) the 5 item-life satisfaction scale
 #In 06, 08, 10, the life satisfaction scale is Q3 (Q2 is a retrospective social participation question)
-# Final step add the year to the  variables
 
-#Life satisfaction '14
-ds1$lifesat1 <- ds1$lb002a
-ds1$lifesat2 <- ds1$lb002b
-ds1$lifesat3 <- ds1$lb002c
-ds1$lifesat4 <- ds1$lb002d
-ds1$lifesat5 <- ds1$lb002e
+
+# rename Life satisfaction '14
+setnames(ds1, old=c('lb002a','lb002b','lb002c','lb002d','lb002e'),new=('lifesat1','lifesat2','lifesat3','lifesat4','lifesat5'))
+  
+
 
 attr(ds1$lifesat1,"label") <- "Q02A. LIFE IS CLOSE TO IDEAL"
 attr(ds1$lifesat2,"label") <- "Q02B. CONDITIONS OF LIFE ARE EXCELLENT"
@@ -251,6 +217,7 @@ which(colnames(ds3)=="snfriends")
 ds3$socnetwork <- rowSums(ds3[436:439])
 summary(ds3$socnetwork)
 
+# Final step add the year to the  variables
 
 vars<-colnames(ds1)
 for (i in 1:length(ds1)){
