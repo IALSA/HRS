@@ -6,8 +6,8 @@ library(plyr)
 
 pathDir <- getwd() # establish home directory
 pathFiles <- file.path(pathDir,"Data/Derived/unshared//")
-ds<- readRDS(paste0(pathFiles,"H14LB_R.RDS"))
-year_letterid <-"O"
+ds <- readRDS(paste0(pathFiles,"H14LB_R.RDS"))
+year_letterid <- "O"
 
 #only for 2014
 ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
@@ -15,30 +15,32 @@ ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
 #Temporarily blocked this out
 #psychosocial<-function(ds,year_letterid,year_label){
   
-  #create a for loop that takes the first letter off 
-  varnames<-colnames(ds)
-  
-  for (i in 1:length(varnames)){
-    if(substring(varnames[i],1,1)==year_letterid){
-      varnames[i]<-substring(varnames[i],2)
-    }else{
-      varnames[i]<-varnames[i]
-    }
+#create a for loop that takes the first letter off 
+varnames <- colnames(ds)
+
+for (i in 1:length(varnames)){
+# for (i in seq_along(varnames)){  
+  if(substring(varnames[i],1,1)==year_letterid){
+    varnames[i] <- substring(varnames[i],2)
+  } else {
+    varnames[i] <- varnames[i]
   }
+}
   
-  #changes all the variable names to lower case
-  names(ds) <- tolower(varnames)
-  varnames2 <- names(ds)
-  #rename essential variables with names for consistency
-  #varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
-  
-  #create a list of variables to include
-  id<-c("hhidpn")
-  condition <- substring(varnames2,1,2)=="lb"
-  sectionvars<-varnames2[which(condition)]
-  section<-c(id,sectionvars)
-  
-  ds1<-ds[section]
+#changes all the variable names to lower case
+names(ds) <- tolower(varnames)
+varnames2 <- names(ds)
+#rename essential variables with names for consistency
+#varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
+
+#create a list of variables to include
+id <- c("hhidpn")
+(condition <- substring(varnames2,1,2) == "lb") #logical columns with "lb" in position 2,3
+(sectionvars <- varnames2[which(condition)]) # names
+section <- c(id,sectionvars) # selection
+ds1 <- ds[section] 
+
+
   
 #} uncomment this to create the function
 
@@ -46,16 +48,41 @@ ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
 #Loneliness scale summary
 
 
-setnames(ds1, old = c('lb019a','lb019b','lb019c','lb019d','lb019e','lb019f','lb019g','lb019h','lb019i'
-                    ,'lb019j','lb019k'), new = c('lone1','lone2','lone3','lone4','lone5','lone6','lone7',
-                    'lone8','lone9','lone10','lone11'))
+# setnames(ds1, old = c('lb019a','lb019b','lb019c','lb019d','lb019e','lb019f','lb019g','lb019h','lb019i'
+#                     ,'lb019j','lb019k'), new = c('lone1','lone2','lone3','lone4','lone5','lone6','lone7',
+#                     'lone8','lone9','lone10','lone11'))
+
+
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb019a" = "loneliness_1", 
+  "lb019b" = "loneliness_2", 
+  "lb019c" = "loneliness_3", 
+  "lb019d" = "loneliness_4", 
+  "lb019e" = "loneliness_5", 
+  "lb019f" = "loneliness_6", 
+  "lb019g" = "loneliness_7", 
+  "lb019h" = "loneliness_8", 
+  "lb019i" = "loneliness_9", 
+  "lb019j" = "loneliness_10", 
+  "lb019k" = "loneliness_11" 
+))
+
+
   
 #Reverse code items 20a 20b 20c and 20e (19a 19b 19c and 19e in some years)
 
-ds1$lone1 <- plyr::mapvalues(ds1$lone1, from=c(1,2,3), to =c(3,2,1))
-ds1$lone2 <- plyr::mapvalues(ds1$lone2, from=c(1,2,3), to =c(3,2,1))
-ds1$lone3 <- plyr::mapvalues(ds1$lone3, from=c(1,2,3), to =c(3,2,1))
-ds1$lone5 <- plyr::mapvalues(ds1$lone5, from=c(1,2,3), to =c(3,2,1))
+# ds1$lone1 <- plyr::mapvalues(ds1$loneliness_1, from=c(1,2,3), to =c(3,2,1))
+# ds1$lone2 <- plyr::mapvalues(ds1$loneliness_2, from=c(1,2,3), to =c(3,2,1))
+# ds1$lone3 <- plyr::mapvalues(ds1$loneliness_3, from=c(1,2,3), to =c(3,2,1))
+# ds1$lone5 <- plyr::mapvalues(ds1$loneliness_5, from=c(1,2,3), to =c(3,2,1))
+
+reverse_coding <- function(data, variables){
+  ds1["loneliness_1"] <- plyr::mapvalues(ds1["loneliness_1"], from=c(1,2,3), to =c(3,2,1))
+}
+reverse_coding(data=ds1, variables = "loneliness_1")
+
+ds1$loneliness_1
+ds1["loneliness_1"]
 
 
 #create variables that indicate missing numbers
