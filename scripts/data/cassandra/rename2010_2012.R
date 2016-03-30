@@ -1,30 +1,74 @@
-rename2008 <- function(ds1){
+library(plyr)
+#rename2010_2012 <- function(ds1){
+#Rename variable for who answered the questionnaire
+ds <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
+
+  varnames<-colnames(ds)
+  #create a for loop that remove the first character from variable/column name  
+  for (i in 1:length(varnames)){
+    if(substring(varnames[i],1,1)=="m"){
+      varnames[i]<-substring(varnames[i],2)
+    }else{
+      varnames[i]<-varnames[i]
+    }
+  }
+  
+  #changes all the variable names to lower case
+  colnames(ds) <- tolower(varnames)
+ds1 <- ds
+colnames(ds1)
+ds2 <- plyr::rename(ds1, replace = c(
+  "lb051" = "Who_answered_qs"
+))
+
+
 #Rename for Activity variables 
-#2008 (two of the items were not included)
-#Do activities with grandchildren, nieces/nephews, or neighborhood children (NA for 2008)
-#watch television (NA for 2008)
-ds1$activity_2 <- NA
-ds1$activity_10 <- NA
+#2012 and 2010 (note that in 2012 and 2010 there is not item 001U otherwise the item names remain consistent with 2014)
 ds1 <- plyr::rename(x=ds1, replace = c(
   "lb001a" = "activity_1",
-  "lb001b" = "activity_3",
-  "lb001c" = "activity_4",
-  "lb001d" = "activity_5",
-  "lb001e" = "activity_6",
-  "lb001f" = "activity_7",
-  "lb001g" = "activity_8",
-  "lb001h" = "activity_9",
-  "lb001i" = "activity_11",
-  "lb001j" = "activity_12",
-  "lb001k" = "activity_13",
-  "lb001l" = "activity_14",
-  "lb001m" = "activity_15",
-  "lb001n" = "activity_16",
-  "lb001o" = "activity_17",
-  "lb001p" = "activity_18",
-  "lb001q" = "activity_19",
-  "lb001r" = "activity_20"
+  "lb001b" = "activity_2",
+  "lb001c" = "activity_3",
+  "lb001d" = "activity_4",
+  "lb001e" = "activity_5",
+  "lb001f" = "activity_6",
+  "lb001g" = "activity_7",
+  "lb001h" = "activity_8",
+  "lb001i" = "activity_9",
+  "lb001j" = "activity_10",
+  "lb001k" = "activity_11",
+  "lb001l" = "activity_12",
+  "lb001m" = "activity_13",
+  "lb001n" = "activity_14",
+  "lb001o" = "activity_15",
+  "lb001p" = "activity_16",
+  "lb001q" = "activity_17",
+  "lb001r" = "activity_18",
+  "lb001s" = "activity_19",
+  "lb001t" = "activity_20"
 ))
+
+#Activity variable labels (should be consistent across years)
+attr(ds1$activity_1,"label") <- "Q01A OFTEN CARE ADULT"
+attr(ds1$activity_2,"label") <- "OFTEN DO ACTIVITIES WITH GRANDCHILDREN"
+attr(ds1$activity_3,"label") <- "OFTEN VOLUNTEER YOUTH"
+attr(ds1$activity_4,"label") <- "OFTEN CHARITY WORK"
+attr(ds1$activity_5,"label") <- "Q01E. OFTEN EDUCATION"
+attr(ds1$activity_6,"label") <- "Q01F. OFTEN ATTEND SPORTS/SOCIAL/CLUB"
+attr(ds1$activity_7,"label") <- "Q01G. OFTEN ATTEND NON RELIGIOUS ORGS"
+attr(ds1$activity_8,"label") <- "Q01H. OFTEN PRAY PRIVATELY"
+attr(ds1$activity_9,"label") <- "Q01I. OFTEN READ"
+attr(ds1$activity_10,"label") <- "Q01J. OFTEN WATCH TELEVISION"
+attr(ds1$activity_11,"label") <- "Q01K. OFTEN DO WORD GAMES"
+attr(ds1$activity_12,"label") <- "Q01L. OFTEN PLAY CARDS AND GAMES"
+attr(ds1$activity_13,"label") <- "Q01M. OFTEN DO WRITING"
+attr(ds1$activity_14,"label") <- "Q01N. OFTEN USE COMPUTER"
+attr(ds1$activity_15,"label") <- "Q01O. OFTEN MAINTENANCE/GARDENING"
+attr(ds1$activity_16,"label") <- "Q01P. OFTEN BAKE OR COOK"
+attr(ds1$activity_17,"label") <- "Q01Q. OFTEN SEW OR KNIT"
+attr(ds1$activity_18,"label") <- "Q01R. OFTEN DO HOBBY"
+attr(ds1$activity_19,"label") <- "Q01S. OFTEN PLAY SPORT/EXERCISE"
+attr(ds1$activity_20,"label") <- "Q01T. OFTEN WALK FOR 20 MINS"
+
 
 #Loneliness scale 2008, 2010, 2012
 ds1 <- plyr::rename(x=ds1, replace = c(
@@ -55,6 +99,7 @@ attr(ds1$lifesatisfaction_2,"label") <- "Q02B. CONDITIONS OF LIFE ARE EXCELLENT"
 attr(ds1$lifesatisfaction_3,"label") <- "Q02C. SATISFIED WITH LIFE"
 attr(ds1$lifesatisfaction_4,"label") <- "Q02D. HAVE IMPORTANT THINGS IN LIFE"
 attr(ds1$lifesatisfaction_5,"label") <- "Q02E. CHANGE NOTHING IF LIVED LIFE OVER"
+
 
 #composition of social network '12, '10, '08, '06,
 ds1 <- plyr::rename(x=ds1, replace = c(
@@ -130,3 +175,4 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "lb035g"="wellbeing_7"
 ))
 }
+

@@ -39,6 +39,7 @@ ds06 <- readRDS("./data/derived/unshared/RAND/h06f2b.rds")
 ds08 <- readRDS("./data/derived/unshared/RAND/h08f2a.rds")
 ds10 <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
 ds12 <- readRDS("./data/derived/unshared/RAND/h12e1a.rds")
+ds14 <- readRDS("./data/derived/unshared/H14LB_R.rds")
 
 # str(ds04)
 # dim(ds04)
@@ -78,10 +79,32 @@ write.csv(nl12,"./data/derived/items/nl12.csv")
 
 
 #### Developmental script beyond this point down ####
-
+#sources of functions used
 source(paste0(pathDir,"/scripts/data/cassandra/selectionfunctions.R"))
+source(paste0(pathDir,"/scripts/data/cassandra/lb_scales.R"))
+source(paste0(pathDir,"/scripts/data/cassandra/rename2004.R"))
+source(paste0(pathDir,"/scripts/data/cassandra/rename2006.R"))
 
-demo04<-data.table(demographics(ds04,"J","04"))
+source(paste0(pathDir,"/scripts/data/cassandra/rename2010_2012.R"))
+
+ds04 <- preparing_variable_labels(ds04, "J", "04")
+ds04 <- rename2004(ds04)
+ds04 <- loneliness_items_recode(ds04)
+ds04 <- lifesatisfaction_summaryscores(ds04)
+ds04 <- social_support_network_recode2004(ds04)
+ds04 <- welling_scale_summarize2004(ds04)
+
+ds04_lb <- subset(ds04, select=c('loneliness_1','loneliness_2','loneliness_3',"loneliness_4","loneliness_total",'loneliness_mean',                        
+                  'lifesatisfaction_mean','snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri',
+                  'close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                  "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                  'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri',
+                  'wellbeing_total','wellbeing_mean'))
+
+ds10 <- preparing_variable_labels(ds10, "m", "10")
+ds10 <- rename2010_2012(ds10)
+demo04<-data.table(demographics(ds04R,"04"))
+
 setkey(demo04,hhidpn.04)
 head(demo04)
 

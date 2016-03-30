@@ -11,23 +11,51 @@ pathFile04 <- file.path(pathFiles, "h04f1a.Rds")
 hrs04<-readRDS(pathFile04)
 
 hrs04[1:10,1]
+demographics <- function(ds, year_letterid, year_label){
+  
+  varnames<-colnames(ds)
+  
+  #create a for loop that remove the first character from variable/column name  
+  for (i in 1:length(varnames)){
+    if(substring(varnames[i],1,1)==year_letterid){
+      varnames[i]<-substring(varnames[i],2)
+    }else{
+      varnames[i]<-varnames[i]
+    }
+  }
+  
+  #changes all the variable names to lower case
+  colnames(ds) <- tolower(varnames)
+  varnames2 <- colnames(ds)
+  
+  #create a list of demographic variables
+  prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study", "phhidpn")
+  condition <- substring(varnames2,1,1)=="a"
+  coverscreen<-varnames2[which(condition)]
+  condition <- substring(varnames2,1,1)=="b"
+  demographic<-varnames2[which(condition)]
+  demovars<-c(prescreenvars,coverscreen,demographic)
+  # browser()
+  data<-ds[demovars]
+  data[1:10,]
+  
+  #add the year to the prescreen variables
+  prescvars<-colnames(data)
+  for (i in 1:length(data)){
+    prescvars[i]<-paste0(prescvars[i], ".", year_label)
+  }
+  
+  colnames(data)<-prescvars
+  return(data)
+}
 
-demographics<-function(datayr,yrletter,yr){
+selectdemographics<-function(datayr,yrletter,yr){
 
 #create a for loop that takes the "J" for 04 off the front 
 #of the variable name and adds .04.
 varnames<-colnames(datayr)
 
-for (i in 1:length(varnames)){
-  if(substring(varnames[i],1,1)==yrletter){
-    varnames[i]<-substring(varnames[i],2)
-  }else{
-  varnames[i]<-varnames[i]
-  }
-}
-varnames[1:100]
-#rename essential variables with names for consistency
-varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
+
 
 #variables identifiable by consistent names
 colnames(datayr)<-varnames2

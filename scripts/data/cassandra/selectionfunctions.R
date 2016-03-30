@@ -1,51 +1,33 @@
 #ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
-demographics <- function(ds, year_letterid, year_label){
-  
-  #create a for loop that remove the first character from variable/column name
-  varnames<-colnames(ds)
-  
-  # grep("^O",x=varnames, perl=T, value=TRUE)
-  
-  
-  
-  for (i in 1:length(varnames)){
-    if(substring(varnames[i],1,1)==year_letterid){
-      varnames[i]<-substring(varnames[i],2)
-    }else{
-      varnames[i]<-varnames[i]
-    }
-  }
-  
-   
- #varnames <- gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
- #varnames <- gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
- #varnames <- gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
- #varnames <- gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
- #varnames <- gsub(pattern = "GENDER", replacement = "gender", x = varnames)
- #varnames <- gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
- #varnames <- gsub(pattern = "RACE", replacement = "race", x = varnames)
- #varnames <- gsub(pattern = "STUDY", replacement = "study", x = varnames)
- #varnames <- gsub(pattern = "PHHIDPN", replacement = "phhidpn", x = varnames)
 
-varnames[1:100]
-# rename essential variables with names for consistency
-varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
-                     ifelse(varnames=="BIRTHYR","birthyr",
-                            ifelse(varnames=="BIRTHMO","birthmo",
-                                   ifelse(varnames=="DEGREE","degree",
-                                          ifelse(varnames=="GENDER","gender",
-                                                 ifelse(varnames=="HISPANIC","hispanic",
-                                                        ifelse(varnames=="RACE","race",
-                                                               ifelse(varnames=="STUDY","study",
-                                                                      ifelse(varnames=="PHHIDPN","phhidpn",varnames)))))))))
-   
+# A function
+preparing_variable_labels <- function(ds, year_letterid, year_label){
+varnames<-colnames(ds)
+#create a for loop that remove the first character from variable/column name  
+for (i in 1:length(varnames)){
+  if(substring(varnames[i],1,1)==year_letterid){
+    varnames[i]<-substring(varnames[i],2)
+  }else{
+    varnames[i]<-varnames[i]
+  }
+}
+
+#changes all the variable names to lower case
+colnames(ds) <- tolower(varnames)
+return(ds)
+
+}
+
+
+demographics <- function(ds, year_label){
+  
+varnames2<-colnames(ds)
+
   #create a list of demographic variables
-  #varnames2 <- varnames 
-  colnames(ds)<-varnames2
   prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study", "phhidpn")
-  condition <- substring(varnames2,1,1)=="A" | substring(varnames2,1,1)=="a"
+  condition <- substring(varnames2,1,1)=="a"
   coverscreen<-varnames2[which(condition)]
-  condition <- substring(varnames2,1,1)=="B" | substring(varnames2,1,1)=="b"
+  condition <- substring(varnames2,1,1)=="b"
   demographic<-varnames2[which(condition)]
   demovars<-c(prescreenvars,coverscreen,demographic)
   # browser()

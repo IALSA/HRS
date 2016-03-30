@@ -1,372 +1,302 @@
-options(width=160)
-rm(list=ls())
-cat("\f")
-library(data.table)
-library(plyr)
+#################################################
+#Below, recoding and summary score calculations based on the renamed variables.
 
-pathDir <- getwd() # establish home directory
-pathFiles <- file.path(pathDir,"Data/Derived/unshared//")
-ds <- readRDS(paste0(pathFiles,"H14LB_R.RDS"))
-year_letterid <- "O"
+#source(paste0(pathDir,"/scripts/data/cassandra/rename2014.R"))
+#dslone14 <- rename2014(ds2)
 
-#only for 2014
-ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
-
-#Temporarily blocked this out
-#psychosocial<-function(ds,year_letterid,year_label){
+#Function that returns recoded loneliness scale items and loneliness scale summary scores
+full_loneliness_scale_recode <- function(data){
   
-#create a for loop that takes the first letter off 
-varnames <- colnames(ds)
+  #Reverse code items loneliness_1, 2, 3, and 5. 
 
-for (i in 1:length(varnames)){
-# for (i in seq_along(varnames)){  
-  if(substring(varnames[i],1,1)==year_letterid){
-    varnames[i] <- substring(varnames[i],2)
-  } else {
-    varnames[i] <- varnames[i]
+  reverse_coding <- function(data2, variables){
+  data2[variables] <- plyr::mapvalues(data2[,variables], from=c(1,2,3), to =c(3,2,1))
+  return(data2)
   }
+
+  variables_to_reverse_code <- c("loneliness_5")
+
+  for(i in variables_to_reverse_code){
+  data <- reverse_coding(data2=data, variable = i) 
+  }
+
+  #Check
+  summary(data$loneliness_1)
+  data[1:10,"loneliness_1"]
+
+  #create a variable to indicate the number of missing loneliness scale items.
+  data$lonemiss <- (is.na(data$loneliness_1)+is.na(data$loneliness_2)+is.na(data$loneliness_3)+is.na(data$loneliness_4)+is.na(data$loneliness_5)+is.na(data$loneliness_6)+is.na(data$loneliness_7)+is.na(data$loneliness_8)+is.na(data$loneliness_9)+is.na(data$loneliness_10)+is.na(data$loneliness_11))
+
+  #check
+  summary(data$lonemiss)
+
+  s <- which(colnames(data)=="loneliness_1")
+  f <- which(colnames(data)=="loneliness_11")
+
+  data$loneliness_total <- rowSums(data[s:f], na.rm=TRUE)
+
+  #Create the loneliness scale score only if there is less than 6 missing values
+  #this is as per codebook instructions.
+  data$loneliness_mean <- ifelse(data$lonemiss<6, data$loneliness_total/(11-data$lonemiss), NA)
+
+  summary(data$loneliness_mean)
+  return(data)
+
 }
+
+#Function that returns recoded loneliness scale items (3 items that are consistent across all years)
+#Run this first to recode the first 3 items
+
+loneliness_items_recode <- function(data){
   
-#changes all the variable names to lower case
-names(ds) <- tolower(varnames)
-varnames2 <- names(ds)
-#rename essential variables with names for consistency
-#varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
-
-#create a list of variables to include
-id <- c("hhidpn")
-(condition <- substring(varnames2,1,2) == "lb") #logical columns with "lb" in position 2,3
-(sectionvars <- varnames2[which(condition)]) # names
-section <- c(id,sectionvars) # selection
-ds1 <- ds[section] 
-
-
+#Reverse code items loneliness_1, 2, 3, and 5. 
   
-#} uncomment this to create the function
+  reverse_coding <- function(data, variables){
+    data[variables] <- plyr::mapvalues(data[,variables], from=c(1,2,3), to =c(3,2,1))
+    return(data)
+  }
+  
+  variables_to_reverse_code <- c("loneliness_1","loneliness_2", "loneliness_3")
+  
+  for(i in variables_to_reverse_code){
+    data <- reverse_coding(data, variable = i) 
+  }
 
-#Note that the numbering of specific items occasionally changes from year to year.
-#Loneliness scale summary
-
-
-# setnames(ds1, old = c('lb019a','lb019b','lb019c','lb019d','lb019e','lb019f','lb019g','lb019h','lb019i'
-#                     ,'lb019j','lb019k'), new = c('lone1','lone2','lone3','lone4','lone5','lone6','lone7',
-#                     'lone8','lone9','lone10','lone11'))
-
-
-ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb019a" = "loneliness_1", 
-  "lb019b" = "loneliness_2", 
-  "lb019c" = "loneliness_3", 
-  "lb019d" = "loneliness_4", 
-  "lb019e" = "loneliness_5", 
-  "lb019f" = "loneliness_6", 
-  "lb019g" = "loneliness_7", 
-  "lb019h" = "loneliness_8", 
-  "lb019i" = "loneliness_9", 
-  "lb019j" = "loneliness_10", 
-  "lb019k" = "loneliness_11" 
-))
-
+  #create a variable to indicate the number of missing loneliness scale items.
+  data$lonemiss <- (is.na(data$loneliness_1)+is.na(data$loneliness_2)+is.na(data$loneliness_3))
 
   
-#Reverse code items 20a 20b 20c and 20e (19a 19b 19c and 19e in some years)
-
-# ds1$lone1 <- plyr::mapvalues(ds1$loneliness_1, from=c(1,2,3), to =c(3,2,1))
-# ds1$lone2 <- plyr::mapvalues(ds1$loneliness_2, from=c(1,2,3), to =c(3,2,1))
-# ds1$lone3 <- plyr::mapvalues(ds1$loneliness_3, from=c(1,2,3), to =c(3,2,1))
-# ds1$lone5 <- plyr::mapvalues(ds1$loneliness_5, from=c(1,2,3), to =c(3,2,1))
-
-reverse_coding <- function(data, variables){
-  ds1["loneliness_1"] <- plyr::mapvalues(ds1["loneliness_1"], from=c(1,2,3), to =c(3,2,1))
+  s <- which(colnames(data)=="loneliness_1")
+  f <- which(colnames(data)=="loneliness_3")
+  
+  data$loneliness_total <- rowSums(data[s:f], na.rm=TRUE)
+  
+  #Create the loneliness scale score only if there is less than 6 missing values
+  #this is as per codebook instructions.
+  data$loneliness_mean <- ifelse(data$lonemiss<1, data$loneliness_total/(3-data$lonemiss), NA)
+  
+  summary(data$loneliness_mean)
+  return(data)
+  
 }
-reverse_coding(data=ds1, variables = "loneliness_1")
 
-ds1$loneliness_1
-ds1["loneliness_1"]
+#Testing functions
 
-
-#create variables that indicate missing numbers
-
-m1 <- ifelse(is.na(ds1$lone1)==TRUE, 1, 0)
-m2 <- ifelse(is.na(ds1$lone2)==TRUE, 1, 0)
-m3 <- ifelse(is.na(ds1$lone3)==TRUE, 1, 0)
-m4 <- ifelse(is.na(ds1$lone4)==TRUE, 1, 0)
-m5 <- ifelse(is.na(ds1$lone5)==TRUE, 1, 0)
-m6 <- ifelse(is.na(ds1$lone6)==TRUE, 1, 0)
-m7 <- ifelse(is.na(ds1$lone7)==TRUE, 1, 0)
-m8 <- ifelse(is.na(ds1$lone8)==TRUE, 1, 0)
-m9 <- ifelse(is.na(ds1$lone9)==TRUE, 1, 0)
-m10 <- ifelse(is.na(ds1$lone10)==TRUE, 1, 0)
-m11 <- ifelse(is.na(ds1$lone11)==TRUE, 1, 0)
-
-ds1$lonemiss <- m1+m2+m3+m4+m5+m6+m7+m8+m9+m10+m10
-
-
-s <- which(colnames(ds1)=="lone1")
-f <- which(colnames(ds1)=="lone11")
-ds1$lonetot <- rowSums(ds1[s:f], na.rm=TRUE)
-
-
-#Create the loneliness scale score only if there is less than 6 missing
-#this is as per codebook instructions.
-ds1$lonemean <- ifelse(ds1$lonemiss<6, ds1$lonetot/(11-ds1$lonemiss), NA)
-
-summary(ds1$lonemean)
-
-
-#Create activity variable list
-#start by renaming the activity variables for consistency
-#Rename for 2014
-setnames(ds1, old = c("lb001a","lb001b","lb001c","lb001d","lb001e","lb001f","lb001g","lb001h","lb001i","lb001j",
-                      "lb001k","lb001l","lb001m","lb001n","lb001o","lb001p","lb001q","lb001r","lb001s","lb001t","lb001u"),
-              new = c('act1','act2','act3','act4','act5','act6','act7','act8','act9','act10','act11','act12','act13','act14'
-                      ,'act15','act16','act17','act18','act19','act20','act21'))
-
-
-#Adding variables should be consistent across years
-attr(ds1$act1,"label") <- "Q01A OFTEN CARE ADULT"
-attr(ds1$act2,"label") <- "OFTEN DO ACTIVITIES WITH GRANDCHILDREN"
-attr(ds1$act3,"label") <- "OFTEN VOLUNTEER YOUTH"
-attr(ds1$act4,"label") <- "OFTEN CHARITY WORK"
-attr(ds1$act5,"label") <- "Q01E. OFTEN EDUCATION"
-attr(ds1$act6,"label") <- "Q01F. OFTEN ATTEND SPORTS/SOCIAL/CLUB"
-attr(ds1$act7,"label") <- "Q01G. OFTEN ATTEND NON RELIGIOUS ORGS"
-attr(ds1$act8,"label") <- "Q01H. OFTEN PRAY PRIVATELY"
-attr(ds1$act9,"label") <- "Q01I. OFTEN READ"
-attr(ds1$act10,"label") <- "Q01J. OFTEN WATCH TELEVISION"
-attr(ds1$act11,"label") <- "Q01K. OFTEN DO WORD GAMES"
-attr(ds1$act12,"label") <- "Q01L. OFTEN PLAY CARDS AND GAMES"
-attr(ds1$act13,"label") <- "Q01M. OFTEN DO WRITING"
-attr(ds1$act14,"label") <- "Q01N. OFTEN USE COMPUTER"
-attr(ds1$act15,"label") <- "Q01O. OFTEN MAINTENANCE/GARDENING"
-attr(ds1$act16,"label") <- "Q01P. OFTEN BAKE OR COOK"
-attr(ds1$act17,"label") <- "Q01Q. OFTEN SEW OR KNIT"
-attr(ds1$act18,"label") <- "Q01R. OFTEN DO HOBBY"
-attr(ds1$act19,"label") <- "Q01S. OFTEN PLAY SPORT/EXERCISE"
-attr(ds1$act20,"label") <- "Q01T. OFTEN WALK FOR 20 MINS"
-attr(ds1$act21,"label") <- "Q01U. PARTICIPATE COMMUNITY ARTS GRP"
-
-s <- which(colnames(ds1)=="act1")
-f <- which(colnames(ds1)=="act21")
-ds1$ActivityTot <- rowSums(ds1[s:f], na.rm=FALSE)
-summary(ds1$ActivityTot)
-ds1$mixAct <- ds1$act1+ds1$act2+ds1$act3+ds1$act4+ds1$act5+ds1$act6+ds1$act7+ds1$act12+ds1$act21
-ds1$cogAct <- ds1$act9+ds1$act11+ds1$act13+ds1$act14
-ds1$physAct <- ds1$act19+ds1$act20+ds1$act15 
-ds1$otherAct <- ds1$act8+ds1$act10+ds1$act16+ds1$act17+ds1$act18
-
-summary(ds1$mixAct)
-
-
-####
-
-
-#Q2 on the LB questionnaire is (in some years) the 5 item-life satisfaction scale
-#In 06, 08, 10, the life satisfaction scale is Q3 (Q2 is a retrospective social participation question)
-
-
-# rename Life satisfaction '14
-setnames(ds1, old=c("lb002a","lb002b","lb002c","lb002d","lb002e"), new= c("lifesat1","lifesat2","lifesat3","lifesat4","lifesat5"))
+full_activity_scale_summaryscores <- function(data){
+  s <- which(colnames(data)=="activity_1")
+  f <- which(colnames(data)=="activity_21")
+  data$ActivityTot <- rowSums(data[s:f], na.rm=FALSE)
+  summary(data$ActivityTot)
+  data$mixAct <- data$activity_1+data$activity_2+data$activity_3+data$activity_4+data$activity_5+data$activity_6+data$activity_7+data$activity_12+data$activity_21
+  data$cogAct <- data$activity_9+data$activity_11+data$activity_13+data$activity_14
+  data$physAct <- data$activity_19+data$activity_20+data$activity_15 
+  data$otherAct <- data$activity_8+data$activity_10+data$activity_16+data$activity_17+data$activity_18
   
-names(ds1)
+  return(data)
+}
 
-attr(ds1$lifesat1,"label") <- "Q02A. LIFE IS CLOSE TO IDEAL"
-attr(ds1$lifesat2,"label") <- "Q02B. CONDITIONS OF LIFE ARE EXCELLENT"
-attr(ds1$lifesat3,"label") <- "Q02C. SATISFIED WITH LIFE"
-attr(ds1$lifesat4,"label") <- "Q02D. HAVE IMPORTANT THINGS IN LIFE"
-attr(ds1$lifesat5,"label") <- "Q02E. CHANGE NOTHING IF LIVED LIFE OVER"
+#dsact14R <- full_activity_scale_summaryscores(data = dslone14R)
 
-s <- which(colnames(ds1)=="lifesat1")
-f <- which(colnames(ds1)=="lifesat5")
+#A function that creates a total score for life satisfaction and a mean score.
+lifesatisfaction_summaryscores <- function(data){
+  
+  s <- which(colnames(data)=="lifesatisfaction_1")
+  f <- which(colnames(data)=="lifesatisfaction_5")
 
-ds1$lifetot <- rowSums(ds1[s:f], na.rm=TRUE)
-m1 <- ifelse(is.na(ds1$lifesat1)==TRUE, 1, 0)
-m2 <- ifelse(is.na(ds1$lifesat2)==TRUE, 1, 0)
-m3 <- ifelse(is.na(ds1$lifesat3)==TRUE, 1, 0)
-m4 <- ifelse(is.na(ds1$lifesat4)==TRUE, 1, 0)
-m5 <- ifelse(is.na(ds1$lifesat5)==TRUE, 1, 0)
-ds1$lifesatmiss <- m1+m2+m3+m4+m5
-summary(ds1$lifesatmiss)
+  lifesatisfaction_total <- rowSums(data[s:f], na.rm=TRUE)
 
-#Calculate a life satisfaction score averaging across 5 items, less if some are missing.
-#Note that '06 scale is 1-6, '08 and onwards scale is 1-7.
-ds1$lifesatm <- ifelse(ds1$lifesatmiss<3, ds1$lifetot/(5-ds1$lifesatmiss), NA)
-summary(ds1$lifesatm)
+  data$lifesatmiss <- (is.na(data$lifesatisfaction_1)+is.na(data$lifesatisfaction_2)+is.na(data$lifesatisfaction_3)+is.na(data$lifesatisfaction_4)+is.na(data$lifesatisfaction_5))
+  summary(data$lifesatmiss)
+
+  #Calculate a life satisfaction score averaging across 5 items, less if some are missing.
+  #Note that '06 scale is 1-6, '08 and onwards scale is 1-7.
+  data$lifesatisfaction_mean <- ifelse(data$lifesatmiss<3, lifesatisfaction_total/(5-data$lifesatmiss), NA)
+  summary(data$lifesatisfaction_mean)
+  return(data)
+}
+
 
 #Q4-Q18 Social network - social integration-quality of relationships-social support
-#Q4-6 spouse/partner
-#Q7-10 children
-#Q11-14 family
-#Q15-18 friends
+#This should work for all years
 
-#composition of social network '14 (note the variable numbers change)
-setnames(ds1, old = c('lb003','lb006','lb010','lb014'), new=c('snspouse','snchild','snfamily','snfriends'))
+social_support_network_recode <- function(data){
+  
+  data$snspouse[data$snspouse==5] <- 0
+  data$snchild[data$snchild==5] <-0
+  data$snfamily[data$snfamily==5] <- 0
+  data$snfriends[data$snfriends==5] <- 0
+  data$snfriends[data$snfriends==7] <- NA
 
+  data$close_relations <- data$closechild + data$closefam + data$closefri
+  
+  s <- which(colnames(data)=="snspouse")
+  f <- which(colnames(data)=="snfriends")
+  data$socnetwork <- rowSums(data[s:f])
+  
 
-#Past here not year specific
-ds1 <- within(ds1, {snspouse[snspouse==5]<- 0
-                    snchild[snchild==5]<-0
-                    snfamily[snfamily==5]<-0
-                    snfriends[snfriends==5]<-0
-                    snfriends[snfriends==7] <- NA
-                    })
+  #Perceived social support(or relationship quality)
+  #reverse code all social support items
+  reverse_coding_socialsupport <- function(data, variables){
+  data[variables] <- plyr::mapvalues(data[,variables], from=c(1,2,3,4), to =c(4,3,2,1))
+  return(data)
+  }
 
-#number of close relationships, spouse excluded from total score
-setnames(ds1, old=c('lb005','lb009','lb013','lb017'), new=c('closespouse','closechild','closefam','closefri'))
-names(ds1)
+  socialsupport_to_reverse_code <- c('ssup1sp', 'ssup2sp', 'ssup3sp', "ssup4sp", "ssup5sp",'ssup6sp',"ssup7sp",'ssup1ch',
+  'ssup2ch', 'ssup3ch', "ssup4ch", 'ssup5ch', 'ssup6ch', 'ssup7ch','ssup1fam','ssup2fam','ssup3fam', 'ssup4fam',
+  'ssup5fam', 'ssup6fam', 'ssup7fam', 'ssup1fr', 'ssup2fr','ssup3fr','ssup4fr', 'ssup5fr','ssup6fr', 'ssup7fr')
 
-ds1 <- within(ds1,{closerel<-closechild+closefam+closefri})
-summary(ds1$closerel)
+  for(i in socialsupport_to_reverse_code){
+  data <- reverse_coding_socialsupport(data, variables = i) 
+  }
 
-#social network contact excluding spouse
-setnames(ds1, old=c("lb008a",'lb008b','lb008c','lb008d','lb012a','lb012b','lb012c','lb012d','lb016a','lb016b','lb016c','lb016d'),
-         new=c('mtchild','spkchild','wrtchild','mediachild','mtfam','spkfam','wrtfam','mediafam','mtfriend','spkfriend','wrtfriend','mediafriend'))
+ 
+  data$positive_support_spouse <- data$ssup1sp+data$ssup2sp+data$ssup3sp
+  data$positive_support_child <- data$ssup1ch+data$ssup2ch+data$ssup3ch
+  data$positive_support_fam <- data$ssup1fam+data$ssup2fam+data$ssup3fam
+  data$positive_support_fri <- data$ssup1fr+data$ssup2fr+data$ssup3fr
 
-s <- which(colnames(ds1)=="snspouse")
-f <- which(colnames(ds1)=="snfriends")
-ds1$socnetwork <- rowSums(ds1[s:f])
-summary(ds1$socnetwork)
-
-#Perceived social support(or relationship quality)
-#Positive social support rename items associated with spouse
-setnames(ds1, old=c('lb004a','lb004b','lb004c','lb004d','lb004e','lb004f','lb004g'), new=c('ssup1sp','ssup2sp','ssup3sp','ssup4sp','ssup5sp','ssup6sp','ssup7sp'))
-setnames(ds1, old=c('lb007a','lb007b','lb007c','lb007d','lb007e','lb007f','lb007g'), new=c('ssup1ch','ssup2ch','ssup3ch','ssup4ch','ssup5ch','ssup6ch','ssup7ch'))
-setnames(ds1, old=c('lb011a','lb011b','lb011c','lb011d','lb011e','lb011f','lb011g'), new=c('ssup1fam','ssup2fam','ssup3fam','ssup4fam','ssup5fam','ssup6fam','ssup7fam'))
-setnames(ds1, old=c('lb015a','lb015b','lb015c','lb015d','lb015e','lb015f','lb015g'), new=c('ssup1fr','ssup2fr','ssup3fr','ssup4fr','ssup5fr','ssup6fr','ssup7fr'))
-
-typeof(ds1$ssup1ch)
-print(ds1$ssup1sp)
-#reverse code all items
-ds1$ssup1sp <- plyr::mapvalues(ds1$ssup1sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup2sp <- plyr::mapvalues(ds1$ssup2sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup3sp <- plyr::mapvalues(ds1$ssup3sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup4sp <- plyr::mapvalues(ds1$ssup4sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup5sp <- plyr::mapvalues(ds1$ssup5sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup6sp <- plyr::mapvalues(ds1$ssup6sp, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup7sp <- plyr::mapvalues(ds1$ssup7sp, from=c(1,2,3,4), to =c(4,3,2,1))
-
-ds1$ssup1ch <- plyr::mapvalues(ds1$ssup1ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup2ch <- plyr::mapvalues(ds1$ssup2ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup3ch <- plyr::mapvalues(ds1$ssup3ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup4ch <- plyr::mapvalues(ds1$ssup4ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup5ch <- plyr::mapvalues(ds1$ssup5ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup6ch <- plyr::mapvalues(ds1$ssup6ch, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup7ch <- plyr::mapvalues(ds1$ssup7ch, from=c(1,2,3,4), to =c(4,3,2,1))
-
-ds1$ssup1fam<- plyr::mapvalues(ds1$ssup1fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup2fam<- plyr::mapvalues(ds1$ssup2fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup3fam<- plyr::mapvalues(ds1$ssup3fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup4fam<- plyr::mapvalues(ds1$ssup4fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup5fam<- plyr::mapvalues(ds1$ssup5fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup6fam<- plyr::mapvalues(ds1$ssup6fam, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup7fam<- plyr::mapvalues(ds1$ssup7fam, from=c(1,2,3,4), to =c(4,3,2,1))
-
-ds1$ssup1fr<- plyr::mapvalues(ds1$ssup1fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup2fr<- plyr::mapvalues(ds1$ssup2fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup3fr<- plyr::mapvalues(ds1$ssup3fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup4fr<- plyr::mapvalues(ds1$ssup4fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup5fr<- plyr::mapvalues(ds1$ssup5fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup6fr<- plyr::mapvalues(ds1$ssup6fr, from=c(1,2,3,4), to =c(4,3,2,1))
-ds1$ssup7fr<- plyr::mapvalues(ds1$ssup7fr, from=c(1,2,3,4), to =c(4,3,2,1))
-
-ds1$pssspouse <- ds1$ssup1sp+ds1$ssup2sp+ds1$ssup3sp
-ds1$psschild <- ds1$ssup1ch+ds1$ssup2ch+ds1$ssup3ch
-ds1$pssfam <- ds1$ssup1fam+ds1$ssup2fam+ds1$ssup3fam
-ds1$pssfr <- ds1$ssup1fr+ds1$ssup2fr+ds1$ssup3fr
-
-ds1$nssspouse <- ds1$ssup4sp+ds1$ssup5sp+ds1$ssup6sp+ds1$ssup7sp
-ds1$nsschild <- ds1$ssup4ch+ds1$ssup5ch+ds1$ssup6ch+ds1$ssup7ch
-ds1$nssfam <- ds1$ssup4fam+ds1$ssup5fam+ds1$ssup6fam+ds1$ssup7fam
-ds1$nssfr <- ds1$ssup4fr+ds1$ssup5fr+ds1$ssup6fr+ds1$ssup7ch
-
-#Positive and Negative Affect
-setnames(ds1, old=c('lb026a','lb026b','lb026c','lb026d','lb026e','lb026f','lb026g','lb026h','lb026i','lb026j','lb026k','lb026l','lb026m','lb026n'
-                    ,'lb026o','lb026p','lb026q','lb026r','lb026s','lb026t','lb026u','lb026v','lb026w','lb026x','lb026y'),
-         new=c('panas1','panas2','panas3','panas4','panas5','panas6','panas7','panas8','panas9','panas10','panas11','panas12','panas13'
-               ,'panas14','panas15','panas16','panas17','panas18','panas19','panas20','panas21','panas22','panas23','panas24','panas25'))
-print(ds1$panas1)
-s <- which(colnames(ds1)=="panas1")
-f <- which(colnames(ds1)=="panas25")
-
-
-ds1$panas1<- plyr::mapvalues(ds1$panas1, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas2<- plyr::mapvalues(ds1$panas2, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas3<- plyr::mapvalues(ds1$panas3, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas4<- plyr::mapvalues(ds1$panas4, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas5<- plyr::mapvalues(ds1$panas5, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas6<- plyr::mapvalues(ds1$panas6, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas7<- plyr::mapvalues(ds1$panas7, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas8<- plyr::mapvalues(ds1$panas8, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas9<- plyr::mapvalues(ds1$panas9, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas10<- plyr::mapvalues(ds1$panas10, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas11<- plyr::mapvalues(ds1$panas11, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas12<- plyr::mapvalues(ds1$panas12, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas13<- plyr::mapvalues(ds1$panas13, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas14<- plyr::mapvalues(ds1$panas14, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas15<- plyr::mapvalues(ds1$panas15, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas16<- plyr::mapvalues(ds1$panas16, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas17<- plyr::mapvalues(ds1$panas17, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas18<- plyr::mapvalues(ds1$panas18, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas19<- plyr::mapvalues(ds1$panas19, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas20<- plyr::mapvalues(ds1$panas20, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas21<- plyr::mapvalues(ds1$panas21, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas22<- plyr::mapvalues(ds1$panas22, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas23<- plyr::mapvalues(ds1$panas23, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas24<- plyr::mapvalues(ds1$panas24, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-ds1$panas25<- plyr::mapvalues(ds1$panas25, from=c(1,2,3,4,5), to =c(5,4,3,2,1))
-
-#positive affect score c,d,f, g, h, k, p, q, t, u, v, x, y
-#negative affect score a, b, e, i, j, l, m, n, o, r, s, w
-ds2 <- within(ds1, {paffect <- panas3+panas4+panas6+panas7+panas8+panas11+panas17+panas20+panas21+panas22+panas24+panas25
-                    naffect <- panas1+panas2+panas5+panas9+panas10+panas12+panas13+panas14+panas15+panas18+panas19+panas23
-  })
-
-#social effort/reward balance possibility but does not seem to be in the 2014 data set
-
-#Ryff Well-being measure purspose in life scale 06-12 Q35
-setnames(ds2, old=c('lb033a','lb033b','lb033c','lb033d','lb033e','lb033f','lb033g'),
-         new=c('wellb1','wellb2','wellb3', 'wellb4','wellb5','wellb6','wellb7'))
-#Reverse-code items 35 b, d, e, f
-ds2$wellb2<- plyr::mapvalues(ds2$wellb2, from=c(1,2,3, 4, 5, 6), to=c(6,5,4,3,2,1))
-ds2$wellb4<- plyr::mapvalues(ds2$wellb4, from=c(1,2,3, 4, 5, 6), to=c(6,5,4,3,2,1))
-ds2$wellb5<- plyr::mapvalues(ds2$wellb5, from=c(1,2,3, 4, 5, 6), to=c(6,5,4,3,2,1))
-ds2$wellb6<- plyr::mapvalues(ds2$wellb6, from=c(1,2,3, 4, 5, 6), to=c(6,5,4,3,2,1))
-
-s <- which(colnames(ds2)=="wellb1")
-f <- which(colnames(ds2)=="wellb7")
-ds2$wellbtot <-rowSums(ds2[s:f], na.rm=TRUE)
-
-summary(ds2$wellbtot)
-
-m1 <- ifelse(is.na(ds2$wellb1)==TRUE, 1, 0)
-m2 <- ifelse(is.na(ds2$wellb2)==TRUE, 1, 0)
-m3 <- ifelse(is.na(ds2$wellb3)==TRUE, 1, 0)
-m4 <- ifelse(is.na(ds2$wellb4)==TRUE, 1, 0)
-m5 <- ifelse(is.na(ds2$wellb5)==TRUE, 1, 0)
-m6 <- ifelse(is.na(ds2$wellb6)==TRUE, 1, 0)
-m7 <- ifelse(is.na(ds2$wellb7)==TRUE, 1, 0)
-
-ds2$missing<-m1+m2+m3+m4+m5+m6+m7
-ds2$wellbm <- ifelse(ds2$missing<3, ds2$wellbtot/(7-ds2$missing), NA)
-summary(ds2$wellbm)
-
-ds3<- subset(ds2, select=c('lone1','lone2','lone3','lone4','lone5','lone6','lone7',
-                                 'lone8','lone9','lone10','lone11',"lonetot","lonemean",
-                                 'act1','act2','act3','act4','act5','act6','act7','act8',
-                                 'act9','act10','act11','act12','act13','act14'
-                                 ,'act15','act16','act17','act18','act19','act20','act21',
-                                 "mixAct","cogAct","physAct","otherAct", "ActivityTot","lifesatm",
-                                 'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri',
-                                 'closerel','socnetwork','pssspouse','psschild','pssfam','pssfr','nssspouse','nsschild','nssfam','nssfr',
-                                 'paffect','naffect','wellbtot','wellbm'))
-
-# Final step add the year to the  variables
-vars<-colnames(ds3)
-for (i in 1:length(ds3)){
-  vars[i]<-paste0(vars[i],year_label)
+  data$negative_support_spouse <- data$ssup4sp+data$ssup5sp+data$ssup6sp+data$ssup7sp
+  data$negative_support_child <- data$ssup4ch+data$ssup5ch+data$ssup6ch+data$ssup7ch
+  data$negative_support_fam <- data$ssup4fam+data$ssup5fam+data$ssup6fam+data$ssup7fam
+  data$negative_support_fri <- data$ssup4fr+data$ssup5fr+data$ssup6fr+data$ssup7ch
+  
+  return(data)
 }
 
-colnames(data)<-vars
-return(data)
+#Q4-Q18 Social network - social integration-quality of relationships-social support
+#This is only for 2004 there is one less item in 2004 (a negative support item)
+
+social_support_network_recode2004 <- function(data){
+  
+  data$snspouse[data$snspouse==5] <- 0
+  data$snchild[data$snchild==5] <-0
+  data$snfamily[data$snfamily==5] <- 0
+  data$snfriends[data$snfriends==5] <- 0
+  data$snfriends[data$snfriends==7] <- NA
+  
+  data$close_relations <- data$closechild + data$closefam + data$closefri
+  
+  s <- which(colnames(data)=="snspouse")
+  f <- which(colnames(data)=="snfriends")
+  data$socnetwork <- rowSums(data[s:f])
+  
+  
+  #Perceived social support(or relationship quality)
+  #reverse code all social support items
+  reverse_coding_socialsupport <- function(data, variables){
+    data[variables] <- plyr::mapvalues(data[,variables], from=c(1,2,3,4), to =c(4,3,2,1))
+    return(data)
+  }
+  
+  socialsupport_to_reverse_code <- c('ssup1sp', 'ssup2sp', 'ssup3sp', "ssup5sp",'ssup6sp',"ssup7sp",'ssup1ch',
+                                     'ssup2ch', 'ssup3ch', 'ssup5ch', 'ssup6ch', 'ssup7ch','ssup1fam','ssup2fam','ssup3fam', 
+                                     'ssup5fam', 'ssup6fam', 'ssup7fam', 'ssup1fr', 'ssup2fr','ssup3fr', 'ssup5fr','ssup6fr', 'ssup7fr')
+  
+  for(i in socialsupport_to_reverse_code){
+    data <- reverse_coding_socialsupport(data, variables = i) 
+  }
+  
+  
+  data$positive_support_spouse <- data$ssup1sp+data$ssup2sp+data$ssup3sp
+  data$positive_support_child <- data$ssup1ch+data$ssup2ch+data$ssup3ch
+  data$positive_support_fam <- data$ssup1fam+data$ssup2fam+data$ssup3fam
+  data$positive_support_fri <- data$ssup1fr+data$ssup2fr+data$ssup3fr
+  
+  data$negative_support_spouse <- data$ssup5sp+data$ssup6sp+data$ssup7sp
+  data$negative_support_child <- data$ssup5ch+data$ssup6ch+data$ssup7ch
+  data$negative_support_fam <- data$ssup5fam+data$ssup6fam+data$ssup7fam
+  data$negative_support_fri <- data$ssup5fr+data$ssup6fr+data$ssup7ch
+  
+  return(data)
+}
+#socialds <- social_support_network_recode(dsact14R)
+
+
+#PANAS only available for some years. 
+panas_recode <- function(data){
+  s <- which(colnames(data)=="panas_1")
+  f <- which(colnames(data)=="panas_25")
+
+  #reverse code all items
+  reverse_coding_panas <- function(data, variables){
+  data[variables] <- plyr::mapvalues(data[,variables], from=c(1,2,3,4,5), to =c(5, 4,3,2,1))
+  return(data)
+  }
+
+  panas_to_reverse_code <- c("panas_1", "panas_2","panas_3","panas_4","panas_5","panas_6","panas_7","panas_8",
+                           "panas_9", "panas_10", "panas_11", "panas_12", "panas_13", "panas_14","panas_15",
+                           "panas_16", "panas_17", "panas_18", "panas_19", "panas_20", "panas_21", "panas_22", 
+                            "panas_23", "panas_24", "panas_25")
+
+  for(i in panas_to_reverse_code){
+  data <- reverse_coding_panas(data, variable = i) 
+  }
+
+  #positive affect score c,d,f, g, h, k, p, q, t, u, v, x, y
+  #negative affect score a, b, e, i, j, l, m, n, o, r, s, w
+  data <- within(data, {positive_affect <- panas_3+panas_4+panas_6+panas_7+panas_8+panas_11+panas_17+panas_20+panas_21+panas_22+panas_24+panas_25
+                    negative_affect <- panas_1+panas_2+panas_5+panas_9+panas_10+panas_12+panas_13+panas_14+panas_15+panas_18+panas_19+panas_23
+  })
+  
+  return(data)
+
+}
+
+# Function that recodes and summarizes the wellbeing data
+welling_scale_summarize <- function(data){
+#Reverse-code items 35 b, d, e, f
+  reverse_coding_wellbeing <- function(data, variables){
+  data[variables] <- plyr::mapvalues(data[,variables], from=c(1,2,3,4,5,6), to =c(6, 5, 4,3,2,1))
+  return(data)
+  }
+
+  wellbeing_to_reverse_code <- c("wellbeing_2", "wellbeing_4","wellbeing_5", "wellbeing_6")
+
+  for(i in wellbeing_to_reverse_code){
+  data <- reverse_coding_wellbeing(data, variable = i) 
+  }
+
+  s <- which(colnames(data)=="wellbeing_1")
+  f <- which(colnames(data)=="wellbeing_7")
+  data$wellbeing_total <-rowSums(data[s:f], na.rm=TRUE)
+
+  #Create a variable that indicates the number of missing per person.
+  data$missing <- (is.na(data$wellbeing_1) + is.na(data$wellbeing_2) + is.na(data$wellbeing_3) + is.na(data$wellbeing_4)+is.na(data$wellbeing_5)+is.na(data$wellbeing_6)+is.na(data$wellbeing_7))
+  data$wellbeing_mean <- ifelse(data$missing<3, data$wellbeing_total/(7-data$missing), NA)
+  
+  return(data)
+}
+
+# Function that recodes and summarizes the wellbeing data with only two wellbeing items given in 2004
+welling_scale_summarize2004 <- function(data){
+  #Reverse-code items 35 b, d, e, f
+
+  data[,"wellbeing_5"] <- plyr::mapvalues(data[,"wellbeing_5"], from=c(1,2,3,4,5,6), to =c(6, 5, 4,3,2,1))
+
+  
+  s <- which(colnames(data)=="wellbeing_1")
+  f <- which(colnames(data)=="wellbeing_5")
+  data$wellbeing_total <- data$wellbeing_1 + data$wellbeing_5
+  
+  #Create a variable that indicates the number of missing per person.
+  data$missing <- (is.na(data$wellbeing_1)+is.na(data$wellbeing_5))
+  data$wellbeing_mean <- data$wellbeing_total/2
+  
+  return(data)
+}
+#ds3<- subset(ds2, select=c('loneliness_1','loneliness_2','loneliness_3','loneliness_4','loneliness_5','loneliness_6','loneliness_7',
+#                           'loneliness_8','loneliness_9','loneliness_10','loneliness_11',"loneliness_total","loneliness_mean",
+#                           'activity_1','activity_2','activity_3','activity_4','activity_5','activity_6','activity_7','activity_8',
+#                             activity_9','activity_10','activity_11','activity_12','activity_13','activity_14'
+#                            ,'activity_15','activity_16','activity_17','activity_18','activity_19','activity_20','activity_21',
+#                            "mixAct","cogAct","physAct","otherAct", "ActivityTot","lifesatisfaction_mean",
+#                           'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri',
+#                           'closerel','socnetwork',"mtchild", "spkchild", "wrtchild", "mediachild", "mtfam", "spkfam", "wrtfam", "mediafam", 
+#                            "mtfriend", "spkfriend", "wrtfriend", "mediafriend",'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+#                           'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri',
+#                            'positive_affect','negative_affect','wellbeing_total','wellbeing_mean'))
+
+
+
   
 
