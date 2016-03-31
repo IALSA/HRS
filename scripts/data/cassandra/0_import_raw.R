@@ -110,7 +110,11 @@ summary(psychosocial_04$loneliness_mean_04)
 #2006
 source(paste0(pathDir,"/scripts/data/cassandra/rename2006.R"))
 ds06 <- preparing_variable_labels(ds06,"K", "06")
-ds06 <- rename2006
+ds06 <- rename2006(ds06)
+ds06 <- loneliness_three_items_recode(ds06)
+ds06 <- lifesatisfaction_summaryscores(ds06)
+ds06 <- social_support_network_recode2004(ds06)
+ds06 <- welling_scale_summarize2004(ds06)
 
 ds10 <- preparing_variable_labels(ds10, "m", "10")
 ds10 <- rename2010_2012(ds10)

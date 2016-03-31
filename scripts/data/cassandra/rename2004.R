@@ -1,5 +1,10 @@
 
 rename2004 <- function(ds1){
+
+ds1 <- plyr::rename(ds1, replace = c(
+    "lb531I" = "who_answered"
+))  
+
 #Rename for Activity variables 
 # Slightly different wording but there is an almost equivalent group participation question
 #Not including attendance at religious services, how often do you attend
