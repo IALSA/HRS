@@ -47,7 +47,7 @@ full_loneliness_scale_recode <- function(data){
 #Function that returns recoded loneliness scale items (3 items that are consistent across all years)
 #Run this first to recode the first 3 items
 
-loneliness_items_recode <- function(data){
+loneliness_three_items_recode <- function(data){
   
 #Reverse code items loneliness_1, 2, 3, and 5. 
   
@@ -117,7 +117,7 @@ lifesatisfaction_summaryscores <- function(data){
 
 
 #Q4-Q18 Social network - social integration-quality of relationships-social support
-#This should work for all years
+#This does not work for all years as one negative social support item was added
 
 social_support_network_recode <- function(data){
   
@@ -276,11 +276,11 @@ welling_scale_summarize2004 <- function(data){
   
   s <- which(colnames(data)=="wellbeing_1")
   f <- which(colnames(data)=="wellbeing_5")
-  data$wellbeing_total <- data$wellbeing_1 + data$wellbeing_5
+  data$wellbeing_total_two <- data$wellbeing_1 + data$wellbeing_5
   
   #Create a variable that indicates the number of missing per person.
-  data$missing <- (is.na(data$wellbeing_1)+is.na(data$wellbeing_5))
-  data$wellbeing_mean <- data$wellbeing_total/2
+  data$missing_two <- (is.na(data$wellbeing_1)+is.na(data$wellbeing_5))
+  data$wellbeing_mean_two <- data$wellbeing_total/2
   
   return(data)
 }

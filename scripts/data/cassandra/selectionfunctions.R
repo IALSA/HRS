@@ -819,3 +819,13 @@ psychosocial<-function(ds,year_letterid,year_label){
   colnames(data)<-vars
   return(data)
 }
+#add the year to the  variables
+add_year_to_variable <- function(data, year_label){
+  vars<-colnames(data)
+  for (i in 1:length(data)){
+    vars[i]<-paste0(vars[i],year_label)
+  }
+  
+  colnames(data)<-vars
+  return(data)
+}
