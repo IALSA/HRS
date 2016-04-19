@@ -66,7 +66,7 @@ ds1 <- plyr::rename(x=ds1, replace = c(
 
 #number of close relationships '12, '10, '08, '06 
 ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb006" = "closepouse",
+  "lb006" = "closespouse",
   "lb010" = "closechild",
   "lb014" = "closefam",
   "lb018" = "closefri"

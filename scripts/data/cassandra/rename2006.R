@@ -19,9 +19,9 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "lb020c" = "loneliness_3"
 ))
 
-attr(ds1$lb020a,"label") <- "Lack companionship"
-attr(ds1$lb020b, "label") <- "Feel left out"
-attr(ds1$lb020c, "label") <- "Feel isolated from others"
+#attr(ds1$lb020a,"label") <- "Lack companionship"
+#attr(ds1$lb020b, "label") <- "Feel left out"
+#attr(ds1$lb020c, "label") <- "Feel isolated from others"
 
 
 # 2012, 2010, 2008, 2006 Life satisfaction (Note that the scale used in 2006 is different)
@@ -49,7 +49,7 @@ ds1 <- plyr::rename(x=ds1, replace = c(
 
 #number of close relationships '12, '10, '08, '06 
 ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb006" = "closepouse",
+  "lb006" = "closespouse",
   "lb010" = "closechild",
   "lb014" = "closefam",
   "lb018" = "closefri"

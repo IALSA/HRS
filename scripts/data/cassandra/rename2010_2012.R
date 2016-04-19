@@ -1,26 +1,7 @@
-library(plyr)
-#rename2010_2012 <- function(ds1){
-#Rename variable for who answered the questionnaire
-ds <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
-
-  varnames<-colnames(ds)
-  #create a for loop that remove the first character from variable/column name  
-  for (i in 1:length(varnames)){
-    if(substring(varnames[i],1,1)=="m"){
-      varnames[i]<-substring(varnames[i],2)
-    }else{
-      varnames[i]<-varnames[i]
-    }
-  }
-  
-  #changes all the variable names to lower case
-  colnames(ds) <- tolower(varnames)
-ds1 <- ds
-colnames(ds1)
-ds2 <- plyr::rename(ds1, replace = c(
+rename2010_2012 <- function(ds1){
+ds1 <- plyr::rename(ds1, replace = c(
   "lb051" = "Who_answered_qs"
 ))
-
 
 #Rename for Activity variables 
 #2012 and 2010 (note that in 2012 and 2010 there is not item 001U otherwise the item names remain consistent with 2014)
@@ -111,7 +92,7 @@ ds1 <- plyr::rename(x=ds1, replace = c(
 
 #number of close relationships '12, '10, '08, '06 
 ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb006" = "closepouse",
+  "lb006" = "closespouse",
   "lb010" = "closechild",
   "lb014" = "closefam",
   "lb018" = "closefri"

@@ -1,46 +1,3 @@
-
-options(width=160)
-rm(list=ls())
-cat("\f")
-library(data.table)
-library(plyr)
-
-pathDir <- getwd() # establish home directory
-pathFiles <- file.path(pathDir,"Data/Derived/unshared//")
-ds <- readRDS(paste0(pathFiles,"H14LB_R.RDS"))
-year_letterid <- "O"
-
-#only for 2014
-ds$hhidpn <- paste0(ds$HHID,"0",ds$PN)
-
-#Temporarily blocked this out
-#psychosocial<-function(ds,year_letterid,year_label){
-
-#create a for loop that takes the first letter off 
-varnames <- colnames(ds)
-
-for (i in 1:length(varnames)){
-  # for (i in seq_along(varnames)){  
-  if(substring(varnames[i],1,1)==year_letterid){
-    varnames[i] <- substring(varnames[i],2)
-  } else {
-    varnames[i] <- varnames[i]
-  }
-}
-
-#changes all the variable names to lower case
-names(ds) <- tolower(varnames)
-varnames2 <- names(ds)
-
-#create a list of variables to include
-id <- c("hhidpn")
-(condition <- substring(varnames2,1,2) == "lb") #logical columns with "lb" in position 2,3
-(sectionvars <- varnames2[which(condition)]) # names
-section <- c(id,sectionvars) # selection
-ds2 <- ds[section] 
-
-# Rename variables for 2014 wave
-
 rename2014 <- function(ds1){
 
 #
@@ -241,4 +198,3 @@ return(ds1)
 
 }
 
-lbvars <- rename2014(ds1=ds2)

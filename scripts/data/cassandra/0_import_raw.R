@@ -83,8 +83,8 @@ write.csv(nl12,"./data/derived/items/nl12.csv")
 source(paste0(pathDir,"/scripts/data/cassandra/selectionfunctions.R"))
 source(paste0(pathDir,"/scripts/data/cassandra/lb_scales.R"))
 source(paste0(pathDir,"/scripts/data/cassandra/rename2004.R"))
-
-
+source(paste0(pathDir,"/scripts/data/cassandra/demographics.R"))
+source(paste0(pathDir,"/scripts/data/cassandra/physical_health.R"))
 source(paste0(pathDir,"/scripts/data/cassandra/rename2010_2012.R"))
 
 ds04 <- preparing_variable_labels(ds04, "J", "04")
@@ -93,18 +93,19 @@ ds04 <- loneliness_three_items_recode(ds04)
 ds04 <- lifesatisfaction_summaryscores(ds04)
 ds04 <- social_support_network_recode2004(ds04)
 ds04 <- welling_scale_summarize2004(ds04)
+ds04 <- physhealthrename2004_2008(ds04)
 
 psychosocial_04 <- subset(ds04, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_4","loneliness_total",'loneliness_mean',                        
                   'lifesatisfaction_mean','snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri',
                   'close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
                   "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
                   'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri',
-                  'wellbeing_total_two','wellbeing_mean_two'))
-psychosocial_04<-add_year_to_variable(data = psychosocial_04, year_label = "_04")
+                  'wellbeing_total_two','wellbeing_mean_two',"memoryproblem","Activity_vigorous", "Activity_moderate", "Activity_mild"))
 
-colnames(psychosocial_04)
+demo04 <- basicdemographics(ds04)
 
-summary(psychosocial_04$loneliness_mean_04)
+ds2004<-merge(demo04, psychosocial_04, by = "hhidpn")
+ds2004<-add_year_to_variable(data = ds2004, year_label = "_04")
 
 #############
 #2006
@@ -114,10 +115,147 @@ ds06 <- rename2006(ds06)
 ds06 <- loneliness_three_items_recode(ds06)
 ds06 <- lifesatisfaction_summaryscores(ds06)
 ds06 <- social_support_network_recode2004(ds06)
-ds06 <- welling_scale_summarize2004(ds06)
+ds06 <- welling_scale_summarize(ds06)
+ds06 <- physhealthrename2004_2008(ds06)
+demo06 <- basicdemographics(ds06)
+psychosocial_06 <- subset(ds06, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+                                         'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"memoryproblem","Activity_vigorous", "Activity_moderate", "Activity_mild"))
 
-ds10 <- preparing_variable_labels(ds10, "m", "10")
+ds2006<-merge(demo06, psychosocial_06, by = "hhidpn")
+
+ds2006<-add_year_to_variable(data = ds2006, year_label = "_06")
+
+
+##################################
+source(paste0(pathDir,"/scripts/data/cassandra/rename2008.R"))
+
+ds08 <- preparing_variable_labels(ds08,"l", "08")
+colnames(ds08)
+ds08 <- rename2008(ds08)
+ds08<- loneliness_three_items_recode(ds08)
+ds08 <- lifesatisfaction_summaryscores(ds08)
+ds08 <- social_support_network_recode(ds08)
+ds08 <- welling_scale_summarize(ds08)
+ds08 <- physhealthrename2004_2008(ds08)
+demo08 <- basicdemographics(ds08)
+psychosocial_08 <- subset(ds08, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+                                         'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"memoryproblem","Activity_vigorous", "Activity_moderate", "Activity_mild"))
+
+ds2008<-merge(demo08, psychosocial_08, by.demo08 = "hhidpn")
+
+ds2008 <- add_year_to_variable(ds2008, "_08")
+
+#####################
+
+ds10 <- preparing_variable_labels(ds10 ,"m", "10")
+colnames(ds10)
 ds10 <- rename2010_2012(ds10)
+ds10<- loneliness_three_items_recode(ds10)
+ds10 <- lifesatisfaction_summaryscores(ds10)
+ds10 <- social_support_network_recode(ds10)
+ds10 <- welling_scale_summarize(ds10)
+ds10 <- physhealthrename2010_2014(ds10)
+demo10 <- basicdemographics(ds10)
+colnames(ds10)
+psychosocial_10 <- subset(ds10, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+                                         'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"AD","dementia","Activity_vigorous", "Activity_moderate", "Activity_mild"))
+
+ds2010<-merge(demo10, psychosocial_10, by = "hhidpn")
+
+ds2010 <- add_year_to_variable(ds2010, "_10")
+
+#####2012###########
+ds12 <- preparing_variable_labels(ds12 ,"n", "12")
+colnames(ds12)
+ds12 <- rename2010_2012(ds12)
+ds12<- loneliness_three_items_recode(ds12)
+ds12 <- lifesatisfaction_summaryscores(ds12)
+ds12 <- social_support_network_recode(ds12)
+ds12 <- welling_scale_summarize(ds12)
+ds12 <- physhealthrename2010_2014(ds12)
+demo12 <- basicdemographics(ds12)
+colnames(ds12)
+psychosocial_12 <- subset(ds12, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+                                         'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"AD","dementia","Activity_vigorous", "Activity_moderate", "Activity_mild"))
+
+ds2012<-merge(demo12, psychosocial_12, by = "hhidpn")
+
+ds2012 <- add_year_to_variable(ds2012, "_12")
+
+##########2014##################
+source(paste0(pathDir,"/scripts/data/cassandra/rename2014.R"))
+dsLB14 <- readRDS("./data/derived/unshared/H14LB_R.rds")
+dsC14 <- readRDS("./data/derived/unshared/H14C_R.rds")
+dsB14 <- readRDS("./data/derived/unshared/H14B_R.rds")
+dsA14 <- readRDS("./data/derived/unshared/H14A_R.rds")
+
+dsLB14$hhidpn <- paste0(dsLB14$HHID,0,dsLB14$PN)
+dsB14$hhidpn <- paste0(dsB14$HHID, 0, dsB14$PN)
+dsC14$hhidpn <- paste0(dsC14$HHID, 0, dsC14$PN)
+dsA14$hhidpn <- paste0(dsA14$HHID, 0, dsA14$PN)
+dsA14$phhidpn <- paste0(dsA14$HHID, 0, dsA14$pn_sp.x)
+
+demo14 <- merge(dsA14, dsB14, by = "hhidpn")
+ds14 <- preparing_variable_labels(dsLB14 ,"O", "14")
+ds14 <- rename2014(ds14)
+ds14<- loneliness_three_items_recode(ds14)
+ds14 <- lifesatisfaction_summaryscores(ds14)
+ds14 <- social_support_network_recode(ds14)
+ds14 <- welling_scale_summarize(ds14)
+
+dsphys14 <- preparing_variable_labels(dsC14 ,"O", "14")
+
+dsphys14 <- physhealthrename2010_2014(dsphys14)
+ds2014<-merge(ds14, dsphys14, by = "hhidpn")
+
+demo14 <- preparing_variable_labels(demo14 ,"O", "14")
+
+demo14 <- basicdemographics2014(demo14)
+
+psychosocial_14 <- subset(ds2014, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+                                         'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
+                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
+                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"AD","dementia","Activity_vigorous", "Activity_moderate", "Activity_mild"))
+
+
+
+ds2014<-merge(demo14, psychosocial_14, by = "hhidpn")
+
+ds2014<-add_year_to_variable(data = ds2014, year_label = "_14")
+colnames(ds2014)
+
+
+
+###########Merge all years######################################
+ds2004$ID <- ds2004$hhidpn_04
+ds2006$ID <- ds2006$hhidpn_06
+ds2008$ID <- ds2008$hhidpn_08
+ds2010$ID <- ds2010$hhidpn_10
+ds2012$ID <- ds2012$hhidpn_12
+ds2014$ID <- ds2014$hhidpn_14
+
+hrs1<-merge(ds2004, ds2006, by = "ID", all = TRUE)
+hrs2<-merge(hrs1, ds2008, by = "ID", all = TRUE)
+hrs3<-merge(hrs2, ds2010, by = "ID", all = TRUE)
+hrs4<-merge(hrs3, ds2012, by = "ID", all = TRUE)
+hrs_all<-merge(hrs4, ds2014, by = "ID", all = TRUE)
+
+saveRDS(hrs_all, paste0("./data/derived/unshared/", "hrs", ".rds"))
+write.csv(hrs_all,"./data/derived/unshared/hrs.csv")
+
+
+
+AD <- subset(hrs_all, select=c())
+hrs_all$tsAD <- ts(hrs_all$A)
+#################################################################
 demo04<-data.table(demographics(ds04R,"04"))
 
 setkey(demo04,hhidpn.04)
