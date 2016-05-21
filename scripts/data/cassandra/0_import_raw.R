@@ -201,7 +201,7 @@ dsLB14$hhidpn <- paste0(dsLB14$HHID,0,dsLB14$PN)
 dsB14$hhidpn <- paste0(dsB14$HHID, 0, dsB14$PN)
 dsC14$hhidpn <- paste0(dsC14$HHID, 0, dsC14$PN)
 dsA14$hhidpn <- paste0(dsA14$HHID, 0, dsA14$PN)
-dsA14$phhidpn <- paste0(dsA14$HHID, 0, dsA14$pn_sp.x)
+dsA14$phhidpn <- ifelse(is.na(dsA14$OPN_SP)==FALSE,paste0(dsA14$HHID, 0, dsA14$OPN_SP),NA)
 
 demo14 <- merge(dsA14, dsB14, by = "hhidpn")
 ds14 <- preparing_variable_labels(dsLB14 ,"O", "14")
