@@ -1,99 +1,112 @@
-options(width=160)
-rm(list=ls())
-cat("\f")
-
 library(dplyr)
+library(zoo)
 ## @knitr setPaths
 
-pathDir <- getwd() # establish home directory
-pathFiles <- file.path(pathDir,"data/extract/RAND_vA/")
-pathFile04 <- file.path(pathFiles, "h04f1a.Rds")
-hrs04<-readRDS(pathFile04)
+basicdemographics<-function(data){
 
-hrs04[1:10,1]
+#recode as missing missing year variables
+data$b066.2[data$b066.2==9999|data$b066.2==9998] <- NA
 
-demographics<-function(datayr,yrletter,yr){
 
-#create a for loop that takes the "J" for 04 off the front 
-#of the variable name and adds .04.
-varnames<-colnames(datayr)
+#Creates single date variables 
 
-for (i in 1:length(varnames)){
-  if(substring(varnames[i],1,1)==yrletter){
-    varnames[i]<-substring(varnames[i],2)
-  }else{
-  varnames[i]<-varnames[i]
-  }
-}
-varnames[1:100]
-#rename essential variables with names for consistency
-varnames2<-ifelse(varnames=="HHIDPN","hhidpn",varnames)
+data[,'birthdate'] <- paste(data[,"birthyr"],data[,'birthmo'], sep = "-")
+data[,'birthdate'] <- as.yearmon(data$birthdate, "%Y-%m")
+data[,'interviewdate'] <- paste(data[,'a500'], data[,'a501'], sep = "-")
+data[,'interviewdate'] <- as.yearmon(data$interviewdate, "%m-%Y")
+data[,'nursinghomedate'] <- as.yearmon(paste(data[,'a065'], data[,'a066'], sep = "-"))
+data[,'firstmarriagedate'] <- as.yearmon(paste(data[,'b066.1'], data[,'b067.1'], sep = "-"))
+data[,'secondmarriagedate'] <- as.yearmon(paste(data[,'b066.2'], data[,'b067.2'], sep = "-"))
+data[,'thirdmarriagedate'] <- as.yearmon(paste(data[,'b066.3'], data[,'b067.3'], sep = "-"))
+data[,'fourthmarriagedate'] <- as.yearmon(paste(data[,'b066.4'], data[,'b067.4'], sep = "-"))
+data[,'btw_wavemarriagedate'] <- as.yearmon(paste(data[,'b056'], data[,'b057'], sep = "-"))
+data[,'btw_wave_divorcewidow_date'] <- as.yearmon(paste(data[,'b059'], data[,'b060'], sep = "-"))                                               
 
-#variables identifiable by consistent names
-colnames(datayr)<-varnames2
-id<-c("hhidpn")
-demographics<-varnames2[which(substring(varnames2,1,1)=="B")]
-vars<-c(id,demographics)
-
-data<-datayr[vars]
-data[1:10,]
+#proxy_self_interview a value of 2 means spouse is the reporter, 4 means spouse that does not live with respondent
 data <- plyr::rename(data, 
   replace = c(
-    "B002"="usborn",
-    "B006"="arriveyr",
-    "B014A"="educ",
-    "B017M"="degree",
-    "B020"="ses",
-    "B026"="fathEd",
-    "B027"="momEd",
-    "B028A"="hispanic2",
-    "B031A"="race2",
-    "B033"="childev",
-    "B034"="childliv",
-    "B035"="military",
-    "B038"="militarydis",
-    "B045"="yrslivearea",
-    "B050"="religion",
-    "B082"="relServ",
-    "B053"="relImport",
-    "B054"="englishH",
-    "B055"="marrynew",
-    "B056"="marryyr",
-    "B057"="marryyr",
-    "B058"="divwidPW",
-    "B059"="divwidmth",
-    "B060"="divwidyr",
-    "B061"="unmarried",
-    "B065"="nummarry",
-    "B066_1"="marry1yr",
-    "B067_1"="marry1mth",
-    "B068_1"="marry1end",
-    "B070_1"="marry1yrs",
-    "B066_2"="marry2yr",
-    "B067_2"="marry2mth",
-    "B068_2"="marry2end",
-    "B070_2"="marry2yrs",
-    "B066_3"="marry3yr",
-    "B067_3"="marry3mth",
-    "B068_3"="marry3end",
-    "B070_3"="marry3yrs",
-    "B066_4"="marry4yr",
-    "B067_4"="marry4mth",
-    "B068_4"="marry4end",
-    "B070_4"="marry4yrs",
-    "B063"="married2",
-    "B076"="demhelp"))
+  "a009"="proxy_self_interview",
+  "a011"="proxyratecogfunction",
+  "a012"="interview_language",
+  "a019"="currentage",
+  "a028"="nursinghome",
+  "b002"="usborn2",
+  "b006"="arriveyr",
+  #"b014a"="educ",
+  "b017m"="degree2",
+  "b020"="ses",
+  #"b028a"="hispanic2",
+  #"b031a"="race2",
+  "b050"="religion",
+  "b082"="religious_service",
+  "b053"="religious_import",
+  "b054"="englishH",
+  "b065"="nummarry",
+  "b063"="married"
+  ))
 
+data2<- subset(data, select=c("hhidpn","birthdate","birthyr","birthmo","degree","gender","hispanic","race","study", "phhidpn","interviewdate", "nursinghomedate","firstmarriagedate","secondmarriagedate","thirdmarriagedate","fourthmarriagedate",
+               "btw_wavemarriagedate", "btw_wave_divorcewidow_date","proxy_self_interview", "interview_language", "currentage","nursinghome",
+               "usborn", "arriveyr", "degree", "ses","religion", "religious_service","religious_import",
+               "englishH","nummarry","married"))
 
-#add the year to the prescreen variables
-demovars<-colnames(data)
-for (i in 1:length(data)){
-  prescvars[i]<-paste0(demovars[i],yr)
+return(data2)
 }
 
-colnames(data)<-demovars
-return(data)
-}
-demo04<-demographics(hrs04,"J",".04")
 
-demo04[1:10,]
+#Variables in years later than 2004 find these for 2004.  
+#  "a100"="nonresidentkids",
+# "a099"="residentkids",
+#"b000"="lifesatisfaction"
+
+basicdemographics2014<-function(data){
+  
+  #recode as missing missing year variables
+  data$b066.2[data$b066_2==9999|data$b066_2==9998] <- NA
+  
+  
+   
+  #Could not find birthday variables
+  #data[,'birthdate'] <- paste(data[,"birthyr"],data[,'birthmo'], sep = "-")
+  #data[,'birthdate'] <- as.yearmon(data$birthdate, "%Y-%m")
+  
+  data[,'interviewdate'] <- paste(data[,'a500'], data[,'a501'], sep = "-")
+  data[,'interviewdate'] <- as.yearmon(data$interviewdate, "%m-%Y")
+  data[,'nursinghomedate'] <- as.yearmon(paste(data[,'a065'], data[,'a066'], sep = "-"))
+  data[,'firstmarriagedate'] <- as.yearmon(paste(data[,'b066_1'], data[,'b067_1'], sep = "-"))
+  data[,'secondmarriagedate'] <- as.yearmon(paste(data[,'b066_2'], data[,'b067_2'], sep = "-"))
+  data[,'thirdmarriagedate'] <- as.yearmon(paste(data[,'b066_3'], data[,'b067_3'], sep = "-"))
+  data[,'fourthmarriagedate'] <- as.yearmon(paste(data[,'b066_4'], data[,'b067_4'], sep = "-"))
+  data[,'btw_wavemarriagedate'] <- as.yearmon(paste(data[,'b056'], data[,'b057'], sep = "-"))
+  data[,'btw_wave_divorcewidow_date'] <- as.yearmon(paste(data[,'b059'], data[,'b060'], sep = "-"))                                               
+  
+  #proxy_self_interview a value of 2 means spouse is the reporter, 4 means spouse that does not live with respondent
+  data <- plyr::rename(data, 
+                       replace = c(
+                         "a009"="proxy_self_interview",
+                         "a011"="proxyratecogfunction",
+                         "a012"="interview_language",
+                         "a019"="currentage",
+                         "a028"="nursinghome",
+                         #"pn_sp.x"="phhidpn",
+                         "b002"="usborn",
+                         "b006"="arriveyr",
+                         "b014"="educ",
+                         "b017m"="degree",
+                         "b020"="ses",
+                         "b028"="hispanic",
+                         "b091m"="race",
+                         "b050"="religion",
+                         "b082"="religious_service",
+                         #"b053"="religious_import",
+                         "b054"="englishH",
+                         "b065"="nummarry",
+                         "b063"="married"
+                       ))
+  
+  data2<- subset(data, select=c("hhidpn","degree","hispanic","race","educ", "phhidpn","interviewdate", "nursinghomedate","firstmarriagedate","secondmarriagedate","thirdmarriagedate","fourthmarriagedate",
+                                "btw_wavemarriagedate", "btw_wave_divorcewidow_date","proxy_self_interview", "interview_language", "currentage","nursinghome",
+                                "usborn", "arriveyr", "degree", "ses","religion", "religious_service","englishH","nummarry","married"))
+  
+  return(data2)
+}

@@ -1,969 +1,114 @@
-# rename and select vars for 2004
 
-require (plyr)
-ds04 <- plyr::rename(ds04, 
-                      
-  replace = c(
-    "HHIDPN"="id_2004",
-    "BIRTHYF"="BIRTHYFDis_2004",
-    "BIRTHYD"="BIRTHYDis_2004",
-    "BIRTHMO"="birthM_2004",
-    "BIRTHYR"="birthY_2004",
-    "DEGREE"="degree_2004",
-    "FIRSTIW"="Firstiyr_2004",
-    "GENDER"="female_2004",
-    "HISPANIC"="Hispanic_2004",
-    "IMMGYEAR"="Immgyear_2004",
-    "OVHHIDC"="OldHRSPN_2004",
-    "OVPNC"="OldHRSPN_2004",
-    "OVRESULT"="OverlapCas_2004",
-    "RACE"="race_2004",
-    "SCHLYRS"="eduyears_2004",
-    "SECU"="sampleerr_2004",
-    "STRATUM"="stratumid_2004",
-    "STUDY"="study_2004",
-    "USBORN"="usborn_2004",
-    "WTCOHORT"="wbirthcohort_2004",
-    "JCSR01"="CSR04_2004",
-    "JN_INHH"="RHHold_2004",
-    "JANYFINR"="FinRespHH_2004",
-    "JFIN_RHP"="FinRespID_2004",
-    "JFINR01"="FinResp04_2004",
-    "JNOFINR"="NoFinData_2004",
-    "JANYFAMR"="FamResp_2004",
-    "JFAM_RHP"="FamRespID_2004",
-    "JFAMR01"="FamResp04_2004",
-    "JNOFAMR"="NoFamData_2004",
-    "JCORES"="Coresstatus_2004",
-    "JIWLANG"="language_2004",
-    "JIWMODE"="Intmode_2004",
-    "JIWMONTH"="intmonth_2004",
-    "JIWYEAR"="intyear_2004",
-    "JMARST"="maritalstat_2004",
-    "JNURSHM"="nurshm_2004",
-    "JPPN"="spousepn_2004",
-    "JPROXY"="proxy_2004",
-    "JSUBHHIW"="subhhint_2004",
-    "JWHY0HWT"="whyhhweight_2004",
-    "JWHY0RWT"="whyresweight_2004",
-    "JSUBHHA_R"="subhhid_2004",
-    "JPN_SP"="sppn_2004",
-    "JCSRA_R"="coverresp_2004",
-    "JFAMRA_R"="famresp_2004",
-    "JFINRA_R"="financialresp_2004",
-    "JWGTHH"="hhweight_2004",
-    "JWGTR"="respweight_2004",
-    "JPNHM"="spnursinghm_2004",
-    "JA500"="intMonth_2004",
-    "JA501"="intYr_2004",
-    "JA002"="agreeInt_2004",
-    "JA009"="proxy_2004",
-    "JA010"="sameproxy_2004",
-    "JA103"="proxyrel_2004",
-    "JA011"="proxyCog_2004",
-    "JA012"="language_2004",
-    "JA019"="age_2004",
-    "JA028"="nursH_2004",
-    "JA065"="nursHmth_2004",
-    "JA066"="nursHyr_2004",
-    
-    
-    
-    
-    
-    
-    
-    
-    "JB002"="usborn_2004",
-    "JB006"="arriveyr_2004",
-    "JB014A"="educ_2004",
-    "JB017M"="degree_2004",
-    "JB020"="ses_2004",
-    "JB026"="FathEd_2004",
-    "JB027"="momEd_2004",
-    "JB028A"="hispanic_2004",
-    "JB031A"="race_2004",
-    "JB033"="childev_2004",
-    "JB034"="childliv_2004",
-    "JB035"="military_2004",
-    "JB038"="militarydis_2004",
-    "JB045"="yrslivearea_2004",
-    "JB050"="religion_2004",
-    "JB082"="relServ_2004",
-    "JB053"="relImport_2004",
-    "JB054"="englishH_2004",
-    "JB055"="marrynew_2004",
-    "JB056"="marryyr_2004",
-    "JB057"="marryyr_2004",
-    "JB058"="divwidPW_2004",
-    "JB059"="divwidmth_2004",
-    "JB060"="divwidyr_2004",
-    "JB061"="unmarried_2004",
-    "JB065"="nummarry_2004",
-    "JB066_1"="marry1yr_2004",
-    "JB067_1"="marry1mth_2004",
-    "JB068_1"="marry1end_2004",
-    "JB070_1"="marry1yrs_2004",
-    "JB066_2"="marry2yr_2004",
-    "JB067_2"="marry2mth_2004",
-    "JB068_2"="marry2end_2004",
-    "JB070_2"="marry2yrs_2004",
-    "JB066_3"="marry3yr_2004",
-    "JB067_3"="marry3mth_2004",
-    "JB068_3"="marry3end_2004",
-    "JB070_3"="marry3yrs_2004",
-    "JB066_4"="marry4yr_2004",
-    "JB067_4"="marry4mth_2004",
-    "JB068_4"="marry4end_2004",
-    "JB070_4"="marry4yrs_2004",
-    "JB063"="maritalstat_2004",
-    "JB076"="demhelp_2004",
-    "HHIDB_R"="HHIDB_R_2004",
-    "JHHIDNB_R"="HHIDNB_R_2004",
-    "PNB_R"="PNB_R_2004",
-    "JSUBHHC_R"="SUBHHC_R_2004",
-    "JCSRC_R"="CSRC_R_2004",
-    "JFAMRC_R"="FAMRC_R_2004",
-    "JFINRC_R"="FINRC_R_2004",
-    "JC001"="rhealth_2004",
-    "JC185"="diffreport_2004",
-    "JC002"="comphlth_2004",
-    "JC005"="highBP_2004",
-    "JC006"="bpmed_2004",
-    "JC008"="bpmanaged_2004",
-    "JC009"="bpworse_2004",
-    "JC211"="bpchecked_2004",
-    "JC212"="bpcheckedyr_2004",
-    "JC010"="diabetes_2004",
-    "JC214"="diabetesyr_2004",
-    "JC011"="diabetespills_2004",
-    "JC012"="insulin_2004",
-    "JC015"="diabcontrol_2004",
-    "JC016"="diabworse_2004",
-    "JC017"="kidney_2004",
-    "JC215"="sugartest_2004",
-    "JC216"="sugartestyr_2004",
-    "JC018"="cancer_2004",
-    "JC023"="cancerworse_2004",
-    "JC024"="newcancer_2004",
-    "JC028"="canceryr_2004",
-    "JC029"="cancermth_2004",
-    "JC030"="lungdis_2004",
-    "JC031"="lungworse_2004",
-    "JC032"="lungmed_2004",
-    "JC033"="lungoxy_2004",
-    "JC034"="lungresther_2004",
-    "JC035"="lungactive_2004",
-    "JC036"="heartcond_2004",
-    "JC037"="heartmed_2004",
-    "JC039"="heartworse_2004",
-    "JC040"="heartattack_2004",
-    "JC042"="hrtattackmed_2004",
-    "JC043"="heartattackyr_2004",
-    "JC044"="heartattackmth_2004",
-    "JC045"="angina_2004",
-    "JC046"="anginamed_2004",
-    "JC047"="anginalimit_2004",
-    "JC048"="heartfail_2004",
-    "JC049"="hospheartfail_2004",
-    "JC050"="heartfailmed_2004",
-    "JC051"="hearttreat_2004",
-    "JC052"="heartsurg_2004",
-    "JC053"="stroke_2004",
-    "JC055"="strokeprob_2004",
-    "JC060"="strokemed_2004",
-    "JC061"="stroketherp_2004",
-    "JC062"="strokeLW_2004",
-    "JC064"="strokeyr_2004",
-    "JC063"="strokemth_2004",
-    "JC065"="psychprob_2004",
-    "JC066"="psychworse_2004",
-    "JC067"="psychtreat_2004",
-    "JC068"="psychmeds_2004",
-    "JC069"="memorydis_2004",
-    "JC070"="arthritis_2004",
-    "JC071"="athritworse_2004",
-    "JC074"="arthmed_2004",
-    "JC075"="arthactivity_2004",
-    "JC076"="jointrepl_2004",
-    "JC218"="jointtype_2004",
-    "JC219"="osteoarth_2004",
-    "JC220"="rheumatoid_2004",
-    "JC221"="gout_2004",
-    "JC222"="arthinjury_2004",
-    "JC079"="fall2yrs_2004",
-    "JC080"="timefall_2004",
-    "JC081"="fallinjury_2004",
-    "JC082"="hipbroke_2004",
-    "JC087"="incontience_2004",
-    "JC095"="eyesrate_2004",
-    "JC098"="cataractsurg_2004",
-    "JC101"="glaucoma_2004",
-    "JC102"="hearaid_2004",
-    "JC103"="hearingrate_2004",
-    "JC083"="fallasleep_2004",
-    "JC084"="wakenight_2004",
-    "JC085"="wakeearl_2004",
-    "JC086"="rested_2004",
-    "JC104"="pain_2004",
-    "JC105"="painrate_2004",
-    "JC106"="painactivity_2004",
-    "JC107"="othermed_2004",
-    "JC223"="activityvig_2004",
-    "JC224"="activitymod_2004",
-    "JC225"="activitymild_2004",
-    "JC116"="smokeEv_2004",
-    "JC117"="smokecurrent_2004",
-    "JC118"="numcig_2004",
-    "JC125"="yrsquit_2004",
-    "JC126"="yrquit_2004",
-    "JC127"="agequit_2004",
-    "JC128"="alcohol_2004",
-    "JC129"="alcdays_2004",
-    "JC130"="alcdrinks_2004",
-    "JC131"="binge_2004",
-    "JC134"="alcever_2004",
-    "JC135"="CAGE1_2004",
-    "JC136"="CAGE2_2004",
-    "JC137"="CAGE3_2004",
-    "JC138"="CAGE4_2004",
-    "JC139"="weight_2004",
-    "JC140"="changelbs_2004",
-    "JC141"="heightft_2004",
-    "JC142"="heightin_2004",
-    "JC143"="feetswell_2004",
-    "JC144"="breathshort_2004",
-    "JC145"="dizzy_2004",
-    "JC146"="backpain_2004",
-    "JC147"="headache_2004",
-    "JC148"="fatigue_2004",
-    "JC149"="cough_2004",
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    "HHIDC_R"="HHIDC_R_2004",
-    "JHHIDNC_R"="HHIDNC_R_2004",
-    "PNC_R"="PNC_R_2004",
-    "JSUBHHD_R"="SUBHHD_R_2004",
-    "JCSRD_R"="CSRD_R_2004",
-    "JFAMRD_R"="FAMRD_R_2004",
-    "JFINRD_R"="FINRD_R_2004",
-    "JD101"="rmemory_2004",
-    "JD102"="pastmem_2004",
-    "JD104"="wordlist_2004",
-    "JD182M1"="wordIR1_2004",
-    "JD182M2"="wordIR2_2004",
-    "JD182M3"="wordIR3_2004",
-    "JD182M4"="wordIR4_2004",
-    "JD182M5"="wordIR5_2004",
-    "JD182M6"="wordIR6_2004",
-    "JD182M7"="wordIR7_2004",
-    "JD182M8"="wordIR8_2004",
-    "JD182M9"="wordIR9_2004",
-    "JD182M10"="wordIR10_2004",
-    "JD182M11"="wordIR11_2004",
-    "JD182M12"="wordIR12_2004",
-    "JD174"="wrdsImgood_2004",
-    "JD175"="wrdsIwrong_2004",
-    "JD176"="wordIforg_2004",
-    "JD177"="nowordsIm_2004",
-    "JD108M1"="wordprob1_2004",
-    "JD108M2"="wordprob2_2004",
-    "JD108M3"="wordprob4_2004",
-    "JD108M4"="wordcheck_2004",
-    "JD110"="cesd1_2004",
-    "JD111"="cesd2_2004",
-    "JD112"="cesd3_2004",
-    "JD113"="cesd4_2004",
-    "JD114"="cesd5_2004",
-    "JD115"="cesd6_2004",
-    "JD116"="cesd7_2004",
-    "JD117"="cesd8_2004",
-    "JD118"="cesd9_2004",
-    "JD120"="count_2004",
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    "JD142"="serial7s1_2004",
-    "JD143"="serial7s2_2004",
-    "JD144"="serial7s3_2004",
-    "JD145"="serial7s4_2004",
-    "JD146"="serial7s5_2004",
-    "JD183M1"="wordDR1_2004",
-    "JD183M2"="wordDR2_2004",
-    "JD183M3"="wordDR3_2004",
-    "JD183M4"="wordDR4_2004",
-    "JD183M5"="wordDR5_2004",
-    "JD183M6"="wordDR6_2004",
-    "JD183M7"="wordDR7_2004",
-    "JD183M8"="wordDR8_2004",
-    "JD183M9"="wordDR9_2004",
-    "JD183M10"="wordDR10_2004",
-    "JD183M11"="wordDR11_2004",
-    "JD183M12"="wordDR12_2004",
-    "JD183M13"="wordDR13_2004",
-    "JD183M14"="wordDR14_2004",
-    "JD183M15"="wordDR15_2004",
-    "JD183M16"="wordDR16_2004",
-    "JD184"="wrdsDgood_2004",
-    "JD185"="wrdsDwrong_2004",
-    "JD186"="wordDforg_2004",
-    "JD187"="nowordsDel_2004",
-    "JD150"="intro_2004",
-    "JD151"="qMonth_2004",
-    "JD152"="qDay_2004",
-    "JD153"="qYear_2004",
-    "JD154"="qWeekday_2004",
-    "JD155"="naming1_2004",
-    "JD156"="naming2_2004",
-    "JD157"="president_2004",
-    "JD158"="vicepres_2004",
-    "JD170"="TICScount_2004",
-    "JD170A"="TICScount65_2004",
-    "JD159"="vocabgiven_2004",
-    "JD161"="vocab1_2004",
-    "JD163"="vocab2_2004",
-    "JD165"="vocab3_2004",
-    "JD167"="vocab4_2004",
-    "JD169"="vocab5_2004",
-    "JD178"="numbers1_2004",
-    "JD179"="numbers2_2004",
-    "JD180"="numbers3_2004",
-    "JD172"="needassist_2004",
-    "JD171"="helpedcog_2004",
-    "JD501"="proxycog1_2004",
-    "JD502"="proxycog2_2004",
-    "JD505"="proxycog3_2004",
-    "JD506"="iqcode1 _2004",
-    "JD507"="iqcode1I _2004",
-    "JD508"="iqcode1w_2004",
-    "JD509"="iqcode2_2004",
-    "JD510"="iqcode2i_2004",
-    "JD511"="iqcode2w_2004",
-    "JD512"="iqcode3_2004",
-    "JD513"="iqcode3i_2004",
-    "JD514"="iqcode3w_2004",
-    "JD515"="iqcode4_2004",
-    "JD516"="iqcode4i_2004",
-    "JD517"="iqcode4w_2004",
-    "JD518"="iqcode5_2004",
-    "JD519"="iqcode5i_2004",
-    "JD520"="iqcode5w_2004",
-    "JD521"="iqcode6_2004",
-    "JD522"="iqcode6i_2004",
-    "JD523"="iqcode6w_2004",
-    "JD524"="iqcode7_2004",
-    "JD525"="iqcode7i_2004",
-    "JD526"="iqcode7w_2004",
-    "JD527"="iqcode8_2004",
-    "JD528"="iqcode8i_2004",
-    "JD529"="iqcode8w_2004",
-    "JD530"="iqcode9_2004",
-    "JD531"="iqcode9i_2004",
-    "JD532"="iqcode9w_2004",
-    "JD533"="iqcode10_2004",
-    "JD534"="iqcode10i_2004",
-    "JD535"="iqcode10w_2004",
-    "JD536"="iqcode11_2004",
-    "JD537"="iqcode11i_2004",
-    "JD538"="iqcode11w_2004",
-    "JD539"="iqcode12_2004",
-    "JD540"="iqcode12i_2004",
-    "JD541"="iqcode12w_2004",
-    "JD542"="iqcode13_2004",
-    "JD543"="iqcode13i_2004",
-    "JD544"="iqcode13w_2004",
-    "JD545"="iqcode14_2004",
-    "JD546"="iqcode14i_2004",
-    "JD547"="iqcode14w_2004",
-    "JD548"="iqcode15_2004",
-    "JD549"="iqcode15i_2004",
-    "JD550"="iqcode15w_2004",
-    "JD551"="iqcode16_2004",
-    "JD552"="iqcode16i_2004",
-    "JD553"="iqcode16w_2004",
-    "JD554"="getslost_2004",
-    "JD555"="wanderoff_2004",
-    "JD556"="leftalone_2004",
-    "JD557"="hallucinate_2004",
-    "HHIDD_R"="HHIDD_R_2004",
-    "JHHIDND_R"="HHIDND_R_2004",
-    "JI800"="I800_2004",
-    "JI801"="I801_2004",
-    "JI850"="I850_2004",
-    "JI802"="I802_2004",
-    "JI803"="I803_2004",
-    "JI804"="breath_2004",
-    "JI805M1"="I805M1_2004",
-    "JI805M2"="I805M2_2004",
-    "JI805M3"="I805M3_2004",
-    "JI805M4"="I805M4_2004",
-    "JI807"="puff1_2004",
-    "JI808"="puff2_2004",
-    "JI809"="puff3_2004",
-    "JI810"="puffeffort_2004",
-    "JI811"="puffpostition_2004",
-    "JI812"="grip_2004",
-    "JI813M1"="I813M1_2004",
-    "JI813M2"="I813M2_2004",
-    "JI813M3"="I813M3_2004",
-    "JI813M4"="I813M4_2004",
-    "JI813M5"="I813M5_2004",
-    "JI815"="domhand_2004",
-    "JI816"="gripLH1_2004",
-    "JI851"="gripRH1_2004",
-    "JI852"="gripLH2_2004",
-    "JI853"="gripRH2_2004",
-    "JI817"="gripeffort_2004",
-    "JI818"="grippos_2004",
-    "JI819"="I819_2004",
-    "JI820"="walk_2004",
-    "JI821M1"="I821M1_2004",
-    "JI821M2"="I821M2_2004",
-    "JI821M3"="I821M3_2004",
-    "JI821M4"="I821M4_2004",
-    "JI821M5"="I821M5_2004",
-    "JI823"="walktime1_2004",
-    "JI824"="walktime2_2004",
-    "JI825"="walksurf_2004",
-    "JI828"="walkaid_2004",
-    "JI830"="walkeffort_2004",
-    "JI831"="I831_2004",
-    "JI832M1"="I832M1_2004",
-    "JI832M2"="I832M2_2004",
-    "JI832M3"="I832M3_2004",
-    "JI834"="height_2004",
-    "JI835"="I835_2004",
-    "JI837"="I837_2004",
-    "JI838"="I838_2004",
-    "JI839M1"="I839M1_2004",
-    "JI839M2"="I839M2_2004",
-    "JI839M3"="I839M3_2004",
-    "JI839M4"="I839M4_2004",
-    "JI841"="weight_2004",
-    "JI842"="I842_2004",
-    "JI844"="I844_2004",
-    "JI845"="I845_2004"
-    
-    
-  
+rename2004 <- function(ds1){
+
+ds1 <- plyr::rename(ds1, replace = c(
+    "lb531I" = "who_answered"
+))  
+
+#Rename for Activity variables 
+# Slightly different wording but there is an almost equivalent group participation question
+#Not including attendance at religious services, how often do you attend
+#meetings or programs of groups, clubs, or organizations that you belong to?
+#Response options 1 more than once a week to 6 never
+ds1 <- plyr::rename(ds1, replace = c(
+  "lb502" = "Group_participation"
 ))
 
-keepvars04 <- c(
-  "id_2004",
-  "BIRTHYFDis_2004",
-  "BIRTHYDis_2004",
-  "birthM_2004",
-  "birthY_2004",
-  "degree_2004",
-  "Firstiyr_2004",
-  "female_2004",
-  "Hispanic_2004",
-  "Immgyear_2004",
-  
-  
-  
-  "race_2004",
-  "eduyears_2004",
-  "sampleerr_2004",
-  "stratumid_2004",
-  "study_2004",
-  "usborn_2004",
-  
-  "CSR04_2004",
-  "RHHold_2004",
-  "FinRespHH_2004",
-  "FinRespID_2004",
-  "FinResp04_2004",
-  
-  "FamResp_2004",
-  "FamRespID_2004",
-  "FamResp04_2004",
-  
-  "Coresstatus_2004",
-  "language_2004",
-  
-  
-  "intyear_2004",
-  "maritalstat_2004",
-  "nurshm_2004",
-  "spousepn_2004",
-  "proxy_2004",
-  "subhhint_2004",
-  "whyhhweight_2004",
-  
-  
-  "sppn_2004",
-  "coverresp_2004",
-  "famresp_2004",
-  "financialresp_2004",
-  "hhweight_2004",
-  "respweight_2004",
-  "spnursinghm_2004",
-  "intMonth_2004",
-  "intYr_2004",
-  "agreeInt_2004",
-  "proxy_2004",
-  "sameproxy_2004",
-  "proxyrel_2004",
-  "proxyCog_2004",
-  "language_2004",
-  "age_2004",
-  "nursH_2004",
-  "nursHmth_2004",
-  "nursHyr_2004",
-  
-  
-  
-  
-  
-  
-  
-  
-  "usborn_2004",
-  "arriveyr_2004",
-  "educ_2004",
-  "degree_2004",
-  "ses_2004",
-  "FathEd_2004",
-  "momEd_2004",
-  "hispanic_2004",
-  "race_2004",
-  
-  
-  
-  
-  
-  "religion_2004",
-  "relServ_2004",
-  "relImport_2004",
-  "englishH_2004",
-  "marrynew_2004",
-  "marryyr_2004",
-  "marryyr_2004",
-  "divwidPW_2004",
-  "divwidmth_2004",
-  "divwidyr_2004",
-  
-  "nummarry_2004",
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  "maritalstat_2004",
-  "demhelp_2004",
-  
-  
-  
-  
-  
-  
-  
-  "rhealth_2004",
-  "diffreport_2004",
-  "comphlth_2004",
-  "highBP_2004",
-  "bpmed_2004",
-  "bpmanaged_2004",
-  "bpworse_2004",
-  "bpchecked_2004",
-  "bpcheckedyr_2004",
-  "diabetes_2004",
-  "diabetesyr_2004",
-  "diabetespills_2004",
-  "insulin_2004",
-  "diabcontrol_2004",
-  "diabworse_2004",
-  "kidney_2004",
-  "sugartest_2004",
-  "sugartestyr_2004",
-  "cancer_2004",
-  "cancerworse_2004",
-  "newcancer_2004",
-  "canceryr_2004",
-  "cancermth_2004",
-  "lungdis_2004",
-  "lungworse_2004",
-  "lungmed_2004",
-  "lungoxy_2004",
-  "lungresther_2004",
-  "lungactive_2004",
-  "heartcond_2004",
-  "heartmed_2004",
-  "heartworse_2004",
-  "heartattack_2004",
-  "hrtattackmed_2004",
-  "heartattackyr_2004",
-  "heartattackmth_2004",
-  "angina_2004",
-  "anginamed_2004",
-  "anginalimit_2004",
-  "heartfail_2004",
-  "hospheartfail_2004",
-  "heartfailmed_2004",
-  "hearttreat_2004",
-  "heartsurg_2004",
-  "stroke_2004",
-  "strokeprob_2004",
-  "strokemed_2004",
-  "stroketherp_2004",
-  "strokeLW_2004",
-  "strokeyr_2004",
-  "strokemth_2004",
-  "psychprob_2004",
-  "psychworse_2004",
-  "psychtreat_2004",
-  "psychmeds_2004",
-  "memorydis_2004",
-  "arthritis_2004",
-  "athritworse_2004",
-  "arthmed_2004",
-  "arthactivity_2004",
-  "jointrepl_2004",
-  "jointtype_2004",
-  "osteoarth_2004",
-  "rheumatoid_2004",
-  "gout_2004",
-  "arthinjury_2004",
-  "fall2yrs_2004",
-  "timefall_2004",
-  "fallinjury_2004",
-  "hipbroke_2004",
-  "incontience_2004",
-  "eyesrate_2004",
-  "cataractsurg_2004",
-  "glaucoma_2004",
-  "hearaid_2004",
-  "hearingrate_2004",
-  "fallasleep_2004",
-  "wakenight_2004",
-  "wakeearl_2004",
-  "rested_2004",
-  "pain_2004",
-  "painrate_2004",
-  "painactivity_2004",
-  "othermed_2004",
-  "activityvig_2004",
-  "activitymod_2004",
-  "activitymild_2004",
-  "smokeEv_2004",
-  "smokecurrent_2004",
-  "numcig_2004",
-  "yrsquit_2004",
-  "yrquit_2004",
-  "agequit_2004",
-  "alcohol_2004",
-  "alcdays_2004",
-  "alcdrinks_2004",
-  "binge_2004",
-  "alcever_2004",
-  "CAGE1_2004",
-  "CAGE2_2004",
-  "CAGE3_2004",
-  "CAGE4_2004",
-  "weight_2004",
-  
-  "heightft_2004",
-  "heightin_2004",
-  "feetswell_2004",
-  "breathshort_2004",
-  "dizzy_2004",
-  "backpain_2004",
-  "headache_2004",
-  "fatigue_2004",
-  "cough_2004",
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  "HHIDC_R_2004",
-  "HHIDNC_R_2004",
-  "PNC_R_2004",
-  "SUBHHD_R_2004",
-  "CSRD_R_2004",
-  "FAMRD_R_2004",
-  "FINRD_R_2004",
-  "rmemory_2004",
-  "pastmem_2004",
-  "wordlist_2004",
-  "wordIR1_2004",
-  "wordIR2_2004",
-  "wordIR3_2004",
-  "wordIR4_2004",
-  "wordIR5_2004",
-  "wordIR6_2004",
-  "wordIR7_2004",
-  "wordIR8_2004",
-  "wordIR9_2004",
-  "wordIR10_2004",
-  "wordIR11_2004",
-  "wordIR12_2004",
-  "wrdsImgood_2004",
-  "wrdsIwrong_2004",
-  "wordIforg_2004",
-  "nowordsIm_2004",
-  "wordprob1_2004",
-  "wordprob2_2004",
-  "wordprob4_2004",
-  "wordcheck_2004",
-  "cesd1_2004",
-  "cesd2_2004",
-  "cesd3_2004",
-  "cesd4_2004",
-  "cesd5_2004",
-  "cesd6_2004",
-  "cesd7_2004",
-  "cesd8_2004",
-  "cesd9_2004",
-  "count_2004",
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  "serial7s1_2004",
-  "serial7s2_2004",
-  "serial7s3_2004",
-  "serial7s4_2004",
-  "serial7s5_2004",
-  "wordDR1_2004",
-  "wordDR2_2004",
-  "wordDR3_2004",
-  "wordDR4_2004",
-  "wordDR5_2004",
-  "wordDR6_2004",
-  "wordDR7_2004",
-  "wordDR8_2004",
-  "wordDR9_2004",
-  "wordDR10_2004",
-  "wordDR11_2004",
-  "wordDR12_2004",
-  "wordDR13_2004",
-  "wordDR14_2004",
-  "wordDR15_2004",
-  "wordDR16_2004",
-  "wrdsDgood_2004",
-  "wrdsDwrong_2004",
-  "wordDforg_2004",
-  "nowordsDel_2004",
-  "intro_2004",
-  "qMonth_2004",
-  "qDay_2004",
-  "qYear_2004",
-  "qWeekday_2004",
-  "naming1_2004",
-  "naming2_2004",
-  "president_2004",
-  "vicepres_2004",
-  "TICScount_2004",
-  "TICScount65_2004",
-  "vocabgiven_2004",
-  "vocab1_2004",
-  "vocab2_2004",
-  "vocab3_2004",
-  "vocab4_2004",
-  "vocab5_2004",
-  "numbers1_2004",
-  "numbers2_2004",
-  "numbers3_2004",
-  "needassist_2004",
-  "helpedcog_2004",
-  "proxycog1_2004",
-  "proxycog2_2004",
-  "proxycog3_2004",
-  "iqcode1 _2004",
-  "iqcode1I _2004",
-  "iqcode1w_2004",
-  "iqcode2_2004",
-  "iqcode2i_2004",
-  "iqcode2w_2004",
-  "iqcode3_2004",
-  "iqcode3i_2004",
-  "iqcode3w_2004",
-  "iqcode4_2004",
-  "iqcode4i_2004",
-  "iqcode4w_2004",
-  "iqcode5_2004",
-  "iqcode5i_2004",
-  "iqcode5w_2004",
-  "iqcode6_2004",
-  "iqcode6i_2004",
-  "iqcode6w_2004",
-  "iqcode7_2004",
-  "iqcode7i_2004",
-  "iqcode7w_2004",
-  "iqcode8_2004",
-  "iqcode8i_2004",
-  "iqcode8w_2004",
-  "iqcode9_2004",
-  "iqcode9i_2004",
-  "iqcode9w_2004",
-  "iqcode10_2004",
-  "iqcode10i_2004",
-  "iqcode10w_2004",
-  "iqcode11_2004",
-  "iqcode11i_2004",
-  "iqcode11w_2004",
-  "iqcode12_2004",
-  "iqcode12i_2004",
-  "iqcode12w_2004",
-  "iqcode13_2004",
-  "iqcode13i_2004",
-  "iqcode13w_2004",
-  "iqcode14_2004",
-  "iqcode14i_2004",
-  "iqcode14w_2004",
-  "iqcode15_2004",
-  "iqcode15i_2004",
-  "iqcode15w_2004",
-  "iqcode16_2004",
-  "iqcode16i_2004",
-  "iqcode16w_2004",
-  "getslost_2004",
-  "wanderoff_2004",
-  "leftalone_2004",
-  "hallucinate_2004",
-  "HHIDD_R_2004",
-  "HHIDND_R_2004",
-  
-  
-  
-  
-  
-  "breath_2004",
-  
-  
-  
-  
-  "puff1_2004",
-  "puff2_2004",
-  "puff3_2004",
-  "puffeffort_2004",
-  "puffpostition_2004",
-  "grip_2004",
-  
-  
-  
-  
-  
-  "domhand_2004",
-  "gripLH1_2004",
-  "gripRH1_2004",
-  "gripLH2_2004",
-  "gripRH2_2004",
-  "gripeffort_2004",
-  "grippos_2004",
-  
-  "walk_2004",
-  
-  
-  
-  
-  
-  "walktime1_2004",
-  "walktime2_2004",
-  "walksurf_2004",
-  "walkaid_2004",
-  "walkeffort_2004",
-  
-  
-  
-  
-  "height_2004",
-  
-  
-  
-  
-  
-  
-  
-  "weight_2004"
-  
-  
-  
-)    
+#2004 Loneliness items available were only these labeled to match the equivalent items from other years
+ds1 <- plyr::rename(ds1, replace = c(
+  "lb504a" = "loneliness_1",
+  "lb504b" = "loneliness_2",
+  "lb504c" = "loneliness_3",
+  "lb504d" = "loneliness_4"
+))
+
+attr(ds1$loneliness_1,"label") <- "Lack companionship"
+attr(ds1$loneliness_2, "label") <- "Feel left out"
+attr(ds1$loneliness_3, "label") <- "Feel isolated from others"
+attr(ds1$loneliness_4, "label") <- "Feel in tune with people around"
+
+#2004 life satisfaction (In 2004 the 7-point scale consistent with 2008 onwards was used)
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb505a" = "lifesatisfaction_1",
+  "lb505b" = "lifesatisfaction_2",
+  "lb505c" = "lifesatisfaction_3",
+  "lb505d" = "lifesatisfaction_4",
+  "lb505e" = "lifesatisfaction_5"
+))
+
+# social network '04 (wording is essentially the same)
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb507" = "snspouse",
+  "lb510" = "snchild",
+  "lb514" = "snfamily",
+  "lb518" = "snfriends"
+))
+
+#number of close relationships '04
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb509" = "closespouse",
+  "lb513" = "closechild",
+  "lb517" = "closefam",
+  "lb521" = "closefri"
+))
+
+# 2004 Social network contact note no social media question
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb512a" = "mtchild",
+  "lb512b" = "spkchild",
+  "lb512c" = "wrtchild",
+  
+  'lb516a' = "mtfam",
+  'lb516b' = "spkfam",
+  'lb516c' = "wrtfam",
+  
+  'lb520a' = "mtfriend",
+  'lb520b' = "spkfriend",
+  'lb520c' = "wrtfriend"
+))
+
+#2004 there was one less question per category
+ds1 <- plyr::rename(x=ds1, replace = c(
+  'lb508a' = 'ssup1sp',
+  'lb508b' = 'ssup2sp',
+  'lb508c' = 'ssup3sp',
+  
+  'lb508d' = "ssup5sp",
+  'lb508e' = 'ssup6sp',
+  'lb508f' = "ssup7sp",
+  
+  'lb511a' = 'ssup1ch',
+  'lb511b' = 'ssup2ch',
+  'lb511c' = 'ssup3ch',
+  
+  'lb511d' = 'ssup5ch',
+  'lb511e' = 'ssup6ch',
+  'lb511f' = 'ssup7ch',
+  
+  'lb515a' = 'ssup1fam',
+  'lb515b' = 'ssup2fam',
+  'lb515c' = 'ssup3fam',
+  
+  'lb515d' = 'ssup5fam',
+  'lb515e' = 'ssup6fam',
+  'lb515f' = 'ssup7fam',
+  
+  'lb519a' = 'ssup1fr',
+  'lb519b' = 'ssup2fr',
+  'lb519c' = 'ssup3fr',
+  
+  'lb519d' = 'ssup5fr',
+  'lb519e' = 'ssup6fr',
+  'lb519f' = 'ssup7fr'
+))
+#04 wellbeing questions
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "lb506g"="wellbeing_1",
+  "lb506i"="wellbeing_5"
+))
+attr(ds1$wellbeing_1,"label") <- "Enjoy making plans for the future"
+attr(ds1$wellbeing_5, "label") <- "Done all there is to do in life"
+return(ds1)
+}
+
+

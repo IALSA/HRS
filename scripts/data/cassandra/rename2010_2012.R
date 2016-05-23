@@ -1,3 +1,8 @@
+rename2010_2012 <- function(ds1){
+ds1 <- plyr::rename(ds1, replace = c(
+  "lb051" = "Who_answered_qs"
+))
+
 #Rename for Activity variables 
 #2012 and 2010 (note that in 2012 and 2010 there is not item 001U otherwise the item names remain consistent with 2014)
 ds1 <- plyr::rename(x=ds1, replace = c(
@@ -23,6 +28,29 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "lb001t" = "activity_20"
 ))
 
+#Activity variable labels (should be consistent across years)
+attr(ds1$activity_1,"label") <- "Q01A OFTEN CARE ADULT"
+attr(ds1$activity_2,"label") <- "OFTEN DO ACTIVITIES WITH GRANDCHILDREN"
+attr(ds1$activity_3,"label") <- "OFTEN VOLUNTEER YOUTH"
+attr(ds1$activity_4,"label") <- "OFTEN CHARITY WORK"
+attr(ds1$activity_5,"label") <- "Q01E. OFTEN EDUCATION"
+attr(ds1$activity_6,"label") <- "Q01F. OFTEN ATTEND SPORTS/SOCIAL/CLUB"
+attr(ds1$activity_7,"label") <- "Q01G. OFTEN ATTEND NON RELIGIOUS ORGS"
+attr(ds1$activity_8,"label") <- "Q01H. OFTEN PRAY PRIVATELY"
+attr(ds1$activity_9,"label") <- "Q01I. OFTEN READ"
+attr(ds1$activity_10,"label") <- "Q01J. OFTEN WATCH TELEVISION"
+attr(ds1$activity_11,"label") <- "Q01K. OFTEN DO WORD GAMES"
+attr(ds1$activity_12,"label") <- "Q01L. OFTEN PLAY CARDS AND GAMES"
+attr(ds1$activity_13,"label") <- "Q01M. OFTEN DO WRITING"
+attr(ds1$activity_14,"label") <- "Q01N. OFTEN USE COMPUTER"
+attr(ds1$activity_15,"label") <- "Q01O. OFTEN MAINTENANCE/GARDENING"
+attr(ds1$activity_16,"label") <- "Q01P. OFTEN BAKE OR COOK"
+attr(ds1$activity_17,"label") <- "Q01Q. OFTEN SEW OR KNIT"
+attr(ds1$activity_18,"label") <- "Q01R. OFTEN DO HOBBY"
+attr(ds1$activity_19,"label") <- "Q01S. OFTEN PLAY SPORT/EXERCISE"
+attr(ds1$activity_20,"label") <- "Q01T. OFTEN WALK FOR 20 MINS"
+
+
 #Loneliness scale 2008, 2010, 2012
 ds1 <- plyr::rename(x=ds1, replace = c(
   "lb020a" = "loneliness_1", 
@@ -38,14 +66,21 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "lb020k" = "loneliness_11" 
 ))
 
-# rename Life satisfaction '14
+# 2012, 2010, 2008, 2006 Life satisfaction (Note that the scale used in 2006 is different)
 ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb002a" = "lifesatisfaction_1",
-  "lb002b" = "lifesatisfaction_2",
-  "lb002c" = "lifesatisfaction_3",
-  "lb002d" = "lifesatisfaction_4",
-  "lb002e" = "lifesatisfaction_5"
+  "lb003a" = "lifesatisfaction_1",
+  "lb003b" = "lifesatisfaction_2",
+  "lb003c" = "lifesatisfaction_3",
+  "lb003d" = "lifesatisfaction_4",
+  "lb003e" = "lifesatisfaction_5"
 ))
+
+attr(ds1$lifesatisfaction_1,"label") <- "Q02A. LIFE IS CLOSE TO IDEAL"
+attr(ds1$lifesatisfaction_2,"label") <- "Q02B. CONDITIONS OF LIFE ARE EXCELLENT"
+attr(ds1$lifesatisfaction_3,"label") <- "Q02C. SATISFIED WITH LIFE"
+attr(ds1$lifesatisfaction_4,"label") <- "Q02D. HAVE IMPORTANT THINGS IN LIFE"
+attr(ds1$lifesatisfaction_5,"label") <- "Q02E. CHANGE NOTHING IF LIVED LIFE OVER"
+
 
 #composition of social network '12, '10, '08, '06,
 ds1 <- plyr::rename(x=ds1, replace = c(
@@ -57,7 +92,7 @@ ds1 <- plyr::rename(x=ds1, replace = c(
 
 #number of close relationships '12, '10, '08, '06 
 ds1 <- plyr::rename(x=ds1, replace = c(
-  "lb006" = "closepouse",
+  "lb006" = "closespouse",
   "lb010" = "closechild",
   "lb014" = "closefam",
   "lb018" = "closefri"
@@ -120,3 +155,5 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "lb035f"="wellbeing_6",
   "lb035g"="wellbeing_7"
 ))
+}
+

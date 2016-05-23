@@ -1,48 +1,34 @@
-demographics <- function(ds, year_letterid, year_label){
-  
-  #create a for loop that remove the first character from variable/column name
-  varnames<-colnames(ds)
-  
-  # grep("^O",x=varnames, perl=T, value=TRUE)
-  
-  
-  
-  for (i in 1:length(varnames)){
-    if(substring(varnames[i],1,1)==year_letterid){
-      varnames[i]<-substring(varnames[i],2)
-    }else{
-      varnames[i]<-varnames[i]
-    }
-  }
-  
-#   
- varnames <- gsub(pattern = "HHIDPN", replacement = "hhidpn", x = varnames)
- varnames <- gsub(pattern = "BIRTHYR", replacement = "birthyr", x = varnames)
- varnames <- gsub(pattern = "BIRTHMO", replacement = "birthmo", x = varnames)
- varnames <- gsub(pattern = "DEGREE", replacement = "degree", x = varnames)
- varnames <- gsub(pattern = "GENDER", replacement = "gender", x = varnames)
- varnames <- gsub(pattern = "HISPANIC", replacement = "hispanic", x = varnames)
- varnames <- gsub(pattern = "RACE", replacement = "race", x = varnames)
- varnames <- gsub(pattern = "STUDY", replacement = "study", x = varnames)
+#ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
 
-   
-  varnames[1:100]
-  # rename essential variables with names for consistency
-#   varnames2<-ifelse(varnames=="HHIDPN","hhidpn",
-#                     ifelse(varnames=="BIRTHYR","birthyr",
-#                            ifelse(varnames=="BIRTHMO","birthmo",
-#                                   ifelse(varnames=="DEGREE","degree",
-#                                          ifelse(varnames=="GENDER","gender",
-#                                                 ifelse(varnames=="HISPANIC","hispanic",
-#                                                        ifelse(varnames=="RACE","race",
-#                                                               ifelse(varnames=="STUDY","study",varnames))))))))
-#   
+# A function
+preparing_variable_labels <- function(ds, year_letterid, year_label){
+varnames<-colnames(ds)
+#create a for loop that remove the first character from variable/column name  
+for (i in 1:length(varnames)){
+  if(substring(varnames[i],1,1)==year_letterid){
+    varnames[i]<-substring(varnames[i],2)
+  }else{
+    varnames[i]<-varnames[i]
+  }
+}
+
+#changes all the variable names to lower case
+colnames(ds) <- tolower(varnames)
+return(ds)
+
+}
+
+
+demographics <- function(ds, year_label){
+  
+varnames2<-colnames(ds)
+
   #create a list of demographic variables
-  varnames2 <- varnames 
-  colnames(ds)<-varnames2
-  prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study")
-  coverscreen<-varnames2[which(substring(varnames2,1,1)=="A")]
-  demographic<-varnames2[which(substring(varnames2,1,1)=="B")]
+  prescreenvars<-c("hhidpn","birthyr","birthmo","degree","gender","hispanic","race","study", "phhidpn")
+  condition <- substring(varnames2,1,1)=="a"
+  coverscreen<-varnames2[which(condition)]
+  condition <- substring(varnames2,1,1)=="b"
+  demographic<-varnames2[which(condition)]
   demovars<-c(prescreenvars,coverscreen,demographic)
   # browser()
   data<-ds[demovars]
@@ -57,7 +43,7 @@ demographics <- function(ds, year_letterid, year_label){
   colnames(data)<-prescvars
   return(data)
 } 
-# dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
+#dstemp <-  demographics(ds = ds04, year_letterid = "J", year_label = "04")
 
 physicalhealth <- function(ds,year_letterid,year_label){
   
@@ -114,7 +100,8 @@ cognition<-function(ds,year_letterid,year_label){
   #create a list of demographic variables
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  cog<-varnames2[which(substring(varnames2,1,1)=="D")]
+  condition <- substring(varnames2,1,1)=="D" | substring(varnames2,1,1)=="d"
+  cog<-varnames2[which(condition)]
   cogvars<-c(id,cog)
   
   data<-ds[cogvars]
@@ -148,7 +135,8 @@ children<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="E")]
+  condition <- substring(varnames2,1,1)=="E"|substring(varnames2,1,1)=="e"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -182,7 +170,8 @@ parents<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="F")]
+  condition <- substring(varnames2,1,1)=="F"|substring(varnames2,1,1)=="f"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -216,7 +205,8 @@ funlimitshelp<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="G")]
+  condition <- substring(varnames2,1,1)=="G"|substring(varnames2,1,1)=="g"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -250,7 +240,8 @@ housing<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="H")]
+  condition <- substring(varnames2,1,1)=="H"|substring(varnames2,1,1)=="h"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -286,7 +277,8 @@ physicalfunction<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="I")]
+  condition <- substring(varnames2,1,1)=="I" | substring(varnames2,1,1)=="i"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -320,7 +312,8 @@ employment<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="J")]
+  condition <- substring(varnames2,1,1)=="J" | substring(varnames2,1,1)=="j"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -354,7 +347,8 @@ lastjob<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="K")]
+  condition <- substring(varnames2,1,1)=="K" | substring(varnames2,1,1)=="k"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -388,7 +382,8 @@ jobhistory<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="L")]
+  condition <- substring(varnames2,1,1)=="L" | substring(varnames2,1,1)=="l"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -422,7 +417,8 @@ disability<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="M")]
+  condition <- substring(varnames2,1,1)=="M" | substring(varnames2,1,1)=="m"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -456,7 +452,8 @@ Healthcare<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="N")]
+  condition <- substring(varnames2,1,1)=="N" | substring(varnames2,1,1)=="n"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -490,7 +487,8 @@ expectations<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="P")]
+  condition <- substring(varnames2,1,1)=="P" | substring(varnames2,1,1)=="p"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -524,7 +522,8 @@ assetsincome<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="Q")]
+  condition <- substring(varnames2,1,1)=="Q" | substring(varnames2,1,1)=="q"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -558,7 +557,8 @@ assetchange<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="R")]
+  condition <- substring(varnames2,1,1)=="R" | substring(varnames2,1,1)=="r"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -592,7 +592,8 @@ repeatcognition<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="RC")]
+  condition <- substring(varnames2,1,1)=="RC" | substring(varnames2,1,1)=="rc"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -626,7 +627,8 @@ widowdivorce<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="S")]
+  condition <- substring(varnames2,1,1)=="S" | substring(varnames2,1,1)=="s"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -660,7 +662,8 @@ willsinsurance<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="T")]
+  condition <- substring(varnames2,1,1)=="T" | substring(varnames2,1,1)=="t"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -694,7 +697,8 @@ assetverification<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="U")]
+  condition <- substring(varnames2,1,1)=="U" | substring(varnames2,1,1)=="u"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -728,7 +732,8 @@ modules<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="V")]
+  condition <- substring(varnames2,1,1)=="V" | substring(varnames2,1,1)=="v"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,section)
   
   data<-ds[section]
@@ -762,7 +767,8 @@ socialsecurity<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,1)=="W")]
+  condition <- substring(varnames2,1,1)=="W" | substring(varnames2,1,1)=="w"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
@@ -796,12 +802,25 @@ psychosocial<-function(ds,year_letterid,year_label){
   #create a list of variables to include
   colnames(ds)<-varnames2
   id<-c("hhidpn")
-  sectionvars<-varnames2[which(substring(varnames2,1,2)=="LB"||"lb")]
+  condition <- substring(varnames2,1,2)=="LB" | substring(varnames2,1,2)=="lb"
+  sectionvars<-varnames2[which(condition)]
   section<-c(id,sectionvars)
   
   data<-ds[section]
   
+  
+  
   #add the year to the  variables
+  vars<-colnames(data)
+  for (i in 1:length(data)){
+    vars[i]<-paste0(vars[i],year_label)
+  }
+  
+  colnames(data)<-vars
+  return(data)
+}
+#add the year to the  variables
+add_year_to_variable <- function(data, year_label){
   vars<-colnames(data)
   for (i in 1:length(data)){
     vars[i]<-paste0(vars[i],year_label)
