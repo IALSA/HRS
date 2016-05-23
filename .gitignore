@@ -75,3 +75,4 @@ data/extract/sean/*
 */*/*/unshared/*
 
 .Rproj.user
+.RDataTmp2
