@@ -240,7 +240,7 @@ ds2006$ID <- ds2006$hhidpn_06
 ds2008$ID <- ds2008$hhidpn_08
 ds2010$ID <- ds2010$hhidpn_10
 ds2012$ID <- ds2012$hhidpn_12
-ds2014$ID <- ds2014$hhidpn_14
+#ds2014$ID <- ds2014$hhidpn_14
 
 hrs1<-merge(ds2004, ds2006, by = "ID", all = TRUE)
 hrs2<-merge(hrs1, ds2008, by = "ID", all = TRUE)
@@ -251,11 +251,11 @@ hrs_all<-merge(hrs4, ds2014, by = "ID", all = TRUE)
 saveRDS(hrs_all, paste0("./data/derived/unshared/", "hrs", ".rds"))
 write.csv(hrs_all,"./data/derived/unshared/hrs.csv")
 
-
-
+#################################################################
+#developmental script below.
 AD <- subset(hrs_all, select=c())
 hrs_all$tsAD <- ts(hrs_all$A)
-#################################################################
+
 demo04<-data.table(demographics(ds04R,"04"))
 
 setkey(demo04,hhidpn.04)
