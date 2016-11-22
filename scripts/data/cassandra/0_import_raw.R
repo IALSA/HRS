@@ -8,7 +8,7 @@ library(data.table)
 library(Hmisc)
 
 pathDir <- getwd() # establish home directory
-pathFiles <- file.path(pathDir,"data/extract/RAND/spss")
+pathFiles <- file.path(pathDir,"Data/Extract/RAND")
 list.files(pathFiles) # inspect participating studies
 
 ## @knitr import_raw_files
