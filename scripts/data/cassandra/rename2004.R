@@ -2,7 +2,7 @@
 rename2004 <- function(ds1){
 
 ds1 <- plyr::rename(ds1, replace = c(
-    "lb531I" = "who_answered"
+    "lb531i" = "who_answered"
 ))  
 
 #Rename for Activity variables 

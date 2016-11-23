@@ -19,11 +19,11 @@ fileNames <- basename(filePaths) # save only the last component
 # read SPSS files, convert to RDS, save in derived only run the first time on new computer
 #for(i in 1:length(filePaths)){
 #for(i in 1){
-  #filePath <- filePaths[[i]]
-  #fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
-  #oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
-  #saveRDS(oneFile, paste0("./data/derived/unshared/", fileName, ".rds")) # all raw data
-# }
+# filePath <- filePaths[[i]]
+#  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+ # oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+ # saveRDS(oneFile, paste0("./Data/Derived/unshared/", fileName, ".rds")) # all raw data
+#}
 
 #collect all RDS in a list object
 pathFilesRDS <- pathFiles <- file.path(pathDir,"data/derived/unshared//")
@@ -34,19 +34,12 @@ lsRAND <- list() # create empty list to population
 
 psychosocial <- c("h04f1a","h06f2b","h08f2a","h10f4a","h12e1a")
 #### Development ####
-ds04 <- readRDS("./data/derived/unshared/RAND/h04f1a.rds")
-ds06 <- readRDS("./data/derived/unshared/RAND/h06f2b.rds")
-ds08 <- readRDS("./data/derived/unshared/RAND/h08f2a.rds")
-ds10 <- readRDS("./data/derived/unshared/RAND/h10f4a.rds")
-ds12 <- readRDS("./data/derived/unshared/RAND/h12e1a.rds")
-ds14 <- readRDS("./data/derived/unshared/H14LB_R.rds")
-
-# str(ds04)
-# dim(ds04)
-# 
-# (ds <- ds04[,c("HHIDPN","JA028")])
-# str(ds)
-# head(ds)
+ds04 <- readRDS("./Data/Derived/unshared/h04f1a.rds")
+ds06 <- readRDS("./Data/Derived/unshared/h06f2b.rds")
+ds08 <- readRDS("./Data/Derived/unshared/h08f2a.rds")
+ds10 <- readRDS("./Data/Derived/unshared/h10f4a.rds")
+ds12 <- readRDS("./Data/Derived/unshared/h12e1a.rds")
+ds14 <- readRDS("./Data/Derived/unshared/h14e1a.rds")
 
 ## @knitr define_lookup_function
 names_labels <- function(ds0){
@@ -69,14 +62,14 @@ nl06 <- names_labels(ds0=ds06)
 nl08 <- names_labels(ds0=ds08)
 nl10 <- names_labels(ds0=ds10)
 nl12 <- names_labels(ds0=ds12)
-
+nl14 <- names_labels(ds0=ds14)
 
 write.csv(nl04,"./data/derived/items/nl04.csv")
 write.csv(nl06,"./data/derived/items/nl06.csv")
 write.csv(nl08,"./data/derived/items/nl08.csv")
 write.csv(nl10,"./data/derived/items/nl10.csv")
 write.csv(nl12,"./data/derived/items/nl12.csv")
-
+write.csv(nl14,"./data/derived/items/nl14.csv")
 
 #### Developmental script beyond this point down ####
 #sources of functions used
@@ -204,23 +197,23 @@ dsA14$hhidpn <- paste0(dsA14$HHID, 0, dsA14$PN)
 dsA14$phhidpn <- ifelse(is.na(dsA14$OPN_SP)==FALSE,paste0(dsA14$HHID, 0, dsA14$OPN_SP),NA)
 
 demo14 <- merge(dsA14, dsB14, by = "hhidpn")
-ds14 <- preparing_variable_labels(dsLB14 ,"O", "14")
+
+ds14 <- preparing_variable_labels(ds14 ,"o", "14")
 ds14 <- rename2014(ds14)
 ds14<- loneliness_three_items_recode(ds14)
 ds14 <- lifesatisfaction_summaryscores(ds14)
 ds14 <- social_support_network_recode(ds14)
 ds14 <- welling_scale_summarize(ds14)
 
-dsphys14 <- preparing_variable_labels(dsC14 ,"O", "14")
+#dsphys14 <- preparing_variable_labels(dsC14 ,"O", "14")
 
-dsphys14 <- physhealthrename2010_2014(dsphys14)
-ds2014<-merge(ds14, dsphys14, by = "hhidpn")
+ds14 <- physhealthrename2010_2014(ds14)
+#ds2014<-merge(ds14, dsphys14, by = "hhidpn")
 
-demo14 <- preparing_variable_labels(demo14 ,"O", "14")
+#demo14 <- preparing_variable_labels(demo14 ,"O", "14")
 
-demo14 <- basicdemographics2014(demo14)
-
-psychosocial_14 <- subset(ds2014, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
+demo14 <- basicdemographics2014(ds14)
+psychosocial_14 <- subset(ds14, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
                                          'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
                                          "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
                                          'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri','wellbeing_total','wellbeing_mean',"AD","dementia","Activity_vigorous", "Activity_moderate", "Activity_mild"))
@@ -240,7 +233,7 @@ ds2006$ID <- ds2006$hhidpn_06
 ds2008$ID <- ds2008$hhidpn_08
 ds2010$ID <- ds2010$hhidpn_10
 ds2012$ID <- ds2012$hhidpn_12
-#ds2014$ID <- ds2014$hhidpn_14
+ds2014$ID <- ds2014$hhidpn_14
 
 hrs1<-merge(ds2004, ds2006, by = "ID", all = TRUE)
 hrs2<-merge(hrs1, ds2008, by = "ID", all = TRUE)
@@ -250,6 +243,7 @@ hrs_all<-merge(hrs4, ds2014, by = "ID", all = TRUE)
 
 saveRDS(hrs_all, paste0("./data/derived/unshared/", "hrs", ".rds"))
 write.csv(hrs_all,"./data/derived/unshared/hrs.csv")
+
 
 #################################################################
 #developmental script below.
