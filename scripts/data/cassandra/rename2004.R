@@ -111,4 +111,38 @@ attr(ds1$wellbeing_5, "label") <- "Done all there is to do in life"
 return(ds1)
 }
 
+#Cognitive data rename
 
+#Self-Memory rating
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "d101"="srmemory",
+  "lb506i"="srmemoryp"
+))
+attr(ds1$srmemory, "label") <- "Rate memory"
+attr(ds1$srmemoryp, "label") <- "Rate past memory"
+
+#Word list recall
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "d104" = "listassi",
+  "d174" = "wrectoti",
+  "d175" = "wrecwrongim",
+  "d177" = "wrecnoneim",
+  "d184" = "wrectotd",
+  "d185" = "wrecwrongd",
+  "d187" = "wrecnoned"
+))
+
+#Mental Status given to those 65 and older only
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "d151" = "msmonth",
+  "d152" = "msdate",
+  "d153" = "msyear",
+  "d154" = "msday",
+  "d155" = "msnaming1",
+  "ds156" = "msnaming2",
+  "ds157" = "mspresident",
+  "ds158" = "msvp"
+))
+
+#Vocabulary
+ds1<- plyr::

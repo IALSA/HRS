@@ -153,7 +153,6 @@ ds10 <- social_support_network_recode(ds10)
 ds10 <- welling_scale_summarize(ds10)
 ds10 <- physhealthrename2010_2014(ds10)
 demo10 <- basicdemographics(ds10)
-colnames(ds10)
 psychosocial_10 <- subset(ds10, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_total",'loneliness_mean',"lifesatisfaction_mean",
                                          'snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri','close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
                                          "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
