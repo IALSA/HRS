@@ -108,15 +108,14 @@ ds1 <- plyr::rename(x=ds1, replace = c(
 ))
 attr(ds1$wellbeing_1,"label") <- "Enjoy making plans for the future"
 attr(ds1$wellbeing_5, "label") <- "Done all there is to do in life"
-return(ds1)
-}
 
-#Cognitive data rename
+
+#########Cognitive data rename
 
 #Self-Memory rating
 ds1 <- plyr::rename(x=ds1, replace = c(
   "d101"="srmemory",
-  "lb506i"="srmemoryp"
+  "d102"="srmemoryp"
 ))
 attr(ds1$srmemory, "label") <- "Rate memory"
 attr(ds1$srmemoryp, "label") <- "Rate past memory"
@@ -139,10 +138,35 @@ ds1 <- plyr::rename(x=ds1, replace = c(
   "d153" = "msyear",
   "d154" = "msday",
   "d155" = "msnaming1",
-  "ds156" = "msnaming2",
-  "ds157" = "mspresident",
-  "ds158" = "msvp"
+  "d156" = "msnaming2",
+  "d157" = "mspresident",
+  "d158" = "msvp"
 ))
 
 #Vocabulary
-ds1<- plyr::
+ds1<- plyr::rename(x=ds1, replace = c(
+  "d159" = "voclist",
+  "d161" = "vocab1",
+  "d163" = "vocab2",
+  "d165" = "vocab3",
+  "d167" = "vocab4",
+  "d169" = "vocab5"
+))
+
+#numeracy
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "d178" = "numer1",
+  "d179" = "numer2",
+  "d180" = "numer3"
+  ))
+
+#Working memory
+ds1 <- plyr::rename(x=ds1, replace = c(
+  "d142" = "serial71",
+  "d143" = "serial72",
+  "d144" = "serial73",
+  "d145" = "serial74",
+  "d146" = "serial75"
+))
+return(ds1)
+}
