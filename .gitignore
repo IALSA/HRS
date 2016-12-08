@@ -15,7 +15,7 @@ devtools.zip
 /data-unshared/raw/*
 /data-unshared/derived/*
 /Data/*
-
+/data-unshared/derived_legacy/*
 
 
 
