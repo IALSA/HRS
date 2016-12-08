@@ -1,6 +1,5 @@
-`./data-unshared/derived` Directory
-=========
+The files resulting from scripts that process the raw data files und up here. They should be in .Rds format, which is easier to work with in R.
 
-The folder contains the files derived programmatically from the raw input files according to the schema encoded in the scripts. Files stored here are de-identified and can be shared with the public at large.
 
+Sean Clouston's [data](./datafromsean.md)  
 

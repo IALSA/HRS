@@ -1,0 +1,1 @@
+ the folder `./manipulation` contains the scripts that transform the data into analysable shape. 
