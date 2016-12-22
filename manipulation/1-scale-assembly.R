@@ -121,96 +121,30 @@ ds_lone <- ds_lone %>%
     "loneliness_2",
     "loneliness_3",
     "loneliness_5"
-    )
-)
+    ) 
+) 
+
 d <- ds_lone %>% dplyr::filter(hhidpn==10001010)
 
 
 
-#create a variable to indicate the number of missing loneliness scale items.
-data$lonemiss <- (is.na(data$loneliness_1)+is.na(data$loneliness_2)+is.na(data$loneliness_3)+is.na(data$loneliness_4)+is.na(data$loneliness_5)+is.na(data$loneliness_6)+is.na(data$loneliness_7)+is.na(data$loneliness_8)+is.na(data$loneliness_9)+is.na(data$loneliness_10)+is.na(data$loneliness_11))
-
-ds_lone$missing_count <- apply(ds_lone, 1, function(z) sum(is.na(z)))
-
-ds_lone <- ds_lone %>% 
-  dplyr::mutate(
-    mean = ifelse(missing_count < 6, sum)
-  )
-head(ds_lone)
-ifelse(data$lonemiss<6, data$loneliness_total/(11-data$lonemiss), NA)
-
-#check
-summary(data$lonemiss)
-
-s <- which(colnames(data)=="loneliness_1")
-f <- which(colnames(data)=="loneliness_11")
-
-data$loneliness_total <- rowSums(data[s:f], na.rm=TRUE)
-
-#Create the loneliness scale score only if there is less than 6 missing values
-#this is as per codebook instructions.
-data$loneliness_mean <- ifelse(data$lonemiss<6, data$loneliness_total/(11-data$lonemiss), NA)
-
-summary(data$loneliness_mean)
-return(data)
-
-
-
-compute_longeliness_scores(d,short_years = c(2004,2006))
-
-
-
 compute_loneliness_scale_score <- function(d){
-  d <- ds_lone %>% dplyr::filter(hhidpn==10001010)
-  target <- d %>% 
-    dplyr::select(-year,-hhidpn) %>% 
-    as.data.frame()
-  target <- lapply(target,as.numeric) %>% as.data.frame()
-  head(target)
-  d[,"sum"] <- apply(target,1,sum, na.rm = TRUE)
-  head(d)
-  d$missing_count <- apply(d, 1, function(z) sum(is.na(z)))
-  d <- d %>% 
-    dplyr::mutate(
-      total_count = ifelse(year==2004,4,
-                                ifelse(year==2006,3,11))
-    )
+  # d <- ds_lone %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+  (col_names_11 <- setdiff(names(d),c("year","hhidpn")))
+  (col_names_3 <- col_names_11[1:3])
+  d[,"sum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
+  d[,"sum_3"] <- apply(d[col_names_3],1,sum, na.rm = TRUE)
+  d[,"score_loneliness_3"] <- apply(d[col_names_3],1,mean, na.rm = TRUE)
+  d$missing_count <- apply(d[col_names], 1, function(z) sum(is.na(z)))
   d <- d %>% 
     dplyr::mutate( 
-      mean = ifelse(total_count==11 | missing_count<6, 
-                    sum/(total_count - missing_count),
-                    ifelse(total_count %in% c(3,4),
-                           sum/(total_count - missing_count),NA))
+      score_loneliness_11 = ifelse(missing_count<6, 
+                    sum_11/(11- missing_count),NA)
     )
-     
-    
-  head(d)
-  ifelse(data$lonemiss<6, data$loneliness_total/(11-data$lonemiss), NA)
-  
-  
-  
-  
-  d[,"sum_3"] <- apply(target[,1:3],1,sum, na.rm = FALSE)
-  d[,"mean_3"] <- apply(target[,1:3],1,mean, na.rm = TRUE)
-  # head(d) 
-  d[,"sum"] <- apply(target,1,sum, na.rm = TRUE)
-  d[,"mean"] <- apply(target, 1,mean, na.rm = TRUE)
-  head(d) 
+  return(d)
 }
-  
-target <- ds_lone %>% 
-  dplyr::select(-year,-hhidpn) %>% 
-  as.data.frame()
-str(target)
-head(target)
-str(target)
-
-str(target)
-ds_lone[,"sum"] <- apply(target,1,sum, na.rm = TRUE)
-head(ds_lone)  
-  
-
-
+# Usage:
+ds_lone <- compute_loneliness_scale_score(ds_lone)
 
 
 
