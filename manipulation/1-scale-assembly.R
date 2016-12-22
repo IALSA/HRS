@@ -114,20 +114,17 @@ reverse_coding <- function(d, variables){
 }
 
 ds_lone %>% dplyr::filter(hhidpn==10001010)
+
+# create a vector with names of items to be reverse scored
+rename_meta <-rename_loneliness 
+# use meta data to provide the rules
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- reverse_these[!is.na(reverse_these)]
+
 ds_lone <- ds_lone %>% 
-  reverse_coding(
-  c(
-    "loneliness_1",
-    "loneliness_2",
-    "loneliness_3",
-    "loneliness_5"
-    ) 
-) 
-
-d <- ds_lone %>% dplyr::filter(hhidpn==10001010)
-
-
-
+  reverse_coding(reverse_these)
+ 
+# d <- ds_lone %>% dplyr::filter(hhidpn==10001010)
 compute_loneliness_scale_score <- function(d){
   # d <- ds_lone %>% dplyr::filter(hhidpn %in% c(3010,10281010))
   (col_names_11 <- setdiff(names(d),c("year","hhidpn")))
@@ -149,44 +146,97 @@ ds_lone <- compute_loneliness_scale_score(ds_lone)
 
 
 
+# ----- life_satisfaction -------------
+# path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
+#read in the renaming rules for this specific variables
+rename_life_satisfaction  <-  readxl::read_excel(
+  path_renaming_rules, 
+  sheet = "lifesatisfaction"
+) %>% as.data.frame()
 
 
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012)){ 
+  # create a string to be passed as command to the eval() function
+  # year <- 2006
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_life_satisfaction,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
 
+rename_meta <-rename_life_satisfaction 
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- reverse_these[!is.na(reverse_these)]
 
+# reverse the coding on selected items
+# define function to reverse code a specified variable
+reverse_coding <- function(d, variables){
+  # d <- ds_lone
+  for(v in variables){
+    # v = "loneliness_1"
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    (original_values <- sort(p,decreasing = F))
+    (reversed_values <- sort(p,decreasing = T))
+    d[,v] <- plyr::mapvalues(d[,v], from=original_values, to=reversed_values) 
+  }
+  return(d)
+}
 
+ds_long %>% dplyr::filter(hhidpn==10001010)
+rename_life_satisfaction
 
+reverse_these <- rename_life_satisfaction %>% 
+  as.data.frame() %>% 
+  dplyr::filter(reversed==TRUE) %>% 
+  dplyr::select(new_name) %>% 
+  unique() %>% as.data.frame() %>% 
+  as.character()
+rn <- rn %>% as.data.frame()
+rn[,"new_name"]
 
-
-
-
-
-ls_temp$`2004` 
-
-
-ds_lone %>% dplyr::filter(hhidpn == 3010) %>% dplyr::count()
-
-lapply(ls_temp, class)
-names(ls_temp)
-class(ls_temp)
-
-str(ls_temp)
-d04 <- subset_rename(ds04, items_04)
-d06 <- subset_rename(ds06, items_06)
-d08 <- subset_rename(ds08, items_08)
-d10 <- subset_rename(ds10, items_10)
-d12 <- subset_rename(ds12, items_12)
-
-
-
-old_names <- c("hhidpn",names(items_04))
-new_names <- c("id",items_04)
-d04 <- ds04 %>% 
-  dplyr::select_(.dots = old_names) 
-colnames(d04) <- new_names
+str(reverse_these)
+  reverse_these=="lifesatisfaction_1"
   
+ds_long <- ds_long %>% 
+  reverse_coding(
+    c(
+      "loneliness_1",
+      "loneliness_2",
+      "loneliness_3",
+      "loneliness_5"
+    ) 
+  ) 
+# d <- ds_lone %>% dplyr::filter(hhidpn==10001010)
+compute_loneliness_scale_score <- function(d){
+  # d <- ds_lone %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+  (col_names_11 <- setdiff(names(d),c("year","hhidpn")))
+  (col_names_3 <- col_names_11[1:3])
+  d[,"sum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
+  d[,"sum_3"] <- apply(d[col_names_3],1,sum, na.rm = TRUE)
+  d[,"score_loneliness_3"] <- apply(d[col_names_3],1,mean, na.rm = TRUE)
+  d$missing_count <- apply(d[col_names], 1, function(z) sum(is.na(z)))
+  d <- d %>% 
+    dplyr::mutate( 
+      score_loneliness_11 = ifelse(missing_count<6, 
+                                   sum_11/(11- missing_count),NA)
+    )
+  return(d)
+}
+# Usage:
+ds_lone <- compute_loneliness_scale_score(ds_lone)
 
-d06 <- ds06 %>% 
-  dplyr::select_(.dots = c("hhidpn", items_06))
+
+
+
 
 
 
