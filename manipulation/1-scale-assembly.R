@@ -38,15 +38,16 @@ ds_2006 <- readRDS("./data-unshared/derived/h06f2b.rds")
 ds_2008 <- readRDS("./data-unshared/derived/h08f2a.rds")
 ds_2010 <- readRDS("./data-unshared/derived/h10f4a.rds")
 ds_2012 <- readRDS("./data-unshared/derived/h12e1a.rds")
-# ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
+ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
 # colnames(ds04) <- tolower(colnames(ds04))
 # colnames(ds06) <- tolower(colnames(ds06))
 # colnames(ds08) <- tolower(colnames(ds08))
 # colnames(ds10) <- tolower(colnames(ds10))
 # colnames(ds12) <- tolower(colnames(ds12))
+# colnames(ds14) <- tolower(colnames(ds14))
  
-for(i in c(2004, 2006, 2008, 2010, 2012)){ 
+for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
     # create a string to be passed as command to the eval() function
     # i <- 2004
     cstring <- paste0("colnames(ds_",i,") <- tolower(colnames(ds_",i,"))")
@@ -118,7 +119,7 @@ rename_loneliness   <-  readxl::read_excel(path_renaming_rules, sheet = "lonelin
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
-for(year in c(2004, 2006, 2008, 2010, 2012)){ 
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
   # year <- 2006
   cstring <- paste0(
@@ -138,7 +139,7 @@ ds_long %>% dplyr::filter(hhidpn==10001010)
 # create a vector with names of items to be reverse scored
 rename_meta <-rename_loneliness 
 # use meta data to provide the rules
-reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
 reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
@@ -151,7 +152,7 @@ compute_loneliness_scale_score <- function(d){
   d[,"sum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
   d[,"sum_3"] <- apply(d[col_names_3],1,sum, na.rm = TRUE)
   d[,"score_loneliness_3"] <- apply(d[col_names_3],1,mean, na.rm = TRUE)
-  d$missing_count <- apply(d[col_names], 1, function(z) sum(is.na(z)))
+  d$missing_count <- apply(d[col_names_11], 1, function(z) sum(is.na(z)))
   d <- d %>% 
     dplyr::mutate( 
       score_loneliness_11 = ifelse(missing_count<6, 
@@ -175,7 +176,7 @@ rename_life_satisfaction  <-  readxl::read_excel(
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
-for(year in c(2004, 2006, 2008, 2010, 2012)){ 
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
   # year <- 2006
   cstring <- paste0(
@@ -201,9 +202,15 @@ head(ds_long)
 dto_scales[["life_satisfaction"]] <- ds_long
 
 
+
+
+
+
+
+
+
+
 # Developmental and reference code below -------------
-
-
 
 #### Developmental script beyond this point down ####
 #sources of functions used

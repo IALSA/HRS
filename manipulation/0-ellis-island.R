@@ -37,13 +37,13 @@ fileNames <- basename(filePaths) # save only the last component
 
 # ---- load-data ------------------------------------------------
 # read SPSS files, convert to RDS, save in derived only run the first time on new computer
-# for(i in seq_along(filePaths)){
-# # for(i in 1){
-# filePath <- filePaths[[i]]
-#  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
-# oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
-# saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw data
-# }
+for(i in seq_along(filePaths)){
+# for(i in 1){
+filePath <- filePaths[[i]]
+ fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw data
+}
 
 # ---- load-data-rds --------------------------------
 ds04 <- readRDS("./data-unshared/derived/h04f1a.rds")
@@ -51,7 +51,7 @@ ds06 <- readRDS("./data-unshared/derived/h06f2b.rds")
 ds08 <- readRDS("./data-unshared/derived/h08f2a.rds")
 ds10 <- readRDS("./data-unshared/derived/h10f4a.rds")
 ds12 <- readRDS("./data-unshared/derived/h12e1a.rds")
-# ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
+ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
 
 
