@@ -110,7 +110,32 @@ reverse_coding <- function(d, variables){
   # reverse_coding(reverse_these)
 
 # ---- create-dto ---------------------
-dto_scales <- list()
+dto <- list()
+
+# ----- demographics ------------------
+# path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
+#read in the renaming rules for this specific variables
+rename_demographics   <-  readxl::read_excel(path_renaming_rules, sheet = "demographics")
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+# for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
+for(year in c(2004, 2006, 2008, 2010, 2012)){
+  # create a string to be passed as command to the eval() function
+  # year <- 2006
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_demographics,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+dto[["demographics"]] <- ds_long
+
 
 # ----- loneliness -------------
 # path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
@@ -162,7 +187,7 @@ compute_loneliness_scale_score <- function(d){
 }
 # Usage:
 ds_long <- compute_loneliness_scale_score(ds_long)
-dto_scales[["loneliness"]] <- ds_long
+dto[["loneliness"]] <- ds_long
 
 
 
@@ -199,9 +224,25 @@ testit::assert("The scale does not contained reverse coded items",reverse_these=
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
-dto_scales[["life_satisfaction"]] <- ds_long
+dto[["life_satisfaction"]] <- ds_long
 
 
+# ---- save-to-disk ------------------------------------------------------------
+names(dto)
+lapply(dto, names)
+
+# Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
+saveRDS(dto, file="./data-unshared/derived/dto.rds", compress="xz")
+
+
+# ---- object-verification ------------------------------------------------
+# the production of the dto object is now complete
+# we verify its structure and content:
+dto <- readRDS("./data-unshared/derived/dto.rds")
+names(dto)
+# at this point the dto contains elements
+# each of which is a dataset with a subset of variables
+# united by type of items
 
 
 
