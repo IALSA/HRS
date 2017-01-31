@@ -226,6 +226,86 @@ ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["life_satisfaction"]] <- ds_long
 
+# ----- social network -------------
+#read in the renaming rules for this specific variables
+rename_social_network  <-  readxl::read_excel(
+  path_renaming_rules, 
+  sheet = "socialnetwork"
+) %>% as.data.frame()
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  # year <- 2006
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_social_network,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+#The first four items do not need to be reverse coded instead it was coded as 1 if yes 
+# (e.g., yes they have children) and 5 in no (e.g., no children). I wanted to recode this so that it was 1 and 0
+# this allows a social network total score to be calculated.
+#data$snspouse[data$snspouse==5] <- 0
+#data$snchild[data$snchild==5] <-0
+#data$snfamily[data$snfamily==5] <- 0
+#data$snfriends[data$snfriends==5] <- 0
+#data$snfriends[data$snfriends==7] <- NA
+
+#for perceived social support(or relationship quality) all items need to be reverse coded.
+
+rename_meta <-rename_social_network
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- reverse_these[!is.na(reverse_these)]
+testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
+
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+ds_long <- ds_long %>% compute_scale_score()
+head(ds_long)
+dto[["social_network"]] <- ds_long
+
+# ----- social support -------------
+#read in the renaming rules for this specific variables
+rename_social_support  <-  readxl::read_excel(
+  path_renaming_rules, 
+  sheet = "socialsupport"
+) %>% as.data.frame()
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  # year <- 2006
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_social_support,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+#for perceived social support(or relationship quality) all items need to be reverse coded.
+rename_meta <-rename_social_support
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- reverse_these[!is.na(reverse_these)]
+testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
+
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+ds_long <- ds_long %>% compute_scale_score()
+head(ds_long)
+dto[["social_support"]] <- ds_long
+
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
