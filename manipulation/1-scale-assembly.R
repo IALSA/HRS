@@ -39,7 +39,7 @@ ds_2008 <- readRDS("./data-unshared/derived/h08f2a.rds")
 ds_2010 <- readRDS("./data-unshared/derived/h10f4a.rds")
 ds_2012 <- readRDS("./data-unshared/derived/h12e1a.rds")
 ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
-
+print(colnames(ds_2006))
 # colnames(ds04) <- tolower(colnames(ds04))
 # colnames(ds06) <- tolower(colnames(ds06))
 # colnames(ds08) <- tolower(colnames(ds08))
