@@ -374,8 +374,16 @@ ds_long <- ds_long %>%
 #Create activity summary scores
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 
-# Usage:
-ds_long <- compute_scale_score(ds_long)
+# take a subject
+d_long <- ds_long %>% 
+  dplyr::filter(year %in% c(2008, 2010, 2012, 2014)) %>%  # only these years
+  dplyr::select(year, hhidpn, dplyr::matches("activity_")) # only these variables
+# compute scale scores on subsetted ds
+d_long <- compute_scale_score(d_long) %>% 
+  dplyr::rename(activity_mean = mean, activity_sum = sum) %>% 
+  dplyr::select(year, hhidpn, activity_mean, activity_sum)
+# merge computed scales score to the general file
+ds_long <- ds_long %>% dplyr::left_join(d_long)
 dto[["activity"]] <- ds_long
 
 
