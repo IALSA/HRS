@@ -33,12 +33,12 @@ requireNamespace("testit") # for asserting conditions meet expected patterns.
 path_renaming_rules <- "./data-phi-free/raw/renaming-rules/renaming-rules.xlsx"
 
 # ---- load-data ------------------------------------------------
-ds04 <- readRDS("./data-unshared/derived/h04f1a.rds")
-ds06 <- readRDS("./data-unshared/derived/h06f2b.rds")
-ds08 <- readRDS("./data-unshared/derived/h08f2a.rds")
-ds10 <- readRDS("./data-unshared/derived/h10f5c.rds")
-ds12 <- readRDS("./data-unshared/derived/h12f1a.rds")
-ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
+ds_2004 <- readRDS("./data-unshared/derived/h04f1a.rds")
+ds_2006 <- readRDS("./data-unshared/derived/h06f2b.rds")
+ds_2008 <- readRDS("./data-unshared/derived/h08f2a.rds")
+ds_2010 <- readRDS("./data-unshared/derived/hd10f5c.rds")
+ds_2012 <- readRDS("./data-unshared/derived/h12f1a.rds")
+ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
 #print(colnames(ds_2006))
 # colnames(ds04) <- tolower(colnames(ds04))
 # colnames(ds06) <- tolower(colnames(ds06))
