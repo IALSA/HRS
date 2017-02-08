@@ -79,7 +79,7 @@ subset_rename <- function(d,renaming_rules,year_){
   colnames(dnew) <- new_names 
   return(dnew) 
 }
-
+colnames(ds_2012)
 # standard computation of scale scores
 compute_scale_score <- function(d){
   # d <- ds_long
@@ -126,6 +126,7 @@ for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_demographics,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
 }
+
 # this creates a list in which each element is a dataset
 # each dataset contains items from target construct for that year
 lapply(ls_temp,names)
