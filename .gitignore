@@ -16,7 +16,7 @@ devtools.zip
 /data-unshared/derived/*
 /Data/*
 /data-unshared/derived_legacy/*
-
+!data/target-variables-for-multistate.md
 
 
 
