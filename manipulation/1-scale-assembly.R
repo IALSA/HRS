@@ -39,7 +39,7 @@ ds_2008 <- readRDS("./data-unshared/derived/h08f2a.rds")
 ds_2010 <- readRDS("./data-unshared/derived/h10f4a.rds")
 ds_2012 <- readRDS("./data-unshared/derived/h12e1a.rds")
 ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
-print(colnames(ds_2006))
+#print(colnames(ds_2006))
 # colnames(ds04) <- tolower(colnames(ds04))
 # colnames(ds06) <- tolower(colnames(ds06))
 # colnames(ds08) <- tolower(colnames(ds08))
@@ -63,7 +63,7 @@ for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){
 # these functions are used in all scale computations
 # custom functions are placed in corresponding chunks
 
-# renames and subsets the origianal data frame
+# renames and subsets the original data frame
 subset_rename <- function(d,renaming_rules,year_){ 
   items <- renaming_rules %>% 
     dplyr::filter(year==year_) %>% 
@@ -118,8 +118,7 @@ dto <- list()
 rename_demographics   <-  readxl::read_excel(path_renaming_rules, sheet = "demographics")
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
-# for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
-for(year in c(2004, 2006, 2008, 2010, 2012)){
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
   # create a string to be passed as command to the eval() function
   # year <- 2006
   cstring <- paste0(
@@ -192,7 +191,7 @@ dto[["loneliness"]] <- ds_long
 
 
 # ----- life_satisfaction -------------
-# path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
+#path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
 rename_life_satisfaction  <-  readxl::read_excel(
   path_renaming_rules, 
@@ -242,6 +241,7 @@ for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_social_network,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
 }
+
 # this creates a list in which each element is a dataset
 # each dataset contains items from target construct for that year
 lapply(ls_temp,names)
@@ -250,7 +250,10 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-#The first four items do not need to be reverse coded instead it was coded as 1 if yes 
+networkvars <- c("snspouse", "snchild", "snfamily","snfriends")
+closevars <-c("closespouse", "closechild", "closefam", "closefri")
+
+#The social network count items do not need to be reverse coded instead it was coded as 1 if yes 
 # (e.g., yes they have children) and 5 in no (e.g., no children). I wanted to recode this so that it was 1 and 0
 # this allows a social network total score to be calculated.
 #data$snspouse[data$snspouse==5] <- 0
@@ -258,13 +261,42 @@ head(ds_long)
 #data$snfamily[data$snfamily==5] <- 0
 #data$snfriends[data$snfriends==5] <- 0
 #data$snfriends[data$snfriends==7] <- NA
+reverse_coding_socialnetwork <- function(d, variables){
+  # d <- ds_lone
+  for(v in variables){
+    # v = "loneliness_1"
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=5, to=0) 
+    d[,v] <- plyr::mapvalues(d[,v], from=7, to=NA) 
+  }
+  return(d)
+}
 
-#for perceived social support(or relationship quality) all items need to be reverse coded.
+ds_long <- ds_long %>% 
+ reverse_coding_socialnetwork(networkvars)
+#Computes two scores socialnetwork_total a count of whether or not network members exist in each of the 
+# four possible categories and close_social_network a count of the total number of relationships the respondent
+# considers close relationships across all relational categories.
+compute_socialnetwork_scale_scores <- function(d){
+  #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+  d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
+  d[,"close_social_network"] <- apply(d[closevars],1,sum, na.rm = TRUE)
+  d$missing_count <- apply(d[networkvars], 1, function(z) sum(is.na(z)))
+  d <- d %>% 
+    dplyr::mutate( 
+      socialnetwork_total = ifelse(missing_count<4, 
+                                   socialnetwork_total,NA))
+  d$missing_count <- apply(d[closevars], 1, function(z) sum(is.na(z)))   
+   d <- d %>% 
+        dplyr::mutate( 
+          close_social_network = ifelse(missing_count<4, 
+                                        close_social_network,NA)
+    )
+  return(d)
+}
 
-rename_meta <-rename_social_network
-reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
-reverse_these <- reverse_these[!is.na(reverse_these)]
-testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
+#Create two summary variables one of social network and one of close social network members. 
 
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
@@ -300,6 +332,8 @@ rename_meta <-rename_social_support
 reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
 reverse_these <- reverse_these[!is.na(reverse_these)]
 testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
+ds_long <- ds_long %>% 
+  reverse_coding(reverse_these)
 
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
