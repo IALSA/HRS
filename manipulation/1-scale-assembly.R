@@ -296,8 +296,6 @@ compute_socialnetwork_scale_scores <- function(d){
   return(d)
 }
 
-#Create two summary variables one of social network and one of close social network members. 
-
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
@@ -339,6 +337,46 @@ ds_long <- ds_long %>%
 ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["social_support"]] <- ds_long
+
+#--------activity---IN PROGRESS--------
+#read in the renaming rules for this specific variables
+rename_activity   <-  readxl::read_excel(path_renaming_rules, sheet = "activity")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_activity,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+ds_long %>% dplyr::filter(hhidpn==10001010)
+
+# create a vector with names of items to be reverse scored 
+# All activity items are reversed scored 1 = Daily to 7 = Never/not relevant recode all so that higher numbers indicate more activity
+rename_meta <-rename_activity
+# use meta data to provide the rules
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
+reverse_these <- reverse_these[!is.na(reverse_these)]
+ds_long <- ds_long %>% 
+  reverse_coding(reverse_these)
+
+#Create activity summary scores
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+
+# Usage:
+ds_long <- compute_scale_score(ds_long)
+dto[["activity"]] <- ds_long
+
+
 
 
 # ---- save-to-disk ------------------------------------------------------------
