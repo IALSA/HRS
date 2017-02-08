@@ -30,7 +30,7 @@ requireNamespace("dplyr") # f() names conflict with other packages (esp. base, s
 requireNamespace("testit") # for asserting conditions meet expected patterns.
 
 # ---- declare-globals ----------------------------------------------
-path_folder <- "./data-unshared/raw/RAND/spss/"
+path_folder <- "./data-unshared/raw/RAND-2017-02-08/"
 
 filePaths <- list.files(path_folder , full.names=T, recursive=T, pattern="sav$")
 fileNames <- basename(filePaths) # save only the last component
@@ -49,8 +49,8 @@ saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw
 ds04 <- readRDS("./data-unshared/derived/h04f1a.rds")
 ds06 <- readRDS("./data-unshared/derived/h06f2b.rds")
 ds08 <- readRDS("./data-unshared/derived/h08f2a.rds")
-ds10 <- readRDS("./data-unshared/derived/h10f4a.rds")
-ds12 <- readRDS("./data-unshared/derived/h12e1a.rds")
+ds10 <- readRDS("./data-unshared/derived/h10f5c.rds")
+ds12 <- readRDS("./data-unshared/derived/h12f1a.rds")
 ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
 
