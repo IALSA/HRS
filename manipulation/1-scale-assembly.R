@@ -84,8 +84,8 @@ colnames(ds_2012)
 compute_scale_score <- function(d){
   # d <- ds_long
   (col_names <- setdiff(names(d),c("year","hhidpn")))
-  d[,'sum'] <-  apply(d[col_names],1,sum, na.rm = TRUE)
-  d[,'mean'] <-  apply(d[col_names],1,mean, na.rm = TRUE)
+  d[,'sum'] <-  apply(d[col_names],1,sum, na.rm = FALSE)
+  d[,'mean'] <-  apply(d[col_names],1,mean, na.rm = FALSE)
   return(d)
 }
 # Usage:
@@ -227,7 +227,7 @@ ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["life_satisfaction"]] <- ds_long
 
-# ----- social network -------------
+# ----- social-network -------------
 #read in the renaming rules for this specific variables
 rename_social_network  <-  readxl::read_excel(
   path_renaming_rules, 
@@ -258,11 +258,7 @@ closevars <-c("closespouse", "closechild", "closefam", "closefri")
 #The social network count items do not need to be reverse coded instead it was coded as 1 if yes 
 # (e.g., yes they have children) and 5 in no (e.g., no children). I wanted to recode this so that it was 1 and 0
 # this allows a social network total score to be calculated.
-#data$snspouse[data$snspouse==5] <- 0
-#data$snchild[data$snchild==5] <-0
-#data$snfamily[data$snfamily==5] <- 0
-#data$snfriends[data$snfriends==5] <- 0
-#data$snfriends[data$snfriends==7] <- NA
+
 reverse_coding_socialnetwork <- function(d, variables){
   # d <- ds_lone
   for(v in variables){
@@ -303,7 +299,7 @@ ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["social_network"]] <- ds_long
 
-# ----- social support -------------
+# ----- social-support -------------
 #read in the renaming rules for this specific variables
 rename_social_support  <-  readxl::read_excel(
   path_renaming_rules, 
@@ -340,7 +336,7 @@ ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["social_support"]] <- ds_long
 
-#--------activity---IN PROGRESS--------
+#--------activity--------
 #read in the renaming rules for this specific variables
 rename_activity   <-  readxl::read_excel(path_renaming_rules, sheet = "activity")
 
@@ -386,8 +382,72 @@ d_long <- compute_scale_score(d_long) %>%
 ds_long <- ds_long %>% dplyr::left_join(d_long)
 dto[["activity"]] <- ds_long
 
+#---------wellbeing------------
+#read in the renaming rules for this specific variables
+rename_wellbeing   <-  readxl::read_excel(path_renaming_rules, sheet = "wellbeing")
 
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_wellbeing,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
 
+ds_long %>% dplyr::filter(hhidpn==10001010)
+
+# create a vector with names of items to be reverse scored 
+rename_meta <-rename_wellbeing
+# use meta data to provide the rules
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
+reverse_these <- reverse_these[!is.na(reverse_these)]
+ds_long <- ds_long %>% 
+  reverse_coding(reverse_these)
+
+# take a subject
+d_long <- ds_long %>% 
+  dplyr::filter(year %in% c(2006, 2008, 2010, 2012, 2014)) %>%  # only these years
+  dplyr::select(year, hhidpn, dplyr::matches("wellbeing_")) # only these variables
+# compute scale scores on subsetted ds
+#Create a variable that indicates the number of missing per person.
+data$missing <- (is.na(data$wellbeing_1) + is.na(data$wellbeing_2) + is.na(data$wellbeing_3) + is.na(data$wellbeing_4)+is.na(data$wellbeing_5)+is.na(data$wellbeing_6)+is.na(data$wellbeing_7))
+data$wellbeing_mean <- ifelse(data$missing<3, data$wellbeing_total/(7-data$missing), NA)
+
+compute_wellbeing_scale_score <- function(d){
+  # d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+  (col_names_7 <- setdiff(names(d),c("year","hhidpn")))
+  (col_names_2 <- col_names_7[1:2])
+  d[,"wellbeing_sum_7"] <- apply(d[col_names_7],1,sum, na.rm = TRUE)
+  d[,"wellbeing_sum_2"] <- apply(d[col_names_2],1,sum, na.rm = TRUE)
+  d[,"score_wellbeing_2"] <- apply(d[col_names_2],1,mean, na.rm = TRUE)
+  d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
+  d <- d %>% 
+    dplyr::mutate( 
+      score_wellbeing_7 = ifelse(missing_count<3, 
+                                   wellbeing_sum_7/(7- missing_count),NA))
+    d <- d %>% 
+        dplyr::mutate( 
+          wellbeing_sum_7 = ifelse(missing_count>0, NA, wellbeing_sum_7)
+    )
+  return(d)
+}
+#d_long <- compute_scale_score(d_long) %>% 
+#  dplyr::rename(wellbeing_mean = mean, wellbeing_sum = sum) %>% 
+#  dplyr::select(year, hhidpn, wellbeing_mean, wellbeing_sum)
+
+ds_long <- ds_long %>% compute_wellbeing_scale_score()
+head(ds_long)
+# merge computed scales score to the general file
+
+dto[["wellbeing"]] <- ds_long
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
