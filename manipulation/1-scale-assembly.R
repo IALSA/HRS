@@ -437,6 +437,75 @@ head(ds_long)
 
 dto[["wellbeing"]] <- ds_long
 
+#------self-rated-memory------
+#read in the renaming rules for this specific variables
+rename_self_rated_memory   <-  readxl::read_excel(path_renaming_rules, sheet = "selfratedmemory")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_self_rated_memory,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+#srmemory needs to be recoded and 8 means Don't know or Not Ascertained and 9 means Refused
+ds_long[,"srmemory"] <- plyr::mapvalues(ds_long[,"srmemory"], from=c(9,8,5,4,3,2,1), to=c(NA,NA,1,2,3,4,5)) 
+
+#srmemoryp is recoded such that higher numbers mean memory has improved and 8 and 9 are recoded as NA
+ds_long[,"srmemoryp"] <- plyr::mapvalues(ds_long[,"srmemoryp"], from=c(9,8,3,2,1), to=c(NA,NA,1,2,3)) 
+
+dto[["srmemory"]] <- ds_long
+
+#---word-list-recall-------
+rename_wordlist   <-  readxl::read_excel(path_renaming_rules, sheet = "wordlist")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_wordlist,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+dto[["wordlist"]] <- ds_long
+
+#---mental-status-----------
+rename_mental_status   <-  readxl::read_excel(path_renaming_rules, sheet = "mentalstatus")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_mental_status,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
 lapply(dto, names)
