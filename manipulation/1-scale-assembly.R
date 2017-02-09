@@ -412,15 +412,6 @@ reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
 
-# take a subject
-d_long <- ds_long %>% 
-  dplyr::filter(year %in% c(2006, 2008, 2010, 2012, 2014)) %>%  # only these years
-  dplyr::select(year, hhidpn, dplyr::matches("wellbeing_")) # only these variables
-# compute scale scores on subsetted ds
-#Create a variable that indicates the number of missing per person.
-data$missing <- (is.na(data$wellbeing_1) + is.na(data$wellbeing_2) + is.na(data$wellbeing_3) + is.na(data$wellbeing_4)+is.na(data$wellbeing_5)+is.na(data$wellbeing_6)+is.na(data$wellbeing_7))
-data$wellbeing_mean <- ifelse(data$missing<3, data$wellbeing_total/(7-data$missing), NA)
-
 compute_wellbeing_scale_score <- function(d){
   # d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
   (col_names_7 <- setdiff(names(d),c("year","hhidpn")))
@@ -439,9 +430,6 @@ compute_wellbeing_scale_score <- function(d){
     )
   return(d)
 }
-#d_long <- compute_scale_score(d_long) %>% 
-#  dplyr::rename(wellbeing_mean = mean, wellbeing_sum = sum) %>% 
-#  dplyr::select(year, hhidpn, wellbeing_mean, wellbeing_sum)
 
 ds_long <- ds_long %>% compute_wellbeing_scale_score()
 head(ds_long)
