@@ -524,6 +524,43 @@ ds_long <- ds_long %>%
 
 dto[["mentalstatus"]] <- ds_long
 
+#-----vocabulary--------
+rename_vocabulary   <-  readxl::read_excel(path_renaming_rules, sheet = "vocabulary")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_vocabulary,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+vocab_recode_vars <- c("vocab1", "vocab2","vocab3","vocab4","vocab5")
+recoding_vocab<- function(d, variables){
+  for(v in variables){
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=9, to=NA) 
+  }
+  return(d)
+}
+
+# vocab items are coded with 9 as refused, recode this to NA scale is from 0 DK or incorrect to 2 perfectly correct.
+ds_long <- ds_long %>% 
+  recoding_vocab(vocab_recode_vars)
+
+ds_long[,'vocab_total'] <-  apply(ds_long[vocab_recode_vars],1,sum, na.rm = FALSE)
+
+
+
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
