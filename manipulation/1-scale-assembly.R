@@ -559,8 +559,7 @@ ds_long <- ds_long %>%
 
 ds_long[,'vocab_total'] <-  apply(ds_long[vocab_recode_vars],1,sum, na.rm = FALSE)
 
-
-
+dto[["vocabulary"]] <- ds_long
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
@@ -579,46 +578,4 @@ names(dto)
 # each of which is a dataset with a subset of variables
 # united by type of items
 
-
-
-
-
-
-
-
-# Developmental and reference code below -------------
-
-#### Developmental script beyond this point down ####
-#sources of functions used
-source("./scripts/data/cassandra/selectionfunctions.R")
-
-source(paste0(pathDir,"/scripts/data/cassandra/lb_scales.R"))
-source(paste0(pathDir,"/scripts/data/cassandra/rename2004.R"))
-source(paste0(pathDir,"/scripts/data/cassandra/demographics.R"))
-source(paste0(pathDir,"/scripts/data/cassandra/physical_health.R"))
-source(paste0(pathDir,"/scripts/data/cassandra/rename2010_2012.R"))
-source(paste0(pathDir,"/scripts/data/cassandra/cognition.R"))
-
-# remove the first character if it signifies the year of measurement
-ds04 <- preparing_variable_labels(ds04, "J", "04")
-
-ds04 <- rename2004(ds04)
-ds04 <- loneliness_three_items_recode(ds04)
-ds04 <- lifesatisfaction_summaryscores(ds04)
-ds04 <- social_support_network_recode2004(ds04)
-ds04 <- welling_scale_summarize2004(ds04)
-ds04 <- physhealthrename2004_2008(ds04)
-ds04 <- MentalStatus(ds04)
-ds04 <- Vocabulary(ds04)
-
-ds04$serial1[ds04$serial71==93] <- 1
-
-psychosocial_04 <- subset(ds04, select=c('hhidpn','loneliness_1','loneliness_2','loneliness_3',"loneliness_4","loneliness_total",'loneliness_mean',                        
-                                         'lifesatisfaction_mean','snspouse','snchild','snfamily','snfriends','closespouse','closechild','closefam','closefri',
-                                         'close_relations','socnetwork',"mtchild", "spkchild", "wrtchild","mtfam", "spkfam", "wrtfam",
-                                         "mtfriend", "spkfriend", "wrtfriend", 'positive_support_spouse','positive_support_child','positive_support_fam','positive_support_fri',
-                                         'negative_support_spouse','negative_support_child','negative_support_fam','negative_support_fri',
-                                         'wellbeing_total_two','wellbeing_mean_two',"memoryproblem","Activity_vigorous", "Activity_moderate", "Activity_mild"))
-
-demo04 <- basicdemographics(ds04)
 
