@@ -505,6 +505,25 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
+mentalstatus_recode_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp")
+recoding_mentalstatus <- function(d, variables){
+  # d <- ds_lone
+  for(v in variables){
+    # v = "loneliness_1"
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,NA,NA)) 
+  }
+  return(d)
+}
+
+# mental status items need to be recoded so that wrong answers are 0 (currently 5)
+# and 8 means Don't know or Not Ascertained and 9 means Refused
+ds_long <- ds_long %>% 
+  recoding_mentalstatus(mentalstatus_recode_vars)
+
+dto[["mentalstatus"]] <- ds_long
+
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
