@@ -507,9 +507,7 @@ head(ds_long)
 
 mentalstatus_recode_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp")
 recoding_mentalstatus <- function(d, variables){
-  # d <- ds_lone
   for(v in variables){
-    # v = "loneliness_1"
     (p <- unique(d[,v]) %>% as.numeric())
     (p <- p[!is.na(p)])
     d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,NA,NA)) 
@@ -560,6 +558,46 @@ ds_long <- ds_long %>%
 ds_long[,'vocab_total'] <-  apply(ds_long[vocab_recode_vars],1,sum, na.rm = FALSE)
 
 dto[["vocabulary"]] <- ds_long
+
+#-----depression--------------
+rename_depression   <-  readxl::read_excel(path_renaming_rules, sheet = "depression")
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_depression,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+# ces-d items are coded with 9 as refused, 8 as dk, and 5 as no.
+cesd_vars <- c("cesd1","cesd2","cesd3","cesd4","cesd5","cesd6","cesd7","cesd8")
+recoding_depression<- function(d, variables){
+  for(v in variables){
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=c(5, 8, 9), to=c(0, NA, NA)) 
+  }
+  return(d)
+}
+
+ds_long <- recoding_depression(ds_long, cesd_vars)
+
+cesd_vars_to_reverse <- cesd_vars <- c("cesd4","cesd6")
+ds_long <- reverse_coding(ds_long, cesd_vars_to_reverse)
+
+head(ds_long)
+
+ds_long[,'dep_total'] <-  apply(ds_long[cesd_vars],1,sum, na.rm = FALSE)
+
+dto[["depression"]] <- ds_long
 
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
