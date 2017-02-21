@@ -54,6 +54,15 @@ for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){
     eval(parse(text=cstring)) # evaluates the content of the command string
 } 
 
+# load meta-data
+(path_meta <- list.files("./data-phi-free/raw/meta/RAND-2017-02-08", full.names = T, pattern=".csv$"))
+ls_meta <- list()
+for(i in seq_along(path_meta)){
+  section_name <- sub(".csv$","", basename(path_meta[i]) )
+  ls_meta[[section_name]] <- readr::read_csv(path_meta[i])
+}
+ls_meta %>%  names()
+
 # ----- dummy -----------------------
 # names_labels(ds04)
 # dim(ds04)
