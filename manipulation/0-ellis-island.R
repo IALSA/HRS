@@ -46,7 +46,7 @@ oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
 saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw data
 # extract and save metadata fro each file. Disable after the first run
 nl <- names_labels(ds=oneFile)
-write.csv(nl, paste0("./data-phi-free/derived/RAND-2017-02-08/nl_",fileName,".csv"))
+write.csv(nl, paste0("./data-phi-free/derived/meta/RAND-2017-02-08/nl_",fileName,".csv"))
 }
 
 # ---- load-data-rds --------------------------------
