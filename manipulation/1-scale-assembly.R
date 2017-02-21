@@ -52,7 +52,12 @@ for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){
 ls_meta <- list()
 for(i in seq_along(path_meta)){
   section_name <- sub(".csv$","", basename(path_meta[i]) )
-  ls_meta[[section_name]] <- readr::read_csv(path_meta[i])
+  ls_meta[[section_name]] <- readr::read_csv(path_meta[i]) %>% 
+    dplyr::mutate(
+      year = as.numeric(year),
+      reversed = as.numeric(reversed)
+    )
+  attr(ls_meta[[section_name]],"spec") <- NULL
 }
 ls_meta %>%  names()
 
@@ -118,7 +123,8 @@ dto <- list()
 # ----- demographics ------------------
 # path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
-rename_demographics   <-  readxl::read_excel(path_renaming_rules, sheet = "demographics")
+rename_demographics   <-  ls_meta[["demographics"]]
+str(rename_demographics)
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
@@ -143,8 +149,7 @@ dto[["demographics"]] <- ds_long
 # ----- loneliness -------------
 # path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
-rename_loneliness   <-  readxl::read_excel(path_renaming_rules, sheet = "loneliness")
-
+rename_loneliness   <-  ls_meta[["loneliness"]]
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
@@ -197,10 +202,7 @@ dto[["loneliness"]] <- ds_long
 # ----- life_satisfaction -------------
 #path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
-rename_life_satisfaction  <-  readxl::read_excel(
-  path_renaming_rules, 
-  sheet = "lifesatisfaction"
-) %>% as.data.frame()
+rename_life_satisfaction  <-  ls_meta[["life-satisfaction"]] %>% as.data.frame()
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -231,11 +233,7 @@ dto[["life_satisfaction"]] <- ds_long
 
 # ----- social-network -------------
 #read in the renaming rules for this specific variables
-rename_social_network  <-  readxl::read_excel(
-  path_renaming_rules, 
-  sheet = "socialnetwork"
-) %>% as.data.frame()
-
+rename_social_network  <-  ls_meta[["social-network"]] %>% as.data.frame()
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
@@ -303,11 +301,7 @@ dto[["social_network"]] <- ds_long
 
 # ----- social-support -------------
 #read in the renaming rules for this specific variables
-rename_social_support  <-  readxl::read_excel(
-  path_renaming_rules, 
-  sheet = "socialsupport"
-) %>% as.data.frame()
-
+rename_social_support  <-  ls_meta[["social-support"]] %>% as.data.frame()
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
@@ -340,7 +334,7 @@ dto[["social_support"]] <- ds_long
 
 #--------activity--------
 #read in the renaming rules for this specific variables
-rename_activity   <-  readxl::read_excel(path_renaming_rules, sheet = "activity")
+rename_activity   <-  ls_meta[["activity"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -386,7 +380,7 @@ dto[["activity"]] <- ds_long
 
 #---------wellbeing------------
 #read in the renaming rules for this specific variables
-rename_wellbeing   <-  readxl::read_excel(path_renaming_rules, sheet = "wellbeing")
+rename_wellbeing   <-  ls_meta[["wellbeing"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -441,7 +435,7 @@ dto[["wellbeing"]] <- ds_long
 
 #------self-rated-memory------
 #read in the renaming rules for this specific variables
-rename_self_rated_memory   <-  readxl::read_excel(path_renaming_rules, sheet = "selfratedmemory")
+rename_self_rated_memory   <-  ls_meta[["self-rated-memory"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -468,7 +462,7 @@ ds_long[,"srmemoryp"] <- plyr::mapvalues(ds_long[,"srmemoryp"], from=c(9,8,3,2,1
 dto[["srmemory"]] <- ds_long
 
 #---word-list-recall-------
-rename_wordlist   <-  readxl::read_excel(path_renaming_rules, sheet = "wordlist")
+rename_wordlist   <-  ls_meta[["word-list"]] 
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -489,7 +483,7 @@ head(ds_long)
 dto[["wordlist"]] <- ds_long
 
 #---mental-status-----------
-rename_mental_status   <-  readxl::read_excel(path_renaming_rules, sheet = "mentalstatus")
+rename_mental_status   <-  ls_meta[["mental-status"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -525,7 +519,7 @@ ds_long <- ds_long %>%
 dto[["mentalstatus"]] <- ds_long
 
 #-----vocabulary--------
-rename_vocabulary   <-  readxl::read_excel(path_renaming_rules, sheet = "vocabulary")
+rename_vocabulary   <-  ls_meta[["vocabulary"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -562,7 +556,7 @@ ds_long[,'vocab_total'] <-  apply(ds_long[vocab_recode_vars],1,sum, na.rm = FALS
 dto[["vocabulary"]] <- ds_long
 
 #-----depression--------------
-rename_depression   <-  readxl::read_excel(path_renaming_rules, sheet = "depression")
+rename_depression   <-  ls_meta[["depression"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
@@ -604,7 +598,7 @@ dto[["depression"]] <- ds_long
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
 lapply(dto, names)
-
+dto %>% object.size() %>% utils:::format.object_size("auto")
 # Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
 saveRDS(dto, file="./data-unshared/derived/dto.rds", compress="xz")
 
