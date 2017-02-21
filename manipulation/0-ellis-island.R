@@ -41,17 +41,22 @@ for(i in seq_along(filePaths)){
 # for(i in 1){
 filePath <- filePaths[[i]]
  fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+# import and save each file in RDS format 
 oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
 saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw data
+# extract and save metadata fro each file. Disable after the first run
+nl <- names_labels(ds=oneFile)
+write.csv(nl, paste0("./data-phi-free/derived/RAND-2017-02-08/nl_",fileName,".csv"))
 }
 
 # ---- load-data-rds --------------------------------
-ds04 <- readRDS("./data-unshared/derived/h04f1a.rds")
-ds06 <- readRDS("./data-unshared/derived/h06f2b.rds")
-ds08 <- readRDS("./data-unshared/derived/h08f2a.rds")
-ds10 <- readRDS("./data-unshared/derived/hd10f5c.rds")
-ds12 <- readRDS("./data-unshared/derived/h12f1a.rds")
-ds14 <- readRDS("./data-unshared/derived/h14e1a.rds")
+
+testit::assert("File does not exist", file.exists("./data-unshared/derived/h04f1a.rds"))
+testit::assert("File does not exist", file.exists("./data-unshared/derived/h06f2b.rds"))
+testit::assert("File does not exist", file.exists("./data-unshared/derived/h08f2a.rds"))
+testit::assert("File does not exist", file.exists("./data-unshared/derived/hd10f5c.rds"))
+testit::assert("File does not exist", file.exists("./data-unshared/derived/h12f1a.rds"))
+testit::assert("File does not exist", file.exists("./data-unshared/derived/h14e1a.rds"))
 
 
 
