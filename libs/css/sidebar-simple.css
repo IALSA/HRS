@@ -1,0 +1,19 @@
+#TOC {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  overflow:auto;
+  line-height:200%;
+}
+
+
+body {
+   font-size: 14px;
+      max-width: 4000px;
+      margin: auto;
+      margin-left:200px;
+      line-height: 17px;
+      overflow:margin-right;
+}

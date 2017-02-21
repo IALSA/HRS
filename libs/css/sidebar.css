@@ -1,0 +1,42 @@
+#TOC {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  overflow:auto;
+  line-height:200%;
+}
+
+
+body {
+   font-family: "Helvetica" , "sans-serif";
+   background-color: white;
+   font-size: 14px;
+      max-width: 1200px;
+      margin: auto;
+      margin-left:200px;
+      line-height: 20px;
+}
+
+td {
+   font-family: "Courier New" , "monospace";
+   background-color: white;
+   font-size: 14px;
+      max-width: 1200px;
+      margin: auto;
+      margin-left:200px;
+}
+
+#dynamic-table td {
+  white-space: nowrap;
+}
+#static-tables td {
+  white-space: pre;   /* preserve white space inside tables */
+  line-height: 5px;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 10px 0px;
+}
