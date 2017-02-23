@@ -165,7 +165,6 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
-head(ds_lone)
 
 ds_long %>% dplyr::filter(hhidpn==10001010)
 
