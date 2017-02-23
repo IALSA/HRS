@@ -40,9 +40,9 @@ fileNames <- basename(filePaths) # save only the last component
 for(i in seq_along(filePaths)){
 # for(i in 1){
 filePath <- filePaths[[i]]
- fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
+fileName <- tail(strsplit(filePath, "/|.sav")[[1]], n=1)
 # import and save each file in RDS format 
-oneFile <- Hmisc::spss.get(filePath, use.value.labels = TRUE)
+oneFile <- haven::read_sav(file = filePath)
 saveRDS(oneFile, paste0("./data-unshared/derived/", fileName, ".rds")) # all raw data
 # extract and save metadata fro each file. Disable after the first run
 nl <- names_labels(ds=oneFile)
@@ -57,6 +57,3 @@ testit::assert("File does not exist", file.exists("./data-unshared/derived/h08f2
 testit::assert("File does not exist", file.exists("./data-unshared/derived/hd10f5c.rds"))
 testit::assert("File does not exist", file.exists("./data-unshared/derived/h12f1a.rds"))
 testit::assert("File does not exist", file.exists("./data-unshared/derived/h14e1a.rds"))
-
-
-
