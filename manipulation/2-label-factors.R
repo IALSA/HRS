@@ -82,6 +82,73 @@ interview_language_levels <- c(
    "1" = "ENGLISH"
   ,"2" = "SPANISH"
 )
+nursing_home <- c(
+   "1" = "YES"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+us_born <- c(
+  "1" = "YES"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+childhood_ses <- c(
+  "1" = "PRETTY WELL OFF FINANCIALLY"
+  ,"3" = "ABOUT AVERAGE"
+  ,"5" = "POOR"
+  ,"6" = "[VOL] IT VARIED"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+religion <- c(
+   "1" = "PROTESTANT"
+  ,"2" = "CATHOLIC"
+  ,"3" = "JEWISH"
+  ,"4" = "NO PREFERENCE"
+  ,"7" = "OTHER (SPECIFY)"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+religious_service <- c(
+   "1" = "MORE THAN ONCE A WEEK"
+  ,"2" = "ONCE A WEEK"
+  ,"3" = "TWO OR THREE TIMES A MONTH"
+  ,"4" = "ONE OR MORE TIMES A YEAR"
+  ,"5" = "NOT AT ALL"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+english_household <- c(
+   "1" =  "YES"
+  ,"5" =  "NO"
+  ,"8" =  "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" =  "RF (Refused)" 
+)
+number_marriages <- c(
+   "0" =  "[VOL] NEVER BEEN MARRIED"
+  ,"1" =  "ONCE"
+  ,"2" =  "TWICE"
+  ,"3" =  "THREE TIMES"
+  ,"4" =  "FOUR OR MORE"
+  ,"8" =  "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" =  "RF (Refused)"
+)
+married <- c(
+   "1" =  "[VOL] MARRIED"
+  ,"2" =  "[VOL] ANNULLED"
+  ,"3" =  "SEPARATED"
+  ,"4" =  "DIVORCED"
+  ,"5" =  "WIDOWED"
+  ,"6" =  "NEVER MARRIED"
+  ,"7" =  "OTHER (SPECIFY)"
+  ,"8" =  "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" =  "RF (Refused)"
+)
+male <- c(
+  
+)
 ds <- ds %>% 
   dplyr::mutate(
     # interview_language = make_factor("interview_language")

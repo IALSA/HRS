@@ -20,7 +20,7 @@ year,old_name,new_name,reversed,note
 2004,ja028,nursing_home,NA,NA
 2004,jb002,us_born,NA,NA
 2004,jb006,arrive_us_year,NA,NA
-2004,jb020,ses,NA,NA
+2004,jb020,childhood_ses,NA,NA
 2004,jb050,religion,NA,NA
 2004,jb082,religious_service,NA,NA
 2004,jb053,religion_importance,NA,NA
@@ -52,7 +52,7 @@ year,old_name,new_name,reversed,note
 2006,ka028,nursing_home,NA,NA
 2006,kb002,us_born,NA,NA
 2006,kb006,arrive_us_year,NA,NA
-2006,kb020,ses,NA,NA
+2006,kb020,childhood_ses,NA,NA
 2006,kb050,religion,NA,NA
 2006,kb082,religious_service,NA,NA
 2006,kb053,religion_importance,NA,NA
@@ -84,7 +84,7 @@ year,old_name,new_name,reversed,note
 2008,la028,nursing_home,NA,NA
 2008,lb002,us_born,NA,NA
 2008,lb006,arrive_us_year,NA,NA
-2008,lb020,ses,NA,NA
+2008,lb020,childhood_ses,NA,NA
 2008,lb050,religion,NA,NA
 2008,lb082,religious_service,NA,NA
 2008,lb053,religion_importance,NA,NA
@@ -116,7 +116,7 @@ year,old_name,new_name,reversed,note
 2010,ma028,nursing_home,NA,NA
 2010,mb002,us_born,NA,NA
 2010,mb006,arrive_us_year,NA,NA
-2010,mb020,ses,NA,NA
+2010,mb020,childhood_ses,NA,NA
 2010,mb050,religion,NA,NA
 2010,mb082,religious_service,NA,NA
 2010,mb053,religion_importance,NA,NA
@@ -148,7 +148,7 @@ year,old_name,new_name,reversed,note
 2012,na028,nursing_home,NA,NA
 2012,nb002,us_born,NA,NA
 2012,nb006,arrive_us_year,NA,NA
-2012,nb020,ses,NA,NA
+2012,nb020,childhood_ses,NA,NA
 2012,nb050,religion,NA,NA
 2012,nb082,religious_service,NA,NA
 2012,nb053,religion_importance,NA,NA
@@ -180,7 +180,7 @@ year,old_name,new_name,reversed,note
 2014,oa028,nursing_home,NA,NA
 2014,ob002,us_born,NA,NA
 2014,ob006,arrive_us_year,NA,NA
-2014,ob020,ses,NA,NA
+2014,ob020,childhood_ses,NA,NA
 2014,ob050,religion,NA,NA
 2014,ob082,religious_service,NA,NA
 2014,ob054,english_household,NA,NA
