@@ -30,3 +30,44 @@ year,old_name,new_name,reversed,note
 2008,lc036,heart,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
 2008,lc053,stroke,FALSE,"1. yes, 2, possible stroke or TIA, 3. disputes previous wave record, but now has the condition, 4. disputes previous wave record, does not have the condition, 5. No, 8. DK or NA, 9. RF. "
 2008,lc065,psychiatric,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2008,lc069,memorydisease,FALSE,"1. yes, 5. No, 8. DK or NA, 9 RF."
+2008,lc070,arthritis,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2008,lc223,vigorousactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2008,lc224,moderateactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2008,lc225,mildactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2010,mc005,hypertension,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc010,diabetes,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc018,cancer,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc030,lungdisease,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc036,heart,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc053,stroke,FALSE,"1. yes, 2, possible stroke or TIA, 3. disputes previous wave record, but now has the condition, 4. disputes previous wave record, does not have the condition, 5. No, 8. DK or NA, 9. RF. "
+2010,mc065,psychiatric,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc069,memorydisease,FALSE,"1. yes, 5. No, 8. DK or NA, 9 RF."
+2010,mc070,arthritis,FALSE,"1. yes, 3. Disputes. previous wave record, but now has, 4. disputes previous wave record, does not have, 5. No, 8. DK NA, 9. Refused"
+2010,mc223,vigorousactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2010,mc224,moderateactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2010,mc225,mildactivity,FALSE,"1. More than once a week, 2. once a week. 3. one to three times a month, 4. Hardly ever or never."
+2012,nc005,hypertension,FALSE,
+2012,nc010,diabetes,FALSE,
+2012,nc018,cancer,FALSE,
+2012,nc030,lungdisease,FALSE,
+2012,nc036,heart,FALSE,
+2012,nc053,stroke,FALSE,
+2012,nc065,psychiatric,FALSE,
+2012,nc069,memorydisease,FALSE,
+2012,nc070,arthritis,FALSE,
+2012,nc223,vigorousactivity,FALSE,
+2012,nc224,moderateactivity,FALSE,
+2012,nc225,mildactivity,FALSE,
+2014,oc005,hypertension,FALSE,
+2014,oc010,diabetes,FALSE,
+2014,oc018,cancer,FALSE,
+2014,oc030,lungdisease,FALSE,
+2014,oc036,heart,FALSE,
+2014,oc053,stroke,FALSE,
+2014,oc065,psychiatric,FALSE,
+2014,oc069,memorydisease,FALSE,
+2014,oc070,arthritis,FALSE,
+2014,oc223,vigorousactivity,FALSE,
+2014,oc224,moderateactivity,FALSE,
+2014,oc225,mildactivity,FALSE,
