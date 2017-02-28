@@ -182,7 +182,7 @@ ds <- ds %>%
     pF = factor(proxy_interview,
                 levels = as.numeric(names(proxy_interview_levels)) ,
                 labels = proxy_interview_levels
-                ),
+                )
     # pcF = factor(proxy_ratiing_cognitive,
     #              levels = as.numeric(names))
   )
