@@ -147,8 +147,35 @@ married <- c(
   ,"9" =  "RF (Refused)"
 )
 male <- c(
-  
+   "1" = "MALE"
+  ,"2" = "FEMALE"
 )
+
+race <- c(
+   "1" = " WHITE/CAUCASIAN"
+  ,"2" = " BLACK/AFRICAN AMERICAN"
+  ,"7" = "OTHER (SPECIFY) Masked version includes American Indian, Alaskan Native, Asian, and Pacific Islander"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
+hispanic <- c(
+   "1" = "YES"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
+degree <- c(
+  "1" = "LESS THAN BACHELORS"
+  ,"2" = "BACHELORS"
+  ,"3" = "MASTERS/MBA"
+  ,"6" = "LAW, PHD, MD"
+  ,"7" = "OTHER (SPECIFY)"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
 ds <- ds %>% 
   dplyr::mutate(
     # interview_language = make_factor("interview_language")
