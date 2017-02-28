@@ -41,69 +41,45 @@ get_freq <- function(
     dplyr::summarize(n=n())
 }
 
-# make_factor <- function(x){
-#   # x = "interview_language"
-#   # cstring <- paste0( 
-#   #   "a <- factor(",x,",
-#   #   levels = as.numeric(names(",x,"_levels",")),
-#   #   labels = ",x,"_levels)")
-#   cstring <- paste0( 
-#     "factor(",x,",
-#     levels = as.numeric(names(",x,"_levels",")),
-#     labels = ",x,"_levels)")
-#   eval(parse(text=cstring)) # evaluates the content of the command string
-#   # return(a)
-# }
-
-
-# ---- demographics -----------------------------------------------------------
-ds <- dto$demographics %>% 
-  dplyr::mutate(
-    year = year %>% as.character() %>% as.integer(),
-    pc   = as.character(proxy_ratiing_cognitive)
+make_factor <- function(d, variable_name){
+  #d <- ds
+  # variable_name <- "interview_language"
+  
+  variable_levels <- paste0(variable_name, "_levels")
+  d[,variable_name]<- as.numeric(d[,variable_name])
+  d[,variable_name] <- factor(
+    d[,variable_name]
+    , levels = as.numeric(names(get(variable_levels))) 
+    , labels = get(variable_levels)
   )
-ds %>% dplyr::glimpse()
+  #browser()
+  return(d)
+}
 
-interview_language_levels <- c(
-   "1" = "ENGLISH"
-  ,"2" = "SPANISH"
-)
+#usage:
+#ds <- make_factor(ds,"interview_language")
 
-
-
-ds[,"interview_language"] <- factor(
-  ds[,"interview_language"]
-  , levels = as.numeric(names(interview_language_levels)) 
-  , labels = interview_language_levels
-)
-
-ds %>% 
-  dplyr::group_by(interview_language) %>% 
-  dplyr::summarise(n=n())
-
-
-
-ds %>% get_freq("proxy_interview")
+# ------ declare-factor-levels -----
 
 proxy_interview_levels <- c(
-   "1" = "SELF"
+  "1" = "SELF"
   ,"2" = "PROXY, SPOUSE IS REPORTER"
   ,"3" = "PROXY, NON-SPOUSE IS REPORTER"
   ,"4" = "PROXY, SPOUSE IS REPORTER - NOT LIVING WITH"
 )
 proxy_rating_cognitive_levels <- c(
-   "1" =  "NO REASON TO THINK THE RESPONDENT HAS ANY COGNITIVE LIMITATIONS"
+  "1" =  "NO REASON TO THINK THE RESPONDENT HAS ANY COGNITIVE LIMITATIONS"
   ,"2" =  "THE RESPONDENT MAY HAVE SOME COGNITIVE LIMITATIONS BUT COULD  PROBABLY DO THE INTERVIEW"
   ,"3" =  "THE RESPONDENT HAS COGNITIVE LIMITATIONS THAT PREVENT  HIM/HER FROM BEING INTERVIEWED"
   ,"8" =  "DK (Dont Know); NA (Not Ascertained)"
   ,"9" =  "RF (Refused)"
 )
 interview_language_levels <- c(
-   "1" = "ENGLISH"
+  "1" = "ENGLISH"
   ,"2" = "SPANISH"
 )
 nursing_home <- c(
-   "1" = "YES"
+  "1" = "YES"
   ,"5" = "NO"
   ,"8" = "DK (Don't Know); NA (Not Ascertained)"
   ,"9" = "RF (Refused)"
@@ -123,7 +99,7 @@ childhood_ses <- c(
   ,"9" = "RF (Refused)"
 )
 religion <- c(
-   "1" = "PROTESTANT"
+  "1" = "PROTESTANT"
   ,"2" = "CATHOLIC"
   ,"3" = "JEWISH"
   ,"4" = "NO PREFERENCE"
@@ -132,7 +108,7 @@ religion <- c(
   ,"9" = "RF (Refused)"
 )
 religious_service <- c(
-   "1" = "MORE THAN ONCE A WEEK"
+  "1" = "MORE THAN ONCE A WEEK"
   ,"2" = "ONCE A WEEK"
   ,"3" = "TWO OR THREE TIMES A MONTH"
   ,"4" = "ONE OR MORE TIMES A YEAR"
@@ -141,13 +117,13 @@ religious_service <- c(
   ,"9" = "RF (Refused)"
 )
 english_household <- c(
-   "1" =  "YES"
+  "1" =  "YES"
   ,"5" =  "NO"
   ,"8" =  "DK (Don't Know); NA (Not Ascertained)"
   ,"9" =  "RF (Refused)" 
 )
 number_marriages <- c(
-   "0" =  "[VOL] NEVER BEEN MARRIED"
+  "0" =  "[VOL] NEVER BEEN MARRIED"
   ,"1" =  "ONCE"
   ,"2" =  "TWICE"
   ,"3" =  "THREE TIMES"
@@ -156,7 +132,7 @@ number_marriages <- c(
   ,"9" =  "RF (Refused)"
 )
 married <- c(
-   "1" =  "[VOL] MARRIED"
+  "1" =  "[VOL] MARRIED"
   ,"2" =  "[VOL] ANNULLED"
   ,"3" =  "SEPARATED"
   ,"4" =  "DIVORCED"
@@ -167,12 +143,12 @@ married <- c(
   ,"9" =  "RF (Refused)"
 )
 male <- c(
-   "1" = "MALE"
+  "1" = "MALE"
   ,"2" = "FEMALE"
 )
 
 race <- c(
-   "1" = " WHITE/CAUCASIAN"
+  "1" = " WHITE/CAUCASIAN"
   ,"2" = " BLACK/AFRICAN AMERICAN"
   ,"7" = "OTHER (SPECIFY) Masked version includes American Indian, Alaskan Native, Asian, and Pacific Islander"
   ,"8" = "DK (Don't Know); NA (Not Ascertained)"
@@ -180,7 +156,7 @@ race <- c(
 )
 
 hispanic <- c(
-   "1" = "YES"
+  "1" = "YES"
   ,"5" = "NO"
   ,"8" = "DK (Don't Know); NA (Not Ascertained)"
   ,"9" = "RF (Refused)"
@@ -195,6 +171,17 @@ degree <- c(
   ,"8" = "DK (Don't Know); NA (Not Ascertained)"
   ,"9" = "RF (Refused)"
 )
+
+# ---- demographics -----------------------------------------------------------
+ds <- dto$demographics %>% 
+  dplyr::mutate(
+    year = year %>% as.character() %>% as.integer(),
+    pc   = as.character(proxy_ratiing_cognitive)
+  )
+ds %>% dplyr::glimpse()
+
+ds %>% get_freq("proxy_interview")
+
 
 ds <- ds %>% 
   dplyr::mutate(
