@@ -41,19 +41,20 @@ get_freq <- function(
     dplyr::summarize(n=n())
 }
 
-make_factor <- function(x){
-  # x = "interview_language"
-  # cstring <- paste0( 
-  #   "a <- factor(",x,",
-  #   levels = as.numeric(names(",x,"_levels",")),
-  #   labels = ",x,"_levels)")
-  cstring <- paste0( 
-    "factor(",x,",
-    levels = as.numeric(names(",x,"_levels",")),
-    labels = ",x,"_levels)")
-  eval(parse(text=cstring)) # evaluates the content of the command string
-  # return(a)
-}
+# make_factor <- function(x){
+#   # x = "interview_language"
+#   # cstring <- paste0( 
+#   #   "a <- factor(",x,",
+#   #   levels = as.numeric(names(",x,"_levels",")),
+#   #   labels = ",x,"_levels)")
+#   cstring <- paste0( 
+#     "factor(",x,",
+#     levels = as.numeric(names(",x,"_levels",")),
+#     labels = ",x,"_levels)")
+#   eval(parse(text=cstring)) # evaluates the content of the command string
+#   # return(a)
+# }
+
 
 # ---- demographics -----------------------------------------------------------
 ds <- dto$demographics %>% 
@@ -62,6 +63,25 @@ ds <- dto$demographics %>%
     pc   = as.character(proxy_ratiing_cognitive)
   )
 ds %>% dplyr::glimpse()
+
+interview_language_levels <- c(
+   "1" = "ENGLISH"
+  ,"2" = "SPANISH"
+)
+
+
+
+ds[,"interview_language"] <- factor(
+  ds[,"interview_language"]
+  , levels = as.numeric(names(interview_language_levels)) 
+  , labels = interview_language_levels
+)
+
+ds %>% 
+  dplyr::group_by(interview_language) %>% 
+  dplyr::summarise(n=n())
+
+
 
 ds %>% get_freq("proxy_interview")
 
@@ -190,7 +210,7 @@ ds <- ds %>%
  ds %>% 
   # dplyr::filter(year == 2010) %>%
   get_freq("interview_language")
-
+ds %>% dplyr::glimpse()
 # ---- tweak-data --------------------------------------------------------------
 
 # ---- basic-table --------------------------------------------------------------
