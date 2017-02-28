@@ -207,15 +207,39 @@ ds %>%
 
 # ----- health-apply-common-levels -----------------
 ds <- dto$
-health_response_1 <- c(
-  "1" = "Yes"
-  ,"3" = "Disputes previous wave record but now has"
-  ,"4" = "Disputes previous wave record does not have"
-  ,"5" = "No"
-  ,"8" = "Don't know, NA"
-  ,"9" = "Refused"
+health_common_response <- c(
+   "1" = "YES"
+  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
+  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
 )
-varlist<- c("hypertension","diabetes")
+stroke_response_labels <- c(
+   "1" = "YES"
+  ,"2" = "[VOL] POSSIBLE STROKE OR TIA (TRANSIENT ISCHEMIC ATTACK)"
+  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
+  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+memorydisease_labels <- c(
+   "1" = "YES"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+exercise_labels <- c(
+   "1" = "MORE THAN ONCE A WEEK"
+  ,"2" = "ONCE A WEEK"
+  ,"3" = "ONE TO THREE TIMES A MONTH"
+  ,"4" = "HARDLY EVER OR NEVER"
+  ,"7" = "(VOL) EVERY DAY"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+varlist<- c("hypertension","diabetes","cancer","lungdisease","heart","psychiatric","arthritis")
 for(i in varlist){
   ds[,paste0(i,"F")]<-ordered(ds[,i],
                                 levels = as.numeric(names(health_response_1)),
