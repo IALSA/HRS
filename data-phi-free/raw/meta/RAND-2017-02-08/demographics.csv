@@ -1,4 +1,6 @@
 year,old_name,new_name,reversed,note
+2004,birthyr,birthyr,NA,NA
+2004,birthmo,birthmo,NA,NA
 2004,ja500,interview_mth,NA,NA
 2004,ja501,interview_yr,NA,NA
 2004,ja065,nursing_home_mth,NA,NA
@@ -31,6 +33,8 @@ year,old_name,new_name,reversed,note
 2004,race,race,NA,NA
 2004,hispanic,hispanic,NA,NA
 2004,degree,degree,NA,NA
+2006,birthyr,birthyr,NA,NA
+2006,birthmo,birthmo,NA,NA
 2006,ka500,interview_mth,NA,NA
 2006,ka501,interview_yr,NA,NA
 2006,ka065,nursing_home_mth,NA,NA
@@ -63,6 +67,8 @@ year,old_name,new_name,reversed,note
 2006,race,race,NA,NA
 2006,hispanic,hispanic,NA,NA
 2006,degree,degree,NA,NA
+2008,birthyr,birthyr,NA,NA
+2008,birthmo,birthmo,NA,NA
 2008,la500,interview_mth,NA,NA
 2008,la501,interview_yr,NA,NA
 2008,la065,nursing_home_mth,NA,NA
@@ -95,6 +101,8 @@ year,old_name,new_name,reversed,note
 2008,race,race,NA,NA
 2008,hispanic,hispanic,NA,NA
 2008,degree,degree,NA,NA
+2010,birthyr,birthyr,NA,NA
+2010,birthmo,birthmo,NA,NA
 2010,ma500,interview_mth,NA,NA
 2010,ma501,interview_yr,NA,NA
 2010,ma065,nursing_home_mth,NA,NA
@@ -127,6 +135,8 @@ year,old_name,new_name,reversed,note
 2010,mb091m,race,NA,NA
 2010,mb028,hispanic,NA,NA
 2010,mb017m,degree,NA,NA
+2012,birthyr,birthyr,NA,NA
+2012,birthmo,birthmo,NA,NA
 2012,na500,interview_mth,NA,NA
 2012,na501,interview_yr,NA,NA
 2012,na065,nursing_home_mth,NA,NA
@@ -159,6 +169,8 @@ year,old_name,new_name,reversed,note
 2012,nb091m,race,NA,NA
 2012,nb028,hispanic,NA,NA
 2012,nb017m,degree,NA,NA
+2014,birthyr,birthyr,NA,NA
+2014,birthmo,birthmo,NA,NA
 2014,oa500,interview_mth,NA,NA
 2014,oa501,interview_yr,NA,NA
 2014,oa065,nursing_home_mth,NA,NA
