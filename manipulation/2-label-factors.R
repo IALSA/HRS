@@ -189,15 +189,15 @@ make_factor <- function(d, variable_name){
 
 # ---- demographics- ----------------
 ds <- dto$demographics
+
 ds %>% dplyr::glimpse()
 names(ls_levels)
 for(i in seq_along(ls_levels) ){
-  # i <- 1
   variable_name <- names(ls_levels[i])
   ds <- make_factor(ds, variable_name)
 }
-ds %>% dplyr::glimpse()
 
+ds %>% dplyr::glimpse()
 ds %>% 
   dplyr::group_by_(variable_name) %>% 
   dplyr::summarize(n=n())
@@ -283,6 +283,7 @@ for(i in seq_along(individual_health_levels) ){
   healthls_levels[[variable_name]] <- get(individual_health_levels[i])
 }
 
+# Apply the make_factor function to health variables that have their own labels.
 for(i in seq_along(healthls_levels) ){
   # i <- 1
   variable_name <- names(healthls_levels[i])
