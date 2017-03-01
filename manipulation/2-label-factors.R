@@ -179,7 +179,6 @@ make_factor <- function(d, variable_name){
     , levels = as.numeric(names(get(variable_levels))) 
     , labels = get(variable_levels)
   )
-  #browser()
   return(d)
 }
 #usage:
@@ -187,8 +186,6 @@ make_factor <- function(d, variable_name){
 #NOTE: for proper use of this function, the object that stores
 # factor level definition must be named "VARIABLE_levels",
 # where VARIABLE is the name of the column
-
-
 
 # ---- demographics- ----------------
 ds <- dto$demographics
@@ -206,7 +203,7 @@ ds %>%
   dplyr::summarize(n=n())
 
 # ----- health-apply-common-levels -----------------
-ds <- dto$
+ds <- dto$health
 health_common_response <- c(
    "1" = "YES"
   ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
@@ -215,22 +212,8 @@ health_common_response <- c(
   ,"8" = "DK (Don't Know); NA (Not Ascertained)"
   ,"9" = "RF (Refused)"
 )
-stroke_response_labels <- c(
-   "1" = "YES"
-  ,"2" = "[VOL] POSSIBLE STROKE OR TIA (TRANSIENT ISCHEMIC ATTACK)"
-  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
-  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
-  ,"5" = "NO"
-  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
-  ,"9" = "RF (Refused)"
-)
-memorydisease_labels <- c(
-   "1" = "YES"
-  ,"5" = "NO"
-  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
-  ,"9" = "RF (Refused)"
-)
-exercise_labels <- c(
+
+exercise_levels <- c(
    "1" = "MORE THAN ONCE A WEEK"
   ,"2" = "ONCE A WEEK"
   ,"3" = "ONE TO THREE TIMES A MONTH"
@@ -242,37 +225,71 @@ exercise_labels <- c(
 varlist<- c("hypertension","diabetes","cancer","lungdisease","heart","psychiatric","arthritis")
 for(i in varlist){
   ds[,paste0(i,"F")]<-ordered(ds[,i],
-                                levels = as.numeric(names(health_response_1)),
-                                labels = health_response_1)
+                                levels = as.numeric(names(health_common_response)),
+                                labels = health_common_response)
 }
 
+exercise_varlist<- c("vigorousactivity","moderateactivity","mildactivity")
+for(i in exercise_varlist){
+  ds[,paste0(i,"F")]<-ordered(ds[,i],
+                              levels = as.numeric(names(exercise_levels)),
+                              labels = exercise_levels)
+}
 
-# ---- demographics -----------------------------------------------------------
-ds <- dto$demographics %>% 
-  dplyr::mutate(
-    year = year %>% as.character() %>% as.integer(),
-    pc   = as.character(proxy_ratiing_cognitive)
-  )
+# ------- health-apply-individual-levels ----------------
+
+stroke_levels <- c(
+  "1" = "YES"
+  ,"2" = "[VOL] POSSIBLE STROKE OR TIA (TRANSIENT ISCHEMIC ATTACK)"
+  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
+  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+memorydisease_levels <- c(
+  "1" = "YES"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
+Alzheimers_levels <- c(
+  "1" = "YES"
+  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
+  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
+  ,"5" = "NO"
+  ,"7" = "[VOL] NOT ALZHEIMER'S DISEASE"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
+dementia_levels <- c(
+   "1" = "YES"
+  ,"3" = "DISPUTES PREVIOUS WAVE RECORD, BUT NOW HAS CONDITION"
+  ,"4" = "DISPUTES PREVIOUS WAVE RECORD, DOES NOT HAVE CONDITION"
+  ,"5" = "NO"
+  ,"8" = "DK (Don't Know); NA (Not Ascertained)"
+  ,"9" = "RF (Refused)"
+)
+
+# create a list object that collects individual health variable definitions
+individual_health_levels <- c("stroke_levels", "memorydisease_levels", "Alzheimers_levels", "dementia_levels")
+healthls_levels <- list()
+# for(i in declared_levels){
+for(i in seq_along(individual_health_levels) ){
+   #i <- 1
+  variable_name <- sub("_levels","",individual_health_levels[i])
+  healthls_levels[[variable_name]] <- get(individual_health_levels[i])
+}
+
+for(i in seq_along(healthls_levels) ){
+  # i <- 1
+  variable_name <- names(healthls_levels[i])
+  ds <- make_factor(ds, variable_name)
+}
 ds %>% dplyr::glimpse()
 
-ds %>% get_freq("proxy_interview")
-
-
-ds <- ds %>% 
-  dplyr::mutate(
-    # interview_language = make_factor("interview_language")
-    pF = factor(proxy_interview,
-                levels = as.numeric(names(proxy_interview_levels)) ,
-                labels = proxy_interview_levels
-                )
-    # pcF = factor(proxy_ratiing_cognitive,
-    #              levels = as.numeric(names))
-  )
-
- ds %>% 
-  # dplyr::filter(year == 2010) %>%
-  get_freq("interview_language")
-ds %>% dplyr::glimpse()
 # ---- tweak-data --------------------------------------------------------------
 
 # ---- basic-table --------------------------------------------------------------

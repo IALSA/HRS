@@ -14,7 +14,7 @@ year,old_name,new_name,reversed,note
 2004,jb056,btw_wave_marriage_mth,NA,NA
 2004,jb057,btw_wave_marriage_yr,NA,NA
 2004,ja009,proxy_interview,NA,"1 means self interview, 2 means proxy interview with spouse as respondent, 3 is proxy interview non-spouse as respondent, 4 is proxy interview spouse is respondent but the spouses no longer living together"
-2004,ja011,proxy_ratiing_cognitive,NA,NA
+2004,ja011,proxy_rating_cognitive,NA,NA
 2004,ja012,interview_language,NA,"1 is English, 2 is Spanish"
 2004,ja019,age_at_visit,NA,NA
 2004,ja028,nursing_home,NA,NA
@@ -46,7 +46,7 @@ year,old_name,new_name,reversed,note
 2006,kb056,btw_wave_marriage_mth,NA,NA
 2006,kb057,btw_wave_marriage_yr,NA,NA
 2006,ka009,proxy_interview,NA,NA
-2006,ka011,proxy_ratiing_cognitive,NA,NA
+2006,ka011,proxy_rating_cognitive,NA,NA
 2006,ka012,interview_language,NA,NA
 2006,ka019,age_at_visit,NA,NA
 2006,ka028,nursing_home,NA,NA
@@ -78,7 +78,7 @@ year,old_name,new_name,reversed,note
 2008,lb056,btw_wave_marriage_mth,NA,NA
 2008,lb057,btw_wave_marriage_yr,NA,NA
 2008,la009,proxy_interview,NA,NA
-2008,la011,proxy_ratiing_cognitive,NA,NA
+2008,la011,proxy_rating_cognitive,NA,NA
 2008,la012,interview_language,NA,NA
 2008,la019,age_at_visit,NA,NA
 2008,la028,nursing_home,NA,NA
@@ -110,7 +110,7 @@ year,old_name,new_name,reversed,note
 2010,mb056,btw_wave_marriage_mth,NA,NA
 2010,mb057,btw_wave_marriage_yr,NA,NA
 2010,ma009,proxy_interview,NA,NA
-2010,ma011,proxy_ratiing_cognitive,NA,NA
+2010,ma011,proxy_rating_cognitive,NA,NA
 2010,ma012,interview_language,NA,NA
 2010,ma019,age_at_visit,NA,NA
 2010,ma028,nursing_home,NA,NA
@@ -142,7 +142,7 @@ year,old_name,new_name,reversed,note
 2012,nb056,btw_wave_marriage_mth,NA,NA
 2012,nb057,btw_wave_marriage_yr,NA,NA
 2012,na009,proxy_interview,NA,NA
-2012,na011,proxy_ratiing_cognitive,NA,NA
+2012,na011,proxy_rating_cognitive,NA,NA
 2012,na012,interview_language,NA,NA
 2012,na019,age_at_visit,NA,NA
 2012,na028,nursing_home,NA,NA
@@ -174,7 +174,7 @@ year,old_name,new_name,reversed,note
 2014,ob056,btw_wave_marriage_mth,NA,NA
 2014,ob057,btw_wave_marriage_yr,NA,NA
 2014,oa009,proxy_interview,NA,NA
-2014,oa011,proxy_ratiing_cognitive,NA,NA
+2014,oa011,proxy_rating_cognitive,NA,NA
 2014,oa012,interview_language,NA,NA
 2014,oa019,age_at_visit,NA,NA
 2014,oa028,nursing_home,NA,NA
