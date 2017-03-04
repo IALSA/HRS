@@ -202,6 +202,85 @@ ds %>%
   dplyr::group_by_(variable_name) %>% 
   dplyr::summarize(n=n())
 
+dto[["demographics"]] <- ds
+
+# ----- loneliness-apply-common-levels -----------------
+ds <- dto$loneliness
+loneliness_response <- c(
+   "1" = "OFTEN"
+  ,"2" = "SOME OF THE TIME"
+  ,"3" = "HARDLY EVER OR NEVER"
+)
+
+varlist<- c("loneliness_1","loneliness_2","loneliness_3","loneliness_4","loneliness_5","loneliness_6","loneliness_7",
+            "loneliness_8","loneliness_9","loneliness_10","loneliness_11")
+for(i in varlist){
+  ds[,paste0(i,"F")]<-ordered(ds[,i],
+                              levels = as.numeric(names(loneliness_response)),
+                              labels = loneliness_response)
+}
+
+# ------- life-satsifaction ----------
+ds_life <- subset( dto$life_satisfaction, year!=2006)
+ds_life_2006 <- subset( dto$life_satisfaction, year==2006)
+
+life_satisfaction_2006 <- c(
+  "1" = "STRONGLY DISAGREE"
+  ,"2" = "SOMEWHAT DISAGREE"
+  ,"3" = "SLIGHTLY DISAGREE"
+  ,"4" = "SLIGHTLY AGREE"
+  ,"5" = "SOMEWHAT AGREE"
+  ,"6" = "STRONGLY AGREE"
+)
+
+life_satisfaction_other <- c(
+   "1" = "STRONGLY DISAGREE"
+  ,"2" = "SOMEWHAT DISAGREE"
+  ,"3" = "SLIGHTLY DISAGREE"
+  ,"4" = "NEITHER AGREE OR DISAGREE"
+  ,"5" = "SLIGHTLY AGREE"
+  ,"6" = "SOMEWHAT AGREE"
+  ,"7" = "STRONGLY AGREE"
+)
+varlist<- c("lifesatisfaction_1","lifesatisfaction_2","lifesatisfaction_3","lifesatisfaction_4","lifesatisfaction_5")
+
+for(i in varlist){
+  ds_life_2006[,paste0(i,"F")]<-ordered(ds_life_2006[,i],
+                              levels = as.numeric(names(life_satisfaction_2006)),
+                              labels = life_satisfaction_2006)
+}
+
+
+for(i in varlist){
+ds_life[,paste0(i,"F")]<-ordered(ds_life[,i],
+                                levels = as.numeric(names(life_satisfaction_other)),
+                                labels = life_satisfaction_other)  
+}
+
+# Need to merge life satisfaction years and combine them with the other data.
+
+# -------- wellbeing -------------
+
+ds_wellbeing <- dto$wellbeing
+
+wellbeing_common <- c(
+  "1" = "STRONGLY DISAGREE"
+  ,"2" = "SOMEWHAT DISAGREE"
+  ,"3" = "SLIGHTLY DISAGREE"
+  ,"4" = "SLIGHTLY AGREE"
+  ,"5" = "SOMEWHAT AGREE"
+  ,"6" = "STRONGLY AGREE"
+)
+
+varlist <- c("wellbeing_1", "wellbeing_2","wellbeing_3","wellbeing_4","wellbeing_5","wellbeing_6","wellbeing_7")
+
+for(i in varlist){
+  ds_wellbeing[,paste0(i,"F")]<-ordered(ds_wellbeing[,i],
+                                   levels = as.numeric(names(wellbeing_common)),
+                                   labels = wellbeing_common)  
+}
+
+
 # ----- health-apply-common-levels -----------------
 ds <- dto$health
 health_common_response <- c(
@@ -291,6 +370,11 @@ for(i in seq_along(healthls_levels) ){
 }
 ds %>% dplyr::glimpse()
 
+dto[["health"]] <- ds
+
+dto %>% object.size() %>% utils:::format.object_size("auto")
+# Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
+saveRDS(dto, file="./data-unshared/derived/dto_labels.rds", compress="xz")
 # ---- tweak-data --------------------------------------------------------------
 
 # ---- basic-table --------------------------------------------------------------

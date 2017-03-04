@@ -294,7 +294,7 @@ compute_socialnetwork_scale_scores <- function(d){
 }
 
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
-ds_long <- ds_long %>% compute_scale_score()
+ds_long <- ds_long %>% compute_socialnetwork_scale_scores()
 head(ds_long)
 dto[["social_network"]] <- ds_long
 
@@ -318,7 +318,7 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-#for perceived social support(or relationship quality) all items need to be reverse coded.
+#for perceived social support(or relationship quality) all positive items need to be reverse coded.
 rename_meta <-rename_social_support
 reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
 reverse_these <- reverse_these[!is.na(reverse_these)]
@@ -326,6 +326,23 @@ testit::assert("The scale does not contained reverse coded items",reverse_these=
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
 
+# Create a function that computes positive and negative social support totals for each category.
+# compute_social_support_scale_score <- function(d){
+#   positive_spouse <- c("ssup1sp","ssup2sp","ssup3sp")
+#   ds_long[,"support_spouse_total"] <- apply(d[positive_spouse],1,sum, na.rm = TRUE)
+#   d[,"wellbeing_sum_2"] <- apply(d[col_names_2],1,sum, na.rm = TRUE)
+#   d[,"score_wellbeing_2"] <- apply(d[col_names_2],1,mean, na.rm = TRUE)
+#   d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       score_wellbeing_7 = ifelse(missing_count<3, 
+#                                  wellbeing_sum_7/(7- missing_count),NA))
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       wellbeing_sum_7 = ifelse(missing_count>0, NA, wellbeing_sum_7)
+#     )
+#   return(d)
+# }
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
@@ -585,7 +602,7 @@ recoding_depression<- function(d, variables){
 
 ds_long <- recoding_depression(ds_long, cesd_vars)
 
-cesd_vars_to_reverse <- cesd_vars <- c("cesd4","cesd6")
+cesd_vars_to_reverse <- c("cesd4","cesd6")
 ds_long <- reverse_coding(ds_long, cesd_vars_to_reverse)
 
 head(ds_long)
@@ -612,6 +629,7 @@ lapply(ls_temp,names)
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
 head(ds_long)
+
 dto[["health"]] <- ds_long
 
 # ---- save-to-disk ------------------------------------------------------------
