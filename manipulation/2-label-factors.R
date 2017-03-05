@@ -220,6 +220,26 @@ for(i in varlist){
                               labels = loneliness_response)
 }
 
+# ------- social-contact ---------
+ds <- dto$social_contact
+
+#Note that this the is the response labels as applied after reverse coding
+social_contact_response <- c(
+  "6" = "THREE OR MORE TIMES A WEEK"
+  ,"5" = "ONCE OR TWICE A WEEK"
+  ,"4" = "ONCE OR TWICE A MONTH"
+  ,"3" = "EVERY FEW MONTHS"
+  ,"2" = "ONCE OR TWICE A YEAR"
+  ,"1" = "LESS THAN ONCE A YEAR OR NEVER"
+)
+
+for(i in names(ds)){
+  ds[,paste0(i,"F")]<-ordered(ds[,i],
+                              levels = as.numeric(names(social_contact_response)),
+                              labels = social_contact_response)
+}
+head(ds)
+
 # ------- life-satsifaction ----------
 ds_life <- subset( dto$life_satisfaction, year!=2006)
 ds_life_2006 <- subset( dto$life_satisfaction, year==2006)

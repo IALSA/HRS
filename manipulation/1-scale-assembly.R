@@ -391,7 +391,16 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-dto[["social-contact"]] <- ds_long
+# create a vector with names of items to be reverse scored 
+# All social contact items are reversed scored 1 = Three or more times a week to 6 = less than once a year or never
+rename_meta <-rename_social_contact
+# use meta data to provide the rules
+reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] ) %>% as.data.frame()
+reverse_these <- reverse_these[!is.na(reverse_these)]
+ds_long <- ds_long %>% 
+  reverse_coding(reverse_these)
+
+dto[["social_contact"]] <- ds_long
 
 #--------activity--------
 #read in the renaming rules for this specific variables
