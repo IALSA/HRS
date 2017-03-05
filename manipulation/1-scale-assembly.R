@@ -391,7 +391,7 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-
+dto[["social-contact"]] <- ds_long
 
 #--------activity--------
 #read in the renaming rules for this specific variables
