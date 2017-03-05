@@ -329,16 +329,30 @@ ds_long <- ds_long %>%
 # Create a function that computes positive and negative social support totals for each category.
 # compute_social_support_scale_score <- function(d){
 positive_spouse <- c("ssup1sp","ssup2sp","ssup3sp")
-ds_long[,"support_spouse_total"] <- apply(ds_long[positive_spouse],1,sum, na.rm = TRUE)
+ds_long[,"support_spouse_total"] <- apply(ds_long[positive_spouse],1,sum, na.rm = FALSE)
    
 negative_spouse <- c("ssup4sp","ssup5sp","ssup6sp","ssup7sp")
-ds_long[,"neg_spouse_total"] <- apply(ds_long[negative_spouse],1,sum, na.rm = TRUE)
+ds_long[,"neg_spouse_total"] <- apply(ds_long[negative_spouse],1,sum, na.rm = FALSE)
 
 positive_child <- c("ssup1ch","ssup2ch","ssup3ch")
-ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = TRUE)
+ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = FALSE)
 
 negative_child <- c("ssup4ch","ssup5ch","ssup6ch","ssup7ch")
-ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = TRUE)
+ds_long[,"negative_child_total"] <- apply(ds_long[negative_child],1,sum, na.rm = FALSE)
+
+positive_family <- c("ssup1fam","ssup2fam","ssup3fam")
+ds_long[,"support_fam_total"] <- apply(ds_long[positive_family],1,sum, na.rm = FALSE)
+
+negative_family <- c("ssup4fam","ssup5fam","ssup6fam","ssup7fam")
+ds_long[,"negative_family_total"] <- apply(ds_long[negative_family],1,sum, na.rm = FALSE)
+
+positive_friends <- c("ssup1fr","ssup2fr","ssup3fr")
+ds_long[,"support_friend_total"] <- apply(ds_long[positive_friends],1,sum, na.rm = FALSE)
+
+negative_friends <- c("ssup4fr","ssup5fr","ssup6fr","ssup7fr")
+ds_long[,"negative_friends_total"] <- apply(ds_long[negative_friends],1,sum, na.rm = FALSE)
+
+head(ds_long)
 #   d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
 #   d <- d %>% 
 #     dplyr::mutate( 
@@ -350,8 +364,8 @@ ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = 
 #     )
 #   return(d)
 # }
-# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
-ds_long <- ds_long %>% compute_scale_score()
+d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+#ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["social_support"]] <- ds_long
 
