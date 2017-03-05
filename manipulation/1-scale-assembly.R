@@ -328,10 +328,17 @@ ds_long <- ds_long %>%
 
 # Create a function that computes positive and negative social support totals for each category.
 # compute_social_support_scale_score <- function(d){
-#   positive_spouse <- c("ssup1sp","ssup2sp","ssup3sp")
-#   ds_long[,"support_spouse_total"] <- apply(d[positive_spouse],1,sum, na.rm = TRUE)
-#   d[,"wellbeing_sum_2"] <- apply(d[col_names_2],1,sum, na.rm = TRUE)
-#   d[,"score_wellbeing_2"] <- apply(d[col_names_2],1,mean, na.rm = TRUE)
+positive_spouse <- c("ssup1sp","ssup2sp","ssup3sp")
+ds_long[,"support_spouse_total"] <- apply(ds_long[positive_spouse],1,sum, na.rm = TRUE)
+   
+negative_spouse <- c("ssup4sp","ssup5sp","ssup6sp","ssup7sp")
+ds_long[,"neg_spouse_total"] <- apply(ds_long[negative_spouse],1,sum, na.rm = TRUE)
+
+positive_child <- c("ssup1ch","ssup2ch","ssup3ch")
+ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = TRUE)
+
+negative_child <- c("ssup4ch","ssup5ch","ssup6ch","ssup7ch")
+ds_long[,"support_child_total"] <- apply(ds_long[positive_child],1,sum, na.rm = TRUE)
 #   d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
 #   d <- d %>% 
 #     dplyr::mutate( 
