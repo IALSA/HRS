@@ -412,6 +412,12 @@ ds_long <- ds_long %>%
 child_contact_vars <- c("mtchild","spkchild","wrtchild")
 ds_long[,"children_contact_mean"] <- apply(ds_long[child_contact_vars],1,mean, na.rm = FALSE)
 
+family_contact_vars <- c("mtfam","spkfam","wrtfam")
+ds_long[,"family_contact_mean"] <- apply(ds_long[family_contact_vars],1,mean, na.rm = FALSE)
+
+friend_contact_vars <- c("mtfriend","spkfriend","wrtfriend")
+ds_long[,"friend_contact_mean"] <- apply(ds_long[friend_contact_vars],1,mean, na.rm = FALSE)
+
 dto[["social_contact"]] <- ds_long
 
 #--------activity--------
