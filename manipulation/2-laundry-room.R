@@ -7,6 +7,7 @@ cat("\f") # clear console
 # Attach these packages so their functions don't need to be qualified: http://r-pkgs.had.co.nz/namespace.html#search-path
 library(magrittr) # enables piping : %>% 
 library(TabularManifest)
+library(psych)
 # ---- load-sources ------------------------------------------------------------
 # Call `base::source()` on any repo file that defines functions needed below.  Ideally, no real operations are performed.
 # source("./scripts/common-functions.R") # used in multiple reports
@@ -67,6 +68,11 @@ describeBy(ds_life, list(year=ds_life$year))
 
 # ----- social-network ------
 ds <- dto$social_network
+describeBy(ds, list(year=ds$year))
+boxplot(socialnetwork_total  ~ year, ds)
+
+# ----- social-contact ------
+ds <- dto$social_contact
 describeBy(ds, list(year=ds$year))
 boxplot(socialnetwork_total  ~ year, ds)
 
