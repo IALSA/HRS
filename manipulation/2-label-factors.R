@@ -136,6 +136,24 @@ degree_levels <- c(
   ,"9" = "RF (Refused)"
 )
 
+lbeligibility_levels <- c(
+   "1" = "Eligible for leave behind"
+  ,"5" =  "Not eligible for leave behind"
+)
+
+lbcompleted_levels <- c(
+   "1" = "Completed; returned by mail"
+  ,"2" = "Completed by phone with interviewer"
+  ,"4" = "Completed by other than assigned R"
+  ,"5" = "Not returned/Not completed"
+)
+
+lbgiven_levels <- c(
+  "1" = "QUESTIONNAIRE LEFT WITH RESPONDENT"
+  ,"2" = "R REFUSED TO COMPLETE QUESTIONNAIRE"
+  ,"3" = "PROXY INDICATED R IS UNABLE/UNWILLING TO COMPLETE QUESTIONNAIRE"
+  ,"4" = "NOT ADMINISTERED"
+)
 # create a list object that collects all factor definitions
 declared_levels <- ls(pattern = "_levels")
 ls_levels <- list()
@@ -155,8 +173,6 @@ dto <- readRDS("./data-unshared/derived/dto.rds")
 # ---- inspect-data -------------------------------------------------------------
 names(dto)
 lapply(dto,names)
-
-
 
 # ----- utility-functions ----------------------
 get_freq <- function(
