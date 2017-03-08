@@ -734,6 +734,28 @@ head(ds_long)
 
 dto[["health"]] <- ds_long
 
+# ------- serial-7's ---------
+rename_serial   <-  ls_meta[["serial7s"]]
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_serial,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+dto[["serial7s"]] <- ds_long
+
+
 # ---- save-to-disk ------------------------------------------------------------
 names(dto)
 lapply(dto, names)

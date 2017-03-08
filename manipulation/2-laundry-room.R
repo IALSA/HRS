@@ -77,9 +77,12 @@ describeBy(ds, list(year=ds$year))
 boxplot(socialnetwork_total  ~ year, ds)
 
 # -----closechild-------
+ds<-dto$social_network
 boxplot(closechild ~ year, ds)
 boxplot.stats(ds$closechild, coef = 5)$out
 which(ds$closechild==99)
+
+boxplot(closefam ~ year, ds)
 
 ds[178,]
 ds[180,]
@@ -146,6 +149,60 @@ describeBy(ds, list(year=ds$year))
 # ---------- mental-status -----
 ds <- dto$mentalstatus
 describeBy(ds, list(year=ds$year))
+
+# ------ serial-7s ------
+ds <- dto$serial7s
+describeBy(ds, list(year=ds$year))
+boxplot(serial1s  ~ year, ds)
+sum(ds$serial1==93, na.rm = TRUE)
+# count instances of refused (refused coded as 999)
+sum(ds$serial1==999, na.rm=TRUE)
+# count instances of don't know or NA (coded as 998)
+sum(ds$serial1==998, na.rm = TRUE)
+
+# Returns the number of Don't Know or Not Ascertained responses
+sum(ds$serial2=="998")
+# Returns the number of Refused responses
+sum(ds$serial2=="999")
+
+#Then recodes these so that they are NA
+variables <- c("serial1","serial2","serial3","serial4","serial5")
+for(v in variables){
+  (p <- unique(ds[,v]) %>% as.numeric())
+  (p <- p[!is.na(p)])
+  ds[,v] <- plyr::mapvalues(ds[,v], from=c(999, 998), to=c(NA, NA)) 
+}
+
+
+#create a variable of the difference between serial 1 response and serial 2 response
+
+ds$serial1d <- as.numeric(7 + ds[,"serial1"])
+ds$serial2d <- ds$serial1 - ds$serial2
+ds$serial3d <- ds$serial2 - ds$serial3
+ds$serial4d <- ds$serial3 - ds$serial4
+ds$serial5d <- ds$serial4 - ds$serial5
+
+head(ds$serial1d)
+boxplot(serial1d  ~ year, ds)
+sum(ds$serial1d == 100, na.rm = TRUE)
+sum(ds$serial1d != 100, na.rm = TRUE)
+sum(is.na(ds$serial1d))
+sum(ds$serial1d==200,na.rm = TRUE)
+sum(ds$serial1d==1000,na.rm = TRUE)
+
+ds[,"serial1s"] <- ifelse(ds[,"serial1d"] == 100, 1, ifelse(ds[,"serial1d"] == 200, 1, ifelse(is.na(ds[,"serial1d"]), NA, ds[,"serial1d"])))
+ds[,"serial2s"] <- ifelse(ds[,"serial2d"] == 7, 1, ifelse(is.na(ds[,"serial2d"]), NA, 0))
+ds[,"serial3s"] <- ifelse(ds[,"serial3d"] == 7, 1, ifelse(is.na(ds[,"serial3d"]), NA, 0))
+ds[,"serial4s"] <- ifelse(ds[,"serial4d"] == 7, 1, ifelse(is.na(ds[,"serial4d"]), NA, 0))
+ds[,"serial5s"] <- ifelse(ds[,"serial5d"] == 7, 1, ifelse(is.na(ds[,"serial5d"]), NA, 0))
+
+
+head(ds$serial3s)
+describeBy(ds$serial2s, list(year=ds$year))
+which(ds$serial1s>1)
+ds[217,]
+
+ds %>% dplyr::filter(hhidpn==32181040)
 
 # ------ depression -------------
 ds <- dto$depression

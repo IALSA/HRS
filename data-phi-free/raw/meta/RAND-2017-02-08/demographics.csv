@@ -106,8 +106,6 @@ year,old_name,new_name,reversed,note
 2008,degree,degree,NA,NA
 2008,llbelig,lbeligibility,NA,LEAVE BEHIND ELIGIBILITY
 2008,llbcomp,lbcompleted,NA,MODE COMPLETED LEAVE BEHIND QNAIRE
-2010,birthyr,birthyr,NA,NA
-2010,birthmo,birthmo,NA,NA
 2010,ma500,interview_mth,NA,NA
 2010,ma501,interview_yr,NA,NA
 2010,ma065,nursing_home_mth,NA,NA
