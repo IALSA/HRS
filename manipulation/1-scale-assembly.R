@@ -143,6 +143,29 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
+#Create a variable indicating what wave of psychosocial activity questionnaires it should be. 
+ids <- unique(ds$hhidpn)
+
+row <- 1
+row2 <- row + 1
+if(ds_long[row,"hhidpn"] == ds_long[row2,"hhidpn"]){
+  addwave <- ifelse(ds_long[,"lbeligibility"]== 1, 1, 0) 
+  ds_long[row2,"wave"] <- ds_long[row2,"wave"] + addwave
+}
+
+ds_long[2,"lbeligibility"]
+
+temporal_pattern <- function(ds, measure){
+  # set.seed(seed_value)
+  ds_long <- ds
+  (ids <- sample(unique(ds$hhidpn),1))
+  d <-ds_long %>%
+    dplyr::filter(hhidpn %in% ids ) %>%
+    dplyr::select_("hhidpn","year", measure)
+  print(d)
+}
+
+
 dto[["demographics"]] <- ds_long
 
 

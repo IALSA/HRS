@@ -175,7 +175,7 @@ for(v in variables){
 
 
 #create a variable of the difference between serial 1 response and serial 2 response
-
+sum(ds$serial1==66, na.rm = TRUE)
 ds$serial1d <- as.numeric(7 + ds[,"serial1"])
 ds$serial2d <- ds$serial1 - ds$serial2
 ds$serial3d <- ds$serial2 - ds$serial3
@@ -189,6 +189,8 @@ sum(ds$serial1d != 100, na.rm = TRUE)
 sum(is.na(ds$serial1d))
 sum(ds$serial1d==200,na.rm = TRUE)
 sum(ds$serial1d==1000,na.rm = TRUE)
+sum(ds$serial1d > 100, na.rm = TRUE)
+print(d)
 
 ds[,"serial1s"] <- ifelse(ds[,"serial1d"] == 100, 1, ifelse(ds[,"serial1d"] == 200, 1, ifelse(is.na(ds[,"serial1d"]), NA, ds[,"serial1d"])))
 ds[,"serial2s"] <- ifelse(ds[,"serial2d"] == 7, 1, ifelse(is.na(ds[,"serial2d"]), NA, 0))
@@ -212,6 +214,7 @@ ds %>% dplyr::filter(hhidpn==32181040)
 # ----- health --------
 ds <- dto$health
 describeBy(ds, list(year=ds$year))
+
 
 # ---- publisher ---------------------------------------
 path_report_1 <- "./reports/report.Rmd"
