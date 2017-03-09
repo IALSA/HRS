@@ -70,8 +70,3 @@ ds <- merge_mulitple_files(dto_new, by_columns = c("year","hhidpn"))
 
 # ---- basic-graph --------------------------------------------------------------
 
-  histogram_discrete("msex")
-
-# ---- reproduce ---------------------------------------
-rmarkdown::render(input = "./sandbox/report-a.Rmd" ,
-                  output_format="html_document", clean=TRUE)
