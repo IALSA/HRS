@@ -27,6 +27,7 @@ generic_path <- "./data-unshared/derived/"
 
 datalist <- readRDS("./data-unshared/derived/dto.rds")
 
+head(datalist)
 #Create a dataframe of 
 ds1<- datalist$demographics
 ds2 <- datalist$loneliness
