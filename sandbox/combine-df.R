@@ -31,7 +31,7 @@ names(dto)
 # ---- utility-functions ---------------------------------------------------------
 # merge multiple datasets that are stored as elements of a list
 merge_mulitple_files <- function(list, by_columns){
-  Reduce(function( d_1, d_2 ) merge(d_1, d_2, by=by_columns), list)
+  Reduce(function( d_1, d_2 ) dplyr::full_join(d_1, d_2, by=by_columns), list)
 }
 
 # ---- inspect-data -------------------------------------------------------------
@@ -40,8 +40,12 @@ dto$demographics %>% dplyr::glimpse()
 # ---- tweak-data --------------------------------------------------------------
 dto_new <- list()
 
-dto_new[["demographics"]] <- dto$demographics %>% 
-  dplyr::select(year, hhidpn, birthyr, interview_yr,male, race )
+dto_new[["life_satisfaction"]] <- dto$life_satisfaction %>% 
+  dplyr::select(year, hhidpn, sum, mean) %>% 
+  dplyr::rename(
+    life_sat_sum  = sum
+    ,life_sat_mean = mean
+  )
 
 dto_new[["loneliness"]] <- dto$loneliness %>% 
   dplyr::select(year,hhidpn,score_loneliness_3, score_loneliness_11  )
@@ -49,18 +53,19 @@ dto_new[["loneliness"]] <- dto$loneliness %>%
 dto_new[["life_satisfaction"]] <- dto$life_satisfaction %>% 
   dplyr::select(year, hhidpn, sum, mean) %>% 
   dplyr::rename(
-     life_sat_sum = sum
+     life_sat_sum  = sum
     ,life_sat_mean = mean
   )
 
-View(dto_new$demographics)
-View(dto_new$loneliness)
-View(dto_new$life_satisfaction)
+dto_new[["demographics"]] <- dto$demographics %>%
+  dplyr::select(year, hhidpn, birthyr, interview_yr,male, race )
 
 
+# View(dto_new$demographics)
+# View(dto_new$loneliness)
+# View(dto_new$life_satisfaction)
 
 ds <- merge_mulitple_files(dto_new, by_columns = c("year","hhidpn"))
-
 
 # ds <- dto_new %>% 
 #   dplyr::bind_rows()
