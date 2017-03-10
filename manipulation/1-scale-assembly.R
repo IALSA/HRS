@@ -142,7 +142,7 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
-head(ds_long)
+tail(ds_long)
 
 # #Create a variable indicating what wave of psychosocial activity questionnaires it should be. 
 # ids <- unique(ds$hhidpn)
@@ -205,14 +205,14 @@ compute_loneliness_scale_score <- function(d){
   # d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
   (col_names_11 <- setdiff(names(d),c("year","hhidpn")))
   (col_names_3 <- col_names_11[1:3])
-  d[,"sum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
-  d[,"sum_3"] <- apply(d[col_names_3],1,sum, na.rm = TRUE)
+  d[,"lonelysum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
+  d[,"lonelysum_3"] <- apply(d[col_names_3],1,sum, na.rm = TRUE)
   d[,"score_loneliness_3"] <- apply(d[col_names_3],1,mean, na.rm = TRUE)
   d$missing_count <- apply(d[col_names_11], 1, function(z) sum(is.na(z)))
   d <- d %>% 
     dplyr::mutate( 
       score_loneliness_11 = ifelse(missing_count<6, 
-                    sum_11/(11- missing_count),NA)
+                    lonelysum_11/(11- missing_count),NA)
     )
   return(d)
 }
@@ -658,6 +658,18 @@ recoding_mentalstatus <- function(d, variables){
 ds_long <- ds_long %>% 
   recoding_mentalstatus(mentalstatus_recode_vars)
 
+# recode count backwards variable so that 5 (incorrect) is 0 and 9 (refused or NA) is NA.
+ds_long[,"countb"] <- plyr::mapvalues(ds_long[,"countb"], from = c(5,9), to =c(0,NA))
+ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,9), to =c(0,NA))
+# if requested participants could start over if they requested this this should be used instead 
+# create a count variable to be used
+ds_long[,"count"] <- ifelse(ds_long[,"countb"]==6, ds_long[,"countb2"], ds_long[,"countb"])
+
+mentalstatus_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp","count")
+# Calculate a mental status total score by summing the items
+ds_long[,"mentalstatus_tot"] <- apply(ds_long[mentalstatus_vars],1,sum, na.rm = TRUE)
+
+
 dto[["mentalstatus"]] <- ds_long
 
 #-----vocabulary--------
@@ -755,6 +767,31 @@ lapply(ls_temp,names)
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
 head(ds_long)
+
+healthconditions <- c("hypertension", "diabetes", "cancer", "lungdisease", "heart", "stroke", "arthritis") 
+
+recoding_health<- function(d, variables){
+  for(v in variables){
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=c(3, 8, 9), to=c(0, NA, NA)) 
+  }
+  return(d)
+}
+
+ds_long[,"healthcond"] <- rowSums(ds_long[,healthconditions]==1)
+
+exercise_vars <- c("vigorousactivity","moderateactivity","mildactivity")
+recoding_exercise<- function(d, variables){
+  for(v in variables){
+    (p <- unique(d[,v]) %>% as.numeric())
+    (p <- p[!is.na(p)])
+    d[,v] <- plyr::mapvalues(d[,v], from=c(1, 2, 3, 4, 7, 8, 9), to=c(4, 3, 2, 1, 5, NA, NA)) 
+  }
+  return(d)
+}
+ds_long <- recoding_exercise(ds_long, exercise_vars)
+ds_long[,"exercise"] <- apply(ds_long[exercise_vars],1,sum, na.rm = FALSE)
 
 dto[["health"]] <- ds_long
 
