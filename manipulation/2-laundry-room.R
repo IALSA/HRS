@@ -31,13 +31,62 @@ dto <- readRDS("./data-unshared/derived/dto_labels.rds")
 names(dto)
 lapply(dto,names)
 
+# ---- functions-to-examime-temporal-patterns -------------------
+view_temporal_pattern <- function(ds, measure, seed_value = 42){
+  set.seed(seed_value)
+  ds_long <- ds
+  (ids <- sample(unique(ds_long$hhidpn),1))
+  d <-ds_long %>%
+    dplyr::filter(hhidpn %in% ids ) %>%
+    dplyr::select_("hhidpn","year", measure)
+  print(d)
+}
+# ds %>%  view_temporal_pattern("male", 2)
+temporal_pattern <- function(ds, measure){
+  # set.seed(seed_value)
+  ds_long <- ds
+  (ids <- sample(unique(ds_long$hhidpn),1))
+  d <-ds_long %>%
+    dplyr::filter(hhidpn %in% ids ) %>%
+    dplyr::select_("hhidpn","year", measure)
+  print(d)
+}
+
+
+# examine the descriptives over waves
+over_waves <- function(ds, measure_name, exclude_values="") {
+  ds <- as.data.frame(ds)
+  testit::assert("No such measure in the dataset", measure_name %in% unique(names(ds)))
+  # measure_name = "htval"; wave_name = "wave"; exclude_values = c(-99999, -1)
+  cat("Measure : ", measure_name,"\n", sep="")
+  t <- table( ds[,measure_name], ds[,"year"], useNA = "always"); t[t==0] <- ".";t
+  print(t)
+  cat("\n")
+  ds[,measure_name] <- as.numeric(ds[,measure_name])
+  
+  d <- ds[!(ds[,measure_name] %in% exclude_values), ]
+  a <- lazyeval::interp(~ round(mean(var),2) , var = as.name(measure_name))
+  b <- lazyeval::interp(~ round(sd(var),3),   var = as.name(measure_name))
+  c <- lazyeval::interp(~ n())
+  dots <- list(a,b,c)
+  t <- d %>%
+    dplyr::select_("hhidpn","year", measure_name) %>%
+    na.omit() %>%
+    # dplyr::mutate_(measure_name = as.numeric(measure_name)) %>%
+    dplyr::group_by_("year") %>%
+    dplyr::summarize_(.dots = setNames(dots, c("mean","sd","count")))
+  return(as.data.frame(t))
+  
+}
+
 
 # ---- tweak-data --------------------------------------------------------------
 
 # ---- basic-table --------------------------------------------------------------
 
 # ---- basic-graph --------------------------------------------------------------
-ds_demo <- dto$demographics
+ds <- dto$demographics
+
 
 ids <-unique(ds_demo$hhidpn)
 
@@ -47,10 +96,156 @@ table(ds_demo$year, ds_demo$interview_language)
 table(ds_demo$year, ds_demo$nursing_home)
 table(ds_demo$year, ds_demo$religion)
 table(ds_demo$year, ds_demo$number_marriages)
-
+table(ds_demo$year, ds_demo$birthyr)
 dto$demographics %>% histogram_discrete("male")
 dto$demographics %>% histogram_continuous("age_at_visit",bin_width = 2)
 boxplot(age_at_visit ~ year, ds_demo)
+
+# ---- force-to-static-sex ---------------------------
+ds %>% view_temporal_pattern("male", 2) # sex
+ds %>% over_waves("male") # 1, 2, 3, 4, 5, 6
+# check that values are the same across waves
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(male[!is.na(male)]))) %>%
+  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+
+# grab the value for the first wave and forces it to all waves 
+ds <- ds %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(
+    male   = dplyr::first(male) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+# examine the difference
+ds %>% over_waves("male")
+ds %>% view_temporal_pattern("male", 2) # sex
+
+# ---- force-to-static-birthyr ---------------------------
+# Note that in the RAND files used here that birthyr is the saved birthyr from the tracker file for each year
+# there are some instances where the birthdate in the tracker file does not correspond to what is called the core
+# birthdate in the RAND corrections they sometimes used the tracker and sometimes the other as the correct birthdate
+# for age calculations. This is flagged in birthyf. 
+ds %>% view_temporal_pattern("birthyru", 9) # birthyr
+ds %>% over_waves("birthyr") # 1, 2, 3, 4, 5, 6
+# check that values are the same across waves
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(birthyru[!is.na(birthyru)]))) %>%
+  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+
+# Count the number of instances where there is more than one birthyr given. 
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(birthyru[!is.na(birthyru)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+
+ds2 <- ds %>% dplyr::filter(birthyf== "DIFFERENCE USED TRACKER")
+ds3 <- ds %>% dplyr::filter(birthyf== "DIFFERENCE USED OTHER")
+ds %>% dplyr::filter(hhidpn==14455011)
+# Use first value for hhidpn 10565020
+# use second value for hhidpn 1065031
+# 
+
+# grab the value for the first wave and forces it to all waves 
+ds <- ds %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(
+    male   = dplyr::first(male) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+
+
+
+# examine the difference
+ds %>% over_waves("birthyr")
+ds %>% view_temporal_pattern("birthyr", 1) # sex
+
+# --------- education -----------
+ds %>% view_temporal_pattern("degree", 2) # sex
+ds %>% over_waves("degree") # 1, 2, 3, 4, 5, 6
+
+# Recode the don't know and RF responses so that they are not considered
+ds[,"degree"] <- plyr::mapvalues(ds[,"degree"], from=c("DK (Don't Know); NA (Not Ascertained)","RF (Refused)"), to=c(NA, NA)) 
+
+
+# check that values are the same across waves
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+
+
+discrepant_ed_ids <- c("33889020","501879011","501880011","534274010","534666020","910504010")
+# examine the cases with descrepant degree values
+for(i in 1:length(discrepant_ed_ids)){
+  v <- discrepant_ed_ids[i]
+  print(ds %>% dplyr::filter(hhidpn==v))
+}
+# hhidpn 33889020 had Law, Phd, Md, then other, set education to Law, Phd, MD (the first value)
+# hhidpn 501879011 had a bachelors in 2006 then a masters/mba in 2008
+# hhidpn 534274010 had a Masters/MBA in 2010 then is listed as bachelors in 2012 use Masters/MBA (First value)
+# hhidpn 534666020 listed as Bachlors in 2010 then less than bachelors in 2012 use Bachelors (first value)
+# hhidpn 910504010 listed as Bachelors in 2010 then less than bachelors in 2012 use Bachelors (first value)
+
+# grab the value for the first wave and forces it to all waves 
+ds <- ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::mutate(
+    male   = dplyr::first(degree) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+
+ds_grouped<- ds %>%
+  dplyr::group_by(hhidpn)
+
+ds_grouped %>%
+dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+
+NonNAindex <- which(!is.na(ds$degree))
+ds[NonNAindex, "degree"]
+head(NonNAindex)
+firstNonNA <- dplyr::first(ds, NonNAindex)
+firstNonNA
+dplyr::first(ds, degree)
+
+# use the value for the first wave and force it to all waves for degree variable
+ds <- ds_grouped %>%
+  dplyr::mutate(
+    degree = dplyr::first(firstNonNA)# grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+
+
+
+
+print(ds %>% dplyr::filter(hhidpn==33889020))
+
+
+# check that values are the same across waves
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
+  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+
+ds[,"edyrs"] <- plyr::mapvalues(ds[,"edyrs"], from=c(97,98,99), to=c(NA, NA, NA))
+
+ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+ds[,"degree"] <- plyr::mapvalues(ds[,"degree"], from=c("DK (Don't Know); NA (Not Ascertained)","RF (Refused)"), to=c(NA, NA)) 
 
 # ----- loneliness --------
 ds_lone <- dto$loneliness
@@ -117,7 +312,7 @@ which(ds$activity_sum == 123)
 ds[3804,]
 
 # investigate individuals with outliers
-ds %>% dplyr::filter(hhidpn==21431040)
+ds %>% dplyr::filter(hhidpn==3010)
 
 
 # -------- wellbeing -----

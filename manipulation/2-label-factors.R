@@ -154,6 +154,12 @@ lbgiven_levels <- c(
   ,"3" = "PROXY INDICATED R IS UNABLE/UNWILLING TO COMPLETE QUESTIONNAIRE"
   ,"4" = "NOT ADMINISTERED"
 )
+
+birthyf_levels <- c(
+  "0" = "NO DIFFERENCE"
+  ,"1" = "DIFFERENCE USED TRACKER"
+  ,"2" = "DIFFERENCE USED OTHER"
+)
 # create a list object that collects all factor definitions
 declared_levels <- ls(pattern = "_levels")
 ls_levels <- list()

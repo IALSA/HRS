@@ -1,6 +1,9 @@
 year,old_name,new_name,reversed,note
 2004,birthyr,birthyr,NA,NA
+2004,jx067_r,birthyru,NA,NA
 2004,birthmo,birthmo,NA,NA
+2004,birthyf,birthyf,NA,NA
+2004,birthyd,birthyd,NA,NA
 2004,ja500,interview_mth,NA,NA
 2004,ja501,interview_yr,NA,NA
 2004,ja065,nursing_home_mth,NA,NA
@@ -33,9 +36,13 @@ year,old_name,new_name,reversed,note
 2004,race,race,NA,NA
 2004,hispanic,hispanic,NA,NA
 2004,degree,degree,NA,NA
+2004,jb014a,edyrs,NA,NA
 2004,jlb009,lbgiven,NA,
 2006,birthyr,birthyr,NA,NA
+2006,kx067_r,birthyru,NA,NA
 2006,birthmo,birthmo,NA,NA
+2006,birthyf,birthyf,NA,NA
+2006,birthyd,birthyd,NA,NA
 2006,ka500,interview_mth,NA,NA
 2006,ka501,interview_yr,NA,NA
 2006,ka065,nursing_home_mth,NA,NA
@@ -68,10 +75,14 @@ year,old_name,new_name,reversed,note
 2006,race,race,NA,NA
 2006,hispanic,hispanic,NA,NA
 2006,degree,degree,NA,NA
-2006,klbelig,lbeligibility,NA,
-2006,klbcomp,lbcompleted,NA,
+2006,kb014,edyrs,NA,NA
+2006,klbelig,lbeligibility,NA,NA
+2006,klbcomp,lbcompleted,NA,NA
 2008,birthyr,birthyr,NA,NA
+2008,lx067_r,birthyru,NA,NA
 2008,birthmo,birthmo,NA,NA
+2008,birthyf,birthyf,NA,NA
+2008,birthyd,birthyd,NA,NA
 2008,la500,interview_mth,NA,NA
 2008,la501,interview_yr,NA,NA
 2008,la065,nursing_home_mth,NA,NA
@@ -104,9 +115,12 @@ year,old_name,new_name,reversed,note
 2008,race,race,NA,NA
 2008,hispanic,hispanic,NA,NA
 2008,degree,degree,NA,NA
+2008,lb014,edyrs,NA,NA
 2008,llbelig,lbeligibility,NA,LEAVE BEHIND ELIGIBILITY
 2008,llbcomp,lbcompleted,NA,MODE COMPLETED LEAVE BEHIND QNAIRE
-2010,birthyd,birthyr,NA,NA
+2010,birthyf,birthyf,NA,NA
+2010,mx067_r,birthyru,NA,NA
+2010,birthyd,birthyd,NA,NA
 2010,ma500,interview_mth,NA,NA
 2010,ma501,interview_yr,NA,NA
 2010,ma065,nursing_home_mth,NA,NA
@@ -139,9 +153,12 @@ year,old_name,new_name,reversed,note
 2010,mb091m,race,NA,NA
 2010,mb028,hispanic,NA,NA
 2010,mb017m,degree,NA,NA
+2010,mb014,edyrs,NA,NA
 2010,mlbelig,lbeligibility,NA,LEAVE BEHIND ELIGIBILITY
 2010,mlbcomp,lbcompleted,NA,MODE COMPLETED LEAVE BEHIND QNAIRE
-2012,birthyd,birthyr,NA,NA
+2012,birthyf,birthyf,NA,NA
+2012,nx067_r,birthyru,NA,NA
+2012,birthyd,birthyd,NA,NA
 2012,na500,interview_mth,NA,NA
 2012,na501,interview_yr,NA,NA
 2012,na065,nursing_home_mth,NA,NA
@@ -176,7 +193,10 @@ year,old_name,new_name,reversed,note
 2012,nb017m,degree,NA,NA
 2012,nlbelig,lbeligibility,NA,LEAVE BEHIND ELIGIBILITY
 2012,nlbcomp,lbcompleted,NA,MODE COMPLETED LEAVE BEHIND QNAIRE
-2014,birthyd,birthyr,NA,NA
+2012,nb014,edyrs,NA,NA
+2014,birthyf,birthyf,NA,NA
+2014,ox067_r,birthyru,NA,NA
+2014,birthyd,birthyd,NA,NA
 2014,oa500,interview_mth,NA,NA
 2014,oa501,interview_yr,NA,NA
 2014,oa065,nursing_home_mth,NA,NA
@@ -208,3 +228,4 @@ year,old_name,new_name,reversed,note
 2014,ob091m,race,NA,NA
 2014,ob028,hispanic,NA,NA
 2014,ob017m,degree,NA,NA
+2014,ob014,edyrs,NA,NA

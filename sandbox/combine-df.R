@@ -58,7 +58,7 @@ dto_new[["life_satisfaction"]] <- dto$life_satisfaction %>%
   )
 
 dto_new[["demographics"]] <- dto$demographics %>%
-  dplyr::select(year, hhidpn, birthyr, interview_yr,male, race )
+  dplyr::select(year, hhidpn, birthyr, birthmo, interview_yr,male, race )
 
 
 # View(dto_new$demographics)

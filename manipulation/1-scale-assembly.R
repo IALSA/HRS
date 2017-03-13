@@ -40,6 +40,7 @@ ds_2010 <- readRDS("./data-unshared/derived/hd10f5c.rds")
 ds_2012 <- readRDS("./data-unshared/derived/h12f1a.rds")
 ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
+
 # make the names lowercase. ??? This may be undesirable. New names only?
 for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
     # create a string to be passed as command to the eval() function
@@ -142,7 +143,7 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
-tail(ds_long)
+head(ds_long)
 
 # #Create a variable indicating what wave of psychosocial activity questionnaires it should be. 
 # ids <- unique(ds$hhidpn)
