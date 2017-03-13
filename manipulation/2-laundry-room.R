@@ -201,32 +201,33 @@ ds <- ds %>%
   ) %>%
   dplyr::ungroup()
 
-ds_grouped<- ds %>%
-  dplyr::group_by(hhidpn)
-
-ds_grouped %>%
-dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
-  dplyr::count(unique>1) # unique > 1 indicates change over wave
-
-NonNAindex <- which(!is.na(ds$degree))
-ds[NonNAindex, "degree"]
-head(NonNAindex)
-firstNonNA <- dplyr::first(ds, NonNAindex)
-firstNonNA
-dplyr::first(ds, degree)
-
-# use the value for the first wave and force it to all waves for degree variable
-ds <- ds_grouped %>%
-  dplyr::mutate(
-    degree = dplyr::first(firstNonNA)# grabs the value for the first wave and forces it to all waves
-  ) %>%
-  dplyr::ungroup()
-
-
-
-
-print(ds %>% dplyr::filter(hhidpn==33889020))
-
+# Trying to get degree to be the same across waves
+#ds_grouped<- ds %>%
+#   dplyr::group_by(hhidpn)
+# 
+# ds_grouped %>%
+# dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+#   dplyr::count(unique>1) # unique > 1 indicates change over wave
+# 
+# NonNAindex <- which(!is.na(ds$degree))
+# ds[NonNAindex, "degree"]
+# head(NonNAindex)
+# firstNonNA <- dplyr::first(ds, NonNAindex)
+# firstNonNA
+# dplyr::first(ds, degree)
+# 
+# # use the value for the first wave and force it to all waves for degree variable
+# ds <- ds_grouped %>%
+#   dplyr::mutate(
+#     degree = dplyr::first(firstNonNA)# grabs the value for the first wave and forces it to all waves
+#   ) %>%
+#   dplyr::ungroup()
+# 
+# 
+# 
+# 
+# print(ds %>% dplyr::filter(hhidpn==33889020))
+# 
 
 # check that values are the same across waves
 ds %>%
