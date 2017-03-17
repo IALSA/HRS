@@ -26,7 +26,7 @@ requireNamespace("testit")# For asserting conditions meet expected patterns.
 # ---- load-data ---------------------------------------------------------------
 # load the product of 0-ellis-island.R,  a list object containing data and metadata
 dto <- readRDS("./data-unshared/derived/dto_labels.rds")
-
+dto <- readRDS("./data-unshared/derived/dto.rds")
 # ---- inspect-data -------------------------------------------------------------
 names(dto)
 lapply(dto,names)
@@ -87,9 +87,6 @@ over_waves <- function(ds, measure_name, exclude_values="") {
 # ---- basic-graph --------------------------------------------------------------
 ds<- dto$demographics
 
-
-ids <-unique(ds_demo$hhidpn)
-
 table(ds_demo$year, ds_demo$male)
 table(ds_demo$year, ds_demo$proxy_interview)
 table(ds_demo$year, ds_demo$interview_language)
@@ -108,39 +105,36 @@ boxplot(age_at_visit ~ year, ds_demo)
 # cycle it is for each participant as this package of questions is given only every second HRS wave. 
 
 # ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
-for(i in unique(ds$hhidpn)){
-#id <- 10106010
-id <- i
-dsyear <- ds %>% dplyr::filter(hhidpn==id)
-wavecount <- 0
-wave_04 <- 0
-dsyear <- ds %>% dplyr::filter(hhidpn==id)
-
-for(y in unique(dsyear$year)){
-  #year <- 2012
-  year <- y
-  current_row <- which(ds$hhidpn==id & ds$year==year)
-  cond_2004 <- !is.na(ds[current_row,"lbgiven"]) & ds[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
-  if(cond_2004==TRUE){
-  wave_04 <- wave_04+1
-  ds[current_row,"lbwave"] <- wave_04
-  next}
-  wave_cond <- !is.na(ds[current_row,"lbeligibility"]) & ds[current_row,"lbeligibility"] == "Eligible for leave behind"
-  if(wave_cond==TRUE){
-    wavecount <- wavecount+1
-    ds[current_row,"lbwave"] <- wave_04 + wavecount
-    }else{
-     ds[current_row,"lbwave"] <- 0 
-    }
-}}
-
-
-  
+# for(i in unique(ds$hhidpn)){
+# #id <- 10106010
+# id <- i
+# dsyear <- ds %>% dplyr::filter(hhidpn==id)
+# wavecount <- 0
+# wave_04 <- 0
+# dsyear <- ds %>% dplyr::filter(hhidpn==id)
+# 
+# for(y in unique(dsyear$year)){
+#   #year <- 2012
+#   year <- y
+#   current_row <- which(ds$hhidpn==id & ds$year==year)
+#   cond_2004 <- !is.na(ds[current_row,"lbgiven"]) & ds[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
+#   if(cond_2004==TRUE){
+#   wave_04 <- wave_04+1
+#   ds[current_row,"lbwave"] <- wave_04
+#   next}
+#   wave_cond <- !is.na(ds[current_row,"lbeligibility"]) & ds[current_row,"lbeligibility"] == "Eligible for leave behind"
+#   if(wave_cond==TRUE){
+#     wavecount <- wavecount+1
+#     ds[current_row,"lbwave"] <- wave_04 + wavecount
+#     }else{
+#      ds[current_row,"lbwave"] <- 0 
+#     }
+# }}
+# 
+ 
 ds %>% dplyr::filter(hhidpn==10059020)
 ds %>% dplyr::filter(hhidpn==3020)
 
-head(ds_demo$lbgiven)
-ds_demo[1:100, "birthyru"]
 # ---- force-to-static-sex ---------------------------
 ds %>% view_temporal_pattern("male", 2) # sex
 ds %>% over_waves("male") # 1, 2, 3, 4, 5, 6
@@ -400,62 +394,120 @@ ds <- dto$mentalstatus
 describeBy(ds, list(year=ds$year))
 
 # ------ serial-7s ------
+# ------ create a serial 7 score for 2014 as this was not available in the HRS RAND longitudinal file
 ds <- dto$serial7s
-describeBy(ds, list(year=ds$year))
-describeBy(dsR$serial7r_tot, list(year=dsR$year))
-boxplot(serial7r_tot  ~ year, dsR)
+
+ds_14<- ds %>%
+  dplyr::filter(year==2014)
+
 sum(ds$serial1==93, na.rm = TRUE)
 # count instances of refused (refused coded as 999)
-sum(ds$serial1==999, na.rm=TRUE)
+sum(ds_14$serial1==999, na.rm=TRUE)
 # count instances of don't know or NA (coded as 998)
-sum(ds$serial1==998, na.rm = TRUE)
-
+sum(ds_14$serial1==998, na.rm = TRUE)
+sum(ds_14$serial1==66, na.rm = TRUE)
 # Returns the number of Don't Know or Not Ascertained responses
-sum(ds$serial2=="998")
+sum(ds_14$serial2=="998")
 # Returns the number of Refused responses
-sum(ds$serial2=="999")
+sum(ds_14$serial2=="999")
 
 #Then recodes these so that they are NA
 variables <- c("serial1","serial2","serial3","serial4","serial5")
 for(v in variables){
-  (p <- unique(ds[,v]) %>% as.numeric())
+  (p <- unique(ds_14[,v]) %>% as.numeric())
   (p <- p[!is.na(p)])
-  ds[,v] <- plyr::mapvalues(ds[,v], from=c(999, 998), to=c(NA, NA)) 
+  ds_14[,v] <- plyr::mapvalues(ds_14[,v], from=c(999, 998, 66), to=c(NA, NA, 66)) 
 }
 
 
 #create a variable of the difference between serial 1 response and serial 2 response
-sum(ds$serial1==66, na.rm = TRUE)
-ds$serial1d <- as.numeric(7 + ds[,"serial1"])
-ds$serial2d <- ds$serial1 - ds$serial2
-ds$serial3d <- ds$serial2 - ds$serial3
-ds$serial4d <- ds$serial3 - ds$serial4
-ds$serial5d <- ds$serial4 - ds$serial5
+ds_14$serial1d <- as.numeric(7 + ds_14[,"serial1"])
+ds_14$serial2d <- ds_14$serial1 - ds_14$serial2
+ds_14$serial3d <- ds_14$serial2 - ds_14$serial3
+ds_14$serial4d <- ds_14$serial3 - ds_14$serial4
+ds_14$serial5d <- ds_14$serial4 - ds_14$serial5
 
-head(ds$serial1d)
-boxplot(serial1d  ~ year, ds)
-sum(ds$serial1d == 100, na.rm = TRUE)
-sum(ds$serial1d != 100, na.rm = TRUE)
-sum(is.na(ds$serial1d))
-sum(ds$serial1d==200,na.rm = TRUE)
-sum(ds$serial1d==1000,na.rm = TRUE)
-sum(ds$serial1d > 100, na.rm = TRUE)
+
+sum(ds_14$serial1d == 100, na.rm = TRUE)
+sum(ds_14$serial1d != 100, na.rm = TRUE)
+sum(is.na(ds_14$serial1d))
+sum(ds_14$serial1d==200,na.rm = TRUE)
+sum(ds_14$serial1d==1000,na.rm = TRUE)
+sum(ds_14$serial1d > 100, na.rm = TRUE)
 print(d)
 
-ds[,"serial1s"] <- ifelse(ds[,"serial1d"] == 100, 1, ifelse(ds[,"serial1d"] == 200, 1, ifelse(is.na(ds[,"serial1d"]), NA, ds[,"serial1d"])))
-ds[,"serial2s"] <- ifelse(ds[,"serial2d"] == 7, 1, ifelse(is.na(ds[,"serial2d"]), NA, 0))
-ds[,"serial3s"] <- ifelse(ds[,"serial3d"] == 7, 1, ifelse(is.na(ds[,"serial3d"]), NA, 0))
-ds[,"serial4s"] <- ifelse(ds[,"serial4d"] == 7, 1, ifelse(is.na(ds[,"serial4d"]), NA, 0))
-ds[,"serial5s"] <- ifelse(ds[,"serial5d"] == 7, 1, ifelse(is.na(ds[,"serial5d"]), NA, 0))
+ds_14[,"serial1s"] <- ifelse(ds_14[,"serial1d"] == 100, 1, ifelse(is.na(ds_14[,"serial1d"]), NA, 0))
+ds_14[,"serial2s"] <- ifelse(ds_14[,"serial2d"] == 7, 1, ifelse(is.na(ds_14[,"serial2d"]), NA, 0))
+ds_14[,"serial3s"] <- ifelse(ds_14[,"serial3d"] == 7, 1, ifelse(is.na(ds_14[,"serial3d"]), NA, 0))
+ds_14[,"serial4s"] <- ifelse(ds_14[,"serial4d"] == 7, 1, ifelse(is.na(ds_14[,"serial4d"]), NA, 0))
+ds_14[,"serial5s"] <- ifelse(ds_14[,"serial5d"] == 7, 1, ifelse(is.na(ds_14[,"serial5d"]), NA, 0))
+
+serial7_scores <- c("serial1s","serial2s","serial3s","serial4s","serial5s")
+ds_14$serial7r_tot <- apply(ds_14[serial7_scores],1,sum, na.rm = FALSE)
 
 
+psych::describe(ds_14[,"serial1s"])
+psych::describe(ds_14$serial7r_tot)
 head(ds$serial3s)
-describeBy(ds$serial2s, list(year=ds$year))
-which(ds$serial1s>1)
-ds[217,]
 
-ds %>% dplyr::filter(hhidpn==32181040)
+# Checking for conditions to impliment data cleaning rules
 
+# Rule 1 Case has four correct codes and one code that is the transposition of a correct answer is recoded to correct
+# Transposition of serial1 correct answer would be 39.
+which(ds_14$serial1 == 39 & ds_14$serial7r_tot == 4)
+
+# Transposition of serial 2 correct answer (86) would be 68. 
+which(ds_14$serial2 == 68 & ds_14$serial7r_tot == 4)
+ds_14[17558,]
+#none need to be recoded
+# Transposition of serial3 correcct answer (79) would be 97.
+#check for cases
+which(ds_14$serial3 == 97 & ds_14$serial7r_tot == 4)
+# examine the data for this case
+ds_14[7061,] # Do not change
+
+# Transposition of serial4 correct answer (72) would be 27.
+which(ds_14$serial4 == 27 & ds_14$serial7r_tot == 4)
+
+# Transposition of serial5 correct answer (65) would be 56.
+check <- which(ds_14$serial5 == 56 & ds_14$serial7r_tot == 4)
+for (i in check){
+  print(ds_14[i,])
+}
+# Recode the serial7r_tot for hhidpn 501750010, 524648010, & 905808010 to 5 as these meet the data cleaning criteria.
+
+
+# Check last data cleaning rule 
+# Case has four correct codes and one code that contains one of the single digits of a correct answer is recoded.
+# Serial1.
+which((ds_14$serial1 == 3 | ds_14$serial1 == 9) & ds_14$serial7r_tot == 4)
+# Serial 2 
+which((ds_14$serial2 == 8 | ds_14$serial2 == 6) & ds_14$serial7r_tot == 4)
+# Serial 3
+which((ds_14$serial3 == 7 | ds_14$serial3 == 9) & ds_14$serial7r_tot == 4)
+# Serial 4 
+which((ds_14$serial4 == 7 | ds_14$serial4 == 2) & ds_14$serial7r_tot == 4)
+# Serial 5
+which((ds_14$serial5 == 6 | ds_14$serial5 == 5)  & ds_14$serial7r_tot == 4)
+check <- which((ds_14$serial5 == 6 | ds_14$serial5 == 5)  & ds_14$serial7r_tot == 4)
+for (i in check){
+  print(ds_14[i,])
+}
+# hhidpn 500201010 meets change criteria.
+
+recode_hhidpn <- c(501750010, 524648010, 905808010, 500201010)
+for (i in recode_hhidpn){
+  row <- which(ds_14$hhidpn== 501750010)
+  ds_14[row, "serial7r_tot"] <- 5 
+}
+
+# examine two cases to check for accuracy of change
+ds_14 %>% dplyr::filter(hhidpn==501750010)
+ds_14 %>% dplyr::filter(hhidpn==10050010)
+
+# Need to add this serial7 total for 2014 to the rest of the serial7 totals from HRS RAND.
+describeBy(dsR$serial7r_tot, list(year=dsR$year))
+boxplot(serial7r_tot  ~ year, dsR)
 # ------ depression -------------
 ds <- dto$depression
 describeBy(ds, list(year=ds$year))
