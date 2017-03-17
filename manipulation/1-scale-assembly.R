@@ -33,6 +33,7 @@ requireNamespace("testit") # for asserting conditions meet expected patterns.
 path_renaming_rules <- "./data-phi-free/raw/renaming-rules/renaming-rules.xlsx"
 
 # ---- load-data ------------------------------------------------
+ds_rand <- readRDS("./data-unshared/derived/rndhrs_p.rds")
 ds_2004 <- readRDS("./data-unshared/derived/h04f1a.rds")
 ds_2006 <- readRDS("./data-unshared/derived/h06f2b.rds")
 ds_2008 <- readRDS("./data-unshared/derived/h08f2a.rds")
@@ -122,6 +123,46 @@ reverse_coding <- function(d, variables){
 # ---- create-dto ---------------------
 dto <- list()
 
+# ------ RAND ------------------------
+#read in the renaming rules for this specific variables
+rename_rand   <-  ls_meta[["rand"]]
+
+# now select the rand ds 
+ls_temp <- list()
+subset_rename_rand <- function(year_){ 
+  # broswer()
+  items <- rename_rand %>% 
+    dplyr::filter(year==year_) %>% 
+    dplyr::select(old_name,new_name) %>% 
+    as.data.frame()
+  # get the list of old and new names from the spreadsheet
+  (old_names <- c("hhidpn",items[,"old_name"]))
+  (new_names <- c("hhidpn",items[,"new_name"]))
+  dnew <- ds_rand %>% 
+    # dplyr::filter(hhidpn == 3010) %>% # filter a specific individual
+    dplyr::select_(.dots = old_names) 
+  colnames(dnew) <- new_names 
+  dnew[,"year"]<- year_
+  return(dnew) 
+}
+
+ls_temp[[paste(2004)]] <- subset_rename_rand(2004)
+ls_temp[[paste(2006)]] <- subset_rename_rand(2006)
+ls_temp[[paste(2008)]] <- subset_rename_rand(2008)
+ls_temp[[paste(2010)]] <- subset_rename_rand(2010)
+ls_temp[[paste(2012)]] <- subset_rename_rand(2012)
+ls_temp[[paste(2014)]] <- subset_rename_rand(2014)
+
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+dto[["rand"]] <- ds_long
+
 # ----- demographics ------------------
 # path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
@@ -145,28 +186,32 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-# #Create a variable indicating what wave of psychosocial activity questionnaires it should be. 
-# ids <- unique(ds$hhidpn)
-# 
-# row <- 1
-# row2 <- row + 1
-# if(ds_long[row,"hhidpn"] == ds_long[row2,"hhidpn"]){
-#   addwave <- ifelse(ds_long[,"lbeligibility"]== 1, 1, 0) 
-#   ds_long[row2,"wave"] <- ds_long[row2,"wave"] + addwave
-# }
-# 
-# ds_long[2,"lbeligibility"]
-# 
-# temporal_pattern <- function(ds, measure){
-#   # set.seed(seed_value)
-#   ds_long <- ds
-#   (ids <- sample(unique(ds$hhidpn),1))
-#   d <-ds_long %>%
-#     dplyr::filter(hhidpn %in% ids ) %>%
-#     dplyr::select_("hhidpn","year", measure)
-#   print(d)
-# }
-
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+for(i in unique(ds_long$hhidpn)){
+  #id <- 10106010
+  id <- i
+  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+  wavecount <- 0
+  wave_04 <- 0
+  
+  for(y in unique(dsyear$year)){
+    #year <- 2012
+    year <- y
+    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+    cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "1"
+    if(cond_2004==TRUE){
+      wave_04 <- wave_04+1
+      ds_long[current_row,"lbwave"] <- wave_04
+      next}
+    wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "1"
+    if(wave_cond==TRUE){
+      wavecount <- wavecount+1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+    }else{
+      ds_long[current_row,"lbwave"] <- 0 
+    }
+    }}
+ds_long %>% dplyr::filter(hhidpn== "3020")
 
 dto[["demographics"]] <- ds_long
 

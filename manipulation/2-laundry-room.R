@@ -85,7 +85,7 @@ over_waves <- function(ds, measure_name, exclude_values="") {
 # ---- basic-table --------------------------------------------------------------
 
 # ---- basic-graph --------------------------------------------------------------
-ds <- dto$demographics
+ds<- dto$demographics
 
 
 ids <-unique(ds_demo$hhidpn)
@@ -97,10 +97,50 @@ table(ds_demo$year, ds_demo$nursing_home)
 table(ds_demo$year, ds_demo$religion)
 table(ds_demo$year, ds_demo$number_marriages)
 table(ds_demo$year, ds_demo$birthyr)
+table(ds_demo$year, ds_demo$lbcompleted)
+table(ds_demo$year, ds_demo$lbgiven)
+table(ds_demo$year, ds_demo$lbeligibility)
 dto$demographics %>% histogram_discrete("male")
 dto$demographics %>% histogram_continuous("age_at_visit",bin_width = 2)
 boxplot(age_at_visit ~ year, ds_demo)
 
+# Create an lbwave variable to indicate which wave of the leave-behind questionniare (psychosocial questionnaire)
+# cycle it is for each participant as this package of questions is given only every second HRS wave. 
+
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+for(i in unique(ds$hhidpn)){
+#id <- 10106010
+id <- i
+dsyear <- ds %>% dplyr::filter(hhidpn==id)
+wavecount <- 0
+wave_04 <- 0
+dsyear <- ds %>% dplyr::filter(hhidpn==id)
+
+for(y in unique(dsyear$year)){
+  #year <- 2012
+  year <- y
+  current_row <- which(ds$hhidpn==id & ds$year==year)
+  cond_2004 <- !is.na(ds[current_row,"lbgiven"]) & ds[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
+  if(cond_2004==TRUE){
+  wave_04 <- wave_04+1
+  ds[current_row,"lbwave"] <- wave_04
+  next}
+  wave_cond <- !is.na(ds[current_row,"lbeligibility"]) & ds[current_row,"lbeligibility"] == "Eligible for leave behind"
+  if(wave_cond==TRUE){
+    wavecount <- wavecount+1
+    ds[current_row,"lbwave"] <- wave_04 + wavecount
+    }else{
+     ds[current_row,"lbwave"] <- 0 
+    }
+}}
+
+
+  
+ds %>% dplyr::filter(hhidpn==10059020)
+ds %>% dplyr::filter(hhidpn==3020)
+
+head(ds_demo$lbgiven)
+ds_demo[1:100, "birthyru"]
 # ---- force-to-static-sex ---------------------------
 ds %>% view_temporal_pattern("male", 2) # sex
 ds %>% over_waves("male") # 1, 2, 3, 4, 5, 6
@@ -112,9 +152,9 @@ ds %>%
 
 # grab the value for the first wave and forces it to all waves 
 ds <- ds %>%
-  dplyr::group_by(id) %>%
+  dplyr::group_by(hhipdn) %>%
   dplyr::mutate(
-    male   = dplyr::first(male) # grabs the value for the first wave and forces it to all waves
+    male   = dplyr::first(hhidpn) # grabs the value for the first wave and forces it to all waves
   ) %>%
   dplyr::ungroup()
 # examine the difference
@@ -126,7 +166,10 @@ ds %>% view_temporal_pattern("male", 2) # sex
 # there are some instances where the birthdate in the tracker file does not correspond to what is called the core
 # birthdate in the RAND corrections they sometimes used the tracker and sometimes the other as the correct birthdate
 # for age calculations. This is flagged in birthyf. 
+dsR <- dto$rand
 ds %>% view_temporal_pattern("birthyru", 9) # birthyr
+dsR %>% dplyr::filter(hhidpn== "35258020")
+ds %>% dplyr::filter(hhidpn== "35258020")
 ds %>% over_waves("birthyr") # 1, 2, 3, 4, 5, 6
 # check that values are the same across waves
 ds %>%
@@ -146,16 +189,6 @@ ds %>% dplyr::filter(hhidpn==14455011)
 # Use first value for hhidpn 10565020
 # use second value for hhidpn 1065031
 # 
-
-# grab the value for the first wave and forces it to all waves 
-ds <- ds %>%
-  dplyr::group_by(id) %>%
-  dplyr::mutate(
-    male   = dplyr::first(male) # grabs the value for the first wave and forces it to all waves
-  ) %>%
-  dplyr::ungroup()
-
-
 
 # examine the difference
 ds %>% over_waves("birthyr")
@@ -219,7 +252,9 @@ ds %>%
 
 # examine single case 
 examine <- ds %>% dplyr::filter(hhidpn==19536010)
-
+dsR <- dto$rand
+dsR %>% dplyr::filter(hhidpn== "19536010")
+ds %>% dplyr::filter(hhidpn== "19536010")
 # ------- years of education --------------
 # Recode 98 dk and 99 refused to missing NOTE that 97 is "Other"
 ds[,"edyrs"] <- plyr::mapvalues(ds[,"edyrs"], from=c(98,99), to=c(NA, NA))
@@ -249,22 +284,23 @@ ds %>%
   dplyr::summarize(unique = length(unique(edyrs_fixed[!is.na(edyrs_fixed)]))) %>%
   dplyr::count(unique>1) # unique > 1 indicates change over wave
 
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  summary()
- 
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  length(less_than_degree_congruent[less_than_degree_congruent==TRUE])
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+# #   summary()
 
+# less_than_degree_congruent <- ds$edyrs<16 & ds$degree_fixed== "LESS THAN BACHELORS"
+# length(less_than_degree_congruent[less_than_degree_congruent==TRUE])
+# # 
+# degree_congruent <- ds$edyrs==16 & ds$degree_fixed=="BACHELORS"
+# length(degree_congruent[degree_congruent==TRUE])
+# postgrad_congruent <- ds$edyrs==17 & ds$degree_fixed== "LAW, PHD, MD"
+# length(postgrad_congruent[postgrad_congruent==TRUE])
+# 
+# ds$edcongruency <- ifelse(less_than_degree_congruent==TRUE, 1, ifelse(degree_congruent==TRUE, 1, ifelse(postgrad_congruent==TRUE, 1, 0)))
+# 
+# table(ds$edcongruency)
+# # examine <- ds %>% dplyr::filter(hhidpn==19536010)
 
-less_than_degree_congruent <- ds$edyrs<16 & ds$degree_fixed== "LESS THAN BACHELORS"
-length(less_than_degree_congruent[less_than_degree_congruent==TRUE])
-
-degree_congruent <- ds$edyrs==16 & ds$degree_fixed=="BACHELORS"
-postgrad_congruent <- ds$edyrs==17 & ds$degree_fixed== "LAW, PHD, MD"
-
-examine <- ds %>% dplyr::filter(hhidpn==19536010)
 # ----- loneliness --------
 ds_lone <- dto$loneliness
 
@@ -366,7 +402,8 @@ describeBy(ds, list(year=ds$year))
 # ------ serial-7s ------
 ds <- dto$serial7s
 describeBy(ds, list(year=ds$year))
-boxplot(serial1s  ~ year, ds)
+describeBy(dsR$serial7r_tot, list(year=dsR$year))
+boxplot(serial7r_tot  ~ year, dsR)
 sum(ds$serial1==93, na.rm = TRUE)
 # count instances of refused (refused coded as 999)
 sum(ds$serial1==999, na.rm=TRUE)
