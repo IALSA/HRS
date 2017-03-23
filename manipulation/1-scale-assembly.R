@@ -215,7 +215,7 @@ ds_long %>% dplyr::filter(hhidpn== "3020")
 
 dto[["demographics"]] <- ds_long
 
-dto$demographics
+
 # ----- loneliness -------------
 # path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
@@ -428,7 +428,7 @@ ds_long[,"support_friend_mean"] <- apply(ds_long[positive_friends],1,mean, na.rm
 
 negative_friends <- c("ssup4fr","ssup5fr","ssup6fr","ssup7fr")
 ds_long[,"strain_friends_total"] <- apply(ds_long[negative_friends],1,sum, na.rm = FALSE)
-ds_long[,"strain_friends_total"] <- apply(ds_long[negative_friends],1,mean, na.rm = FALSE)
+ds_long[,"strain_friends_mean"] <- apply(ds_long[negative_friends],1,mean, na.rm = FALSE)
 head(ds_long)
 
 #   d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
