@@ -43,10 +43,10 @@ dto$rand %>% dplyr::glimpse()
 dto_new <- list()
 
 dto_new[["demographics"]] <- dto$demographics %>%
-  dplyr::select(year, hhidpn, interview_yr, male, race, hispanic,lbwave)
+  dplyr::select(year, hhidpn, interview_yr, male, lbwave)
 
 dto_new[["rand"]] <- dto$rand %>%
-  dplyr::select(year, hhidpn, birthyr_rand, birthmo_rand, intage_r,cohort, raedyrs,raedegrm,responded, 
+  dplyr::select(year, hhidpn, birthyr_rand, birthmo_rand, race_rand, hispanic_rand,intage_r,cohort, raedyrs,raedegrm,responded, 
                 proxy,countb20r,shhidpnr, rmaritalst,rpartst,serial7r_tot)
 
 dto_new[["life_satisfaction"]] <- dto$life_satisfaction %>% 
@@ -136,6 +136,37 @@ ds_long <- subset(ds_long, cohort!= 0)
 # check to see subsetting worked.
 ds_long %>% over_waves("cohort")
 
+over_lbwaves <- function(ds, measure_name, exclude_values="") {
+  ds <- as.data.frame(ds)
+  testit::assert("No such measure in the dataset", measure_name %in% unique(names(ds)))
+  # measure_name = "htval"; wave_name = "wave"; exclude_values = c(-99999, -1)
+  cat("Measure : ", measure_name,"\n", sep="")
+  t <- table( ds[,measure_name], ds[,"lbwave"], useNA = "always"); t[t==0] <- ".";t
+  print(t)
+  cat("\n")
+  ds[,measure_name] <- as.numeric(ds[,measure_name])
+  
+  d <- ds[!(ds[,measure_name] %in% exclude_values), ]
+  a <- lazyeval::interp(~ round(mean(var),2) , var = as.name(measure_name))
+  b <- lazyeval::interp(~ round(sd(var),3),   var = as.name(measure_name))
+  c <- lazyeval::interp(~ n())
+  dots <- list(a,b,c)
+  t <- d %>%
+    dplyr::select_("hhidpn","lbwave", measure_name) %>%
+    na.omit() %>%
+    # dplyr::mutate_(measure_name = as.numeric(measure_name)) %>%
+    dplyr::group_by_("lbwave") %>%
+    dplyr::summarize_(.dots = setNames(dots, c("mean","sd","count")))
+  return(as.data.frame(t))
+  
+}
+
+names(ds_long)
+ds_long %>% over_lbwaves("score_loneliness_11")
+
+which(ds_long$lbwave==0 & !is.na(ds_long$score_loneliness_11))
+
+print(ds_long[11,])
 
 # ds <- dto_new %>% 
 #   dplyr::bind_rows()
@@ -146,12 +177,69 @@ ds_long %>% over_waves("cohort")
 variables_static <- c("hhidpn", "male", "birthyr_rand", "birthmo_rand",
                       "race", "hispanic", "cohort", "raedyrs", "raedegrm")
 
-variables_longitudinal <- setdiff(colnames(ds),variables_static)  # not static
+variables_longitudinal <- setdiff(colnames(ds_long),variables_static)  # not static
 (variables_longitudinal <- variables_longitudinal[!variables_longitudinal=="year"]) # all except year
 # establish a wide format
+variables_longitudinal <- variables_longitudinal[1:5]
+variables_static <- variables_static[1]
 
-ds_selected <- ds %>%
+dplyr::glimpse(ds_long)
+
+ds_wide <- ds_long %>%
+  dplyr::select_(.dots = c(variables_static, "year", variables_longitudinal))  %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal)  %>%
+  # dplyr::mutate(wave = as.character(seq_along(unique(year)))) %>%
+  # dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
+  dplyr::mutate(wave=as.character(year)) %>%
+  dplyr::arrange(hhidpn) %>% 
+  dplyr::mutate(
+    # variable = gsub("^v","",variable),
+    temp = paste0(variable,"_",wave)) %>%
+  dplyr::select(-variable,-year,-wave) %>% 
+  tidyr::spread(temp, value)
+ds_wide
+
+# define variable properties for long-to-wide conversion
+variables_static <- c("id", "sex")
+variables_longitudinal <- setdiff(colnames(ds_long),variables_static)  # not static
+(variables_longitudinal <- variables_longitudinal[!variables_longitudinal=="time"]) # all except wave
+# establish a wide format
+ds_wide <- ds_long %>%
+  dplyr::select_(.dots=c(variables_static, "time", variables_longitudinal)) %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal) %>%
+  dplyr::mutate(wave = as.character(time)) %>%
+  dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
+  dplyr::arrange(id) %>% 
+  dplyr::mutate(
+    # variable = gsub("^v","",variable),
+    temp = paste0(variable,"_",wave)
+  ) %>% 
+  dplyr::select(-time,-variable,-wave) %>% 
+  tidyr::spread(temp, value)
+ds_wide
+
+
+ds_long <- ds_long %>%
   dplyr::select_(.dots=c(variables_static, "year", variables_longitudinal))
+
+# establish a wide format
+ds_wide <- ds_long %>% 
+  tidyr::spread_(key_col = "year", variables_longitudinal)
+  
+# dplyr::select(id, wave, animals, word_recall_de ) %>%
+  # gather(variable, value, -(id:wave)) %>%
+  dplyr::select_(.dots=c(variables_static, "wave", variables_longitudinal)) %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal) %>%
+  dplyr::mutate(wave = as.character(wave)) %>%
+  dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
+  # dplyr::mutate(wave = paste0("t", wave)) %>%
+  tidyr::unite(temp, variable, wave) %>%
+  tidyr::spread(temp, value)
+ds_wide %>% dplyr::glimpse()
+# prepare data to be read by MPlus
+ds_mplus <- sapply(ds_wide,as.numeric) %>% as.data.frame()
+ds_mplus[is.na(ds_mplus)] <- -9999 # replace NA with a numerical code
+ds_mplus %>% dplyr::glimpse()
 
 
 # prepare data to be read by MPlus

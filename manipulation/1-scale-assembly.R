@@ -42,6 +42,7 @@ ds_2012 <- readRDS("./data-unshared/derived/h12f1a.rds")
 ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
 
+
 # make the names lowercase. ??? This may be undesirable. New names only?
 for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
     # create a string to be passed as command to the eval() function
@@ -299,6 +300,7 @@ testit::assert("The scale does not contained reverse coded items",reverse_these=
 ds_long <- ds_long %>% compute_scale_score()
 head(ds_long)
 dto[["life_satisfaction"]] <- ds_long
+
 
 # ----- social-network -------------
 #read in the renaming rules for this specific variables

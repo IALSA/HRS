@@ -116,13 +116,52 @@ ds %>% view_temporal_pattern("male", 2) # sex
 
 dto[["demographics"]] <- ds
 
+# -------- force-to-static-race -----------
+dsR <- dto$rand
+
+dsR %>% view_temporal_pattern("race_rand", 2) # race
+
+# check that values are the same across waves
+dsR %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(race_rand[!is.na(race_rand)]))) %>%
+  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+
+examine <- dsR %>% dplyr::filter(hhidpn== "10210010")
+
+dsR %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(race_rand[!is.na(race_rand)]))) %>%
+  dplyr::count(unique>1) # unique > 1 indicates change over wave
+
+# grab the value for the first wave and forces it to all waves 
+dsR <- dsR %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::mutate(
+    race_rand = dplyr::first(race_rand) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+# examine the difference
+dsR %>% over_waves("race_rand")
+ds %>% view_temporal_pattern("race_rand", 2) # sex
+
+# grab the value for the first wave and forces it to all waves 
+dsR <- dsR %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::mutate(
+    hispanic_rand = dplyr::first(hispanic_rand) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
+
+dto[["rand"]] <- dsR
+
 # ---- force-to-static-birthyr ---------------------------
 # Note that in the RAND files used here that birthyr is the saved birthyr from the tracker file for each year
 # there are some instances where the birthdate in the tracker file does not correspond to what is called the core
 # birthdate in the RAND corrections they sometimes used the tracker and sometimes the other as the correct birthdate
 # for age calculations. This is flagged in birthyf. Therefore using the HRS Rand Longitidinal file version of birth year
 # and birth month is recommended. 
-dsR <- dto$rand
+
 
 # example of a case with different birth dates in the RAND fat files versus the RAND longitudinal files
 dsR %>% dplyr::filter(hhidpn== "35258020")
