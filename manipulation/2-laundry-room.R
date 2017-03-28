@@ -376,13 +376,14 @@ ds$digit <-as.character(ds$digit)
 ds$digit1 <-as.character(ds$digit1)
 ds$closechildr <- as.numeric(ifelse(ds$digit1 == ds$digit, ds$digit1, ds$closechild))
 
+# Print the data for the hhidpn's of those with remaining outlier values.
 check <- which(ds$closechildr>20)
 ids <- ds[check,"hhidpn"]
 for (i in ids){
     print(ds %>% dplyr::filter(hhidpn==i))
 }
 
-ds %>% dplyr::filter(hhidpn==918959010)
+
 
 
 # ------ closefam -------
