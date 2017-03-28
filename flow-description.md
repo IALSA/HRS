@@ -17,7 +17,9 @@ This repository does not contain any actual data. You must provide  your own dat
 2. Proceed to [Data Download](https://ssl.isr.umich.edu/hrs/files2.php)
 3. Download `Core Fat Files` shown on the image below. Save in `./data-unshared/raw/RAND-YYYY-MM-DD`
 ![](./libs/images/source-files.JPG)
-4. Unzip the files into the same folder
+4. Download the RAND HRS Data file
+![](./libs/images/source-files-rand.JPG)   
+5. Unzip the files into the same folder
 
 # Scripts 
 
