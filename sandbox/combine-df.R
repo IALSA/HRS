@@ -168,6 +168,7 @@ for(i in unique(ds_long$hhidpn)){
   }}
 
 
+saveRDS(ds_long, file="./data-unshared/derived/data-long.rds")
 # Examine distribution of lb waves
 table(ds_long$lbwave2, ds_long$year)
 
