@@ -25,7 +25,7 @@ requireNamespace("testit")# For asserting conditions meet expected patterns.
 
 # ---- load-data ---------------------------------------------------------------
 # load the product of 0-ellis-island.R,  a list object containing data and metadata
-dto <- readRDS("./data-unshared/derived/dto_labels.rds")
+dto <- readRDS("./data-unshared/derived/dto.rds")
 
 # ---- inspect-data -------------------------------------------------------------
 names(dto)
@@ -121,14 +121,6 @@ dsR <- dto$rand
 
 dsR %>% view_temporal_pattern("race_rand", 2) # race
 
-# check that values are the same across waves
-dsR %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(race_rand[!is.na(race_rand)]))) %>%
-  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
-
-examine <- dsR %>% dplyr::filter(hhidpn== "10210010")
-
 dsR %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::summarize(unique = length(unique(race_rand[!is.na(race_rand)]))) %>%
@@ -143,9 +135,9 @@ dsR <- dsR %>%
   dplyr::ungroup()
 # examine the difference
 dsR %>% over_waves("race_rand")
-ds %>% view_temporal_pattern("race_rand", 2) # sex
+dsR %>% view_temporal_pattern("race_rand", 2) # sex
 
-# grab the value for the first wave and forces it to all waves 
+# grab the value for the first wave and forces it to all waves (hispanic) 
 dsR <- dsR %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
@@ -209,94 +201,94 @@ dsR <- dsR %>%
   dplyr::ungroup()
 
 # --------- education -----------
-ds %>% view_temporal_pattern("degree", 2) # degree
-ds %>% over_waves("degree") # 1, 2, 3, 4, 5, 6
-
-# Recode the don't know and RF responses so that they are not considered
-ds[,"degree"] <- plyr::mapvalues(ds[,"degree"], from=c("DK (Don't Know); NA (Not Ascertained)","RF (Refused)"), to=c(NA, NA)) 
-
-
-# check that values are the same across waves
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
-  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
-
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
-  dplyr::count(unique>1) # unique > 1 indicates change over wave
-
-
-discrepant_ed_ids <- c("33889020","501879011","501880011","534274010","534666020","910504010")
-# examine the cases with descrepant degree values
-for(i in 1:length(discrepant_ed_ids)){
-  v <- discrepant_ed_ids[i]
-  print(ds %>% dplyr::filter(hhidpn==v))
-}
+# ds %>% view_temporal_pattern("degree", 2) # degree
+# ds %>% over_waves("degree") # 1, 2, 3, 4, 5, 6
+# 
+# # Recode the don't know and RF responses so that they are not considered
+# #ds[,"degree"] <- plyr::mapvalues(ds[,"degree"], from=c("DK (Don't Know); NA (Not Ascertained)","RF (Refused)"), to=c(NA, NA)) 
+# 
+# 
+# # check that values are the same across waves
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+#   dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+# 
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(degree[!is.na(degree)]))) %>%
+#   dplyr::count(unique>1) # unique > 1 indicates change over wave
+# 
+# 
+# discrepant_ed_ids <- c("33889020","501879011","501880011","534274010","534666020","910504010")
+# # examine the cases with descrepant degree values
+# for(i in 1:length(discrepant_ed_ids)){
+#   v <- discrepant_ed_ids[i]
+#   print(ds %>% dplyr::filter(hhidpn==v))
+# }
 # hhidpn 33889020 had Law, Phd, Md, then other, set education to Law, Phd, MD (the first value)
 # hhidpn 501879011 had a bachelors in 2006 then a masters/mba in 2008
 # hhidpn 534274010 had a Masters/MBA in 2010 then is listed as bachelors in 2012 use Masters/MBA (First value)
 # hhidpn 534666020 listed as Bachlors in 2010 then less than bachelors in 2012 use Bachelors (first value)
 # hhidpn 910504010 listed as Bachelors in 2010 then less than bachelors in 2012 use Bachelors (first value)
 
-
-# grab the value for the first wave where there is a non-missing value and forces it to all waves 
-ds <- ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::arrange(hhidpn, year) %>%
-  dplyr::mutate(
-    degree_fixed = setdiff(unique(degree),NA)[1]
-  ) %>%
-  dplyr::ungroup()
-
-# change the newly created degree_fixed variable from a character vector to a factor.
-ds$degree_fixed <- factor(ds$degree_fixed, order=TRUE, 
-                          levels = c("LESS THAN BACHELORS"
-                            ,"BACHELORS"
-                            ,"MASTERS/MBA"
-                            ,"LAW, PHD, MD"
-                            ,"OTHER (SPECIFY)"
-                          ))
-# check that values are now the same across waves
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(degree_fixed[!is.na(degree_fixed)]))) %>%
-  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
-
-# examine single case 
-ds %>% dplyr::filter(hhidpn==19536010)
-dsR %>% dplyr::filter(hhidpn== "19536010")
-ds %>% dplyr::filter(hhidpn== "19536010")
-
-# ------- years of education --------------
-# # Recode 98 dk and 99 refused to missing NOTE that 97 is "Other"
-ds[,"edyrs"] <- plyr::mapvalues(ds[,"edyrs"], from=c(98,99), to=c(NA, NA))
-
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
-  dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
-
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
-  dplyr::count(unique>1) # unique > 1 indicates change over wave
-
-# grab the value for the first wave where there is a non-missing value and forces it to all waves
-ds <- ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::arrange(hhidpn, year) %>%
-  dplyr::mutate(
-    edyrs_fixed = setdiff(unique(edyrs),NA)[1]
-  ) %>%
-  dplyr::ungroup()
-
-#Check
-ds %>%
-  dplyr::group_by(hhidpn) %>%
-  dplyr::summarize(unique = length(unique(edyrs_fixed[!is.na(edyrs_fixed)]))) %>%
-  dplyr::count(unique>1) # unique > 1 indicates change over wave
+# 
+# # grab the value for the first wave where there is a non-missing value and forces it to all waves 
+# ds <- ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::arrange(hhidpn, year) %>%
+#   dplyr::mutate(
+#     degree_fixed = setdiff(unique(degree),NA)[1]
+#   ) %>%
+#   dplyr::ungroup()
+# 
+# # change the newly created degree_fixed variable from a character vector to a factor.
+# ds$degree_fixed <- factor(ds$degree_fixed, order=TRUE, 
+#                           levels = c("LESS THAN BACHELORS"
+#                             ,"BACHELORS"
+#                             ,"MASTERS/MBA"
+#                             ,"LAW, PHD, MD"
+#                             ,"OTHER (SPECIFY)"
+#                           ))
+# # check that values are now the same across waves
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(degree_fixed[!is.na(degree_fixed)]))) %>%
+#   dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+# 
+# # examine single case 
+# ds %>% dplyr::filter(hhidpn==19536010)
+# dsR %>% dplyr::filter(hhidpn== "19536010")
+# ds %>% dplyr::filter(hhidpn== "19536010")
+# 
+# # ------- years of education --------------
+# # # Recode 98 dk and 99 refused to missing NOTE that 97 is "Other"
+# ds[,"edyrs"] <- plyr::mapvalues(ds[,"edyrs"], from=c(98,99), to=c(NA, NA))
+# 
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
+#   dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
+# 
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(edyrs[!is.na(edyrs)]))) %>%
+#   dplyr::count(unique>1) # unique > 1 indicates change over wave
+# 
+# # grab the value for the first wave where there is a non-missing value and forces it to all waves
+# ds <- ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::arrange(hhidpn, year) %>%
+#   dplyr::mutate(
+#     edyrs_fixed = setdiff(unique(edyrs),NA)[1]
+#   ) %>%
+#   dplyr::ungroup()
+# 
+# #Check
+# ds %>%
+#   dplyr::group_by(hhidpn) %>%
+#   dplyr::summarize(unique = length(unique(edyrs_fixed[!is.na(edyrs_fixed)]))) %>%
+#   dplyr::count(unique>1) # unique > 1 indicates change over wave
 
 # ---- RAND education values -------
 
@@ -364,8 +356,11 @@ ds<-dto$social_network
 boxplot(closechild ~ year, ds)
 boxplot.stats(ds$closechild, coef = 5)$out
 which(ds$closechild==99)
+which(ds$closechild==98) # None
 
-boxplot(closefam ~ year, ds)
+# Recode the don't know and RF responses so that they are not considered
+ds[,"closechild"] <- plyr::mapvalues(ds[,"closechild"], from=99, to=NA) 
+ 
 check <- which(ds$closechild >20)
 for (i in check){
   print(ds[i,])
@@ -382,9 +377,13 @@ ds$digit1 <-as.character(ds$digit1)
 ds$closechildr <- as.numeric(ifelse(ds$digit1 == ds$digit, ds$digit1, ds$closechild))
 
 check <- which(ds$closechildr>20)
-for (i in check){
-  print(ds[i,])
+ids <- ds[check,"hhidpn"]
+for (i in ids){
+    print(ds %>% dplyr::filter(hhidpn==i))
 }
+
+ds %>% dplyr::filter(hhidpn==918959010)
+
 
 # ------ closefam -------
 boxplot(closefam ~ year, ds)

@@ -188,30 +188,30 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
 head(ds_long)
 
 # ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
-for(i in unique(ds_long$hhidpn)){
-  #id <- 10106010
-  id <- i
-  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
-  wavecount <- 0
-  wave_04 <- 0
-  
-  for(y in unique(dsyear$year)){
-    #year <- 2012
-    year <- y
-    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
-    cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "1"
-    if(cond_2004==TRUE){
-      wave_04 <- wave_04+1
-      ds_long[current_row,"lbwave"] <- wave_04
-      next}
-    wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "1"
-    if(wave_cond==TRUE){
-      wavecount <- wavecount+1
-      ds_long[current_row,"lbwave"] <- wave_04 + wavecount
-    }else{
-      ds_long[current_row,"lbwave"] <- 0 
-    }
-    }}
+# for(i in unique(ds_long$hhidpn)){
+#   #id <- 10106010
+#   id <- i
+#   dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+#   wavecount <- 0
+#   wave_04 <- 0
+#   
+#   for(y in unique(dsyear$year)){
+#     #year <- 2012
+#     year <- y
+#     current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+#     cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "1"
+#     if(cond_2004==TRUE){
+#       wave_04 <- wave_04+1
+#       ds_long[current_row,"lbwave"] <- wave_04
+#       next}
+#     wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "1"
+#     if(wave_cond==TRUE){
+#       wavecount <- wavecount+1
+#       ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+#     }else{
+#       ds_long[current_row,"lbwave"] <- 0 
+#     }
+#     }}
 ds_long %>% dplyr::filter(hhidpn== "3020")
 
 dto[["demographics"]] <- ds_long
@@ -882,6 +882,10 @@ lapply(ls_temp,names)
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
 head(ds_long)
+
+chronicstress_vars <- c("healthprob","physicalprob","alcoholprob","workprob","financialprob","houseprob","relationshipprob","sickfam")
+
+ds_long[,"stresstotal"] <- rowSums(ds_long[,chronicstress_vars])
 
 dto[["chronic-stressors"]] <- ds_long
 
