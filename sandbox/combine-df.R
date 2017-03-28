@@ -43,7 +43,7 @@ dto$rand %>% dplyr::glimpse()
 dto_new <- list()
 
 dto_new[["demographics"]] <- dto$demographics %>%
-  dplyr::select(year, hhidpn, interview_yr, male, lbwave)
+  dplyr::select(year, hhidpn, interview_yr, male, lbgiven, lbeligibility)
 
 dto_new[["rand"]] <- dto$rand %>%
   dplyr::select(year, hhidpn, birthyr_rand, birthmo_rand, race_rand, hispanic_rand,intage_r,cohort, raedyrs,raedegrm,responded, 
@@ -57,7 +57,7 @@ dto_new[["life_satisfaction"]] <- dto$life_satisfaction %>%
   )
 
 dto_new[["loneliness"]] <- dto$loneliness %>% 
-  dplyr::select(year,hhidpn,score_loneliness_3, score_loneliness_11  )
+  dplyr::select(year,hhidpn,score_loneliness_3, score_loneliness_11)
 
 dto_new[["social_network"]] <- dto$social_network %>% 
   dplyr::select(year, hhidpn, socialnetwork_total, snspouse, snchild, snfamily, snfriends)
@@ -99,8 +99,85 @@ dto_new[["health"]] <- dto$health %>%
 
 ds_long <- merge_mulitple_files(dto_new, by_columns = c("year","hhidpn"))
 
-# select only cases where the participant belongs to one of the HRS cohorts.
 
+
+ds_lbvars <- ds_long %>% 
+  dplyr::select(score_loneliness_3, score_loneliness_11, socialnetwork_total, snspouse, snchild, 
+              snfamily, snfriends,support_spouse_total, support_child_total, support_fam_total, 
+              support_friend_total, strain_spouse_total, strain_child_total, strain_family_total, 
+              strain_friends_total, children_contact_mean, family_contact_mean, friend_contact_mean,
+              activity_mean, activity_sum)
+
+ds_long$lbvars <- rowSums(!is.na(ds_lbvars))
+head(ds_long)
+
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+for(i in unique(ds_long$hhidpn)){
+ #id <- 3020
+  id <- i
+  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+  wavecount <- 0
+  wave_04 <- 0
+  
+  for(y in unique(dsyear$year)){
+    #year <- 2014
+    year <- y
+    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+    cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
+    if(cond_2004==TRUE){
+      wave_04 <- wave_04+1
+      ds_long[current_row,"lbwave"] <- wave_04
+      next}
+    wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "Eligible for leave behind"
+    if(wave_cond==TRUE){
+      wavecount <- wavecount+1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+    }else{
+      ds_long[current_row,"lbwave"] <- 0 
+    }
+    wave_2014 <- ds_long[current_row,"lbvars"] > 0 & year == "2014"
+    if(wave_2014==TRUE){
+      wavecount2014 <- 1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount + wavecount2014
+    }
+  }}
+ds_long %>% dplyr::filter(hhidpn== "3020")
+
+if(ds_long$lbvars>0 & ds_long$lbwave==0)
+
+# ----- Creates a variable lbwave that designates wave number based on whether or not there are any
+# non-missing leave-behind questionnaire items. 
+for(i in unique(ds_long$hhidpn)){
+  #id <- 3020
+  id <- i
+  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+  wavecount <- 0
+  
+  for(y in unique(dsyear$year)){
+    #year <- 2012
+    year <- y
+    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+    
+    wave_cond <- ds_long[current_row,"lbvars"] > 0
+    if(wave_cond==TRUE){
+      wavecount <- wavecount+1
+      ds_long[current_row,"lbwave2"] <- wavecount
+    }else{
+      ds_long[current_row,"lbwave2"] <- 0 
+    }
+  }}
+
+
+# Examine distribution of lb waves
+table(ds_long$lbwave2, ds_long$year)
+
+
+ds_long[which(ds_long$lbwave2==5),]
+
+examine <- ds_long %>% dplyr::filter(hhidpn==500172010)
+
+
+# select only cases where the participant belongs to one of the HRS cohorts.
 # examine the descriptives over waves
 over_waves <- function(ds, measure_name, exclude_values="") {
   ds <- as.data.frame(ds)
@@ -133,8 +210,18 @@ ds_long %>% over_waves("cohort")
 # subset the data frame to include only those belonging to a cohort.
 ds_long <- subset(ds_long, cohort!= 0)
 
+
+
 # check to see subsetting worked.
 ds_long %>% over_waves("cohort")
+
+# Select only hhidpn's that have at least one wave of LB completed.
+ds_long2 <- ds_long %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::filter(any(lbwave2>0))
+ 
+
+
 
 over_lbwaves <- function(ds, measure_name, exclude_values="") {
   ds <- as.data.frame(ds)
@@ -171,21 +258,41 @@ print(ds_long[11,])
 # ds <- dto_new %>% 
 #   dplyr::bind_rows()
 
+ds_long2%>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::summarize(unique = length(unique(raedegrm[!is.na(raedegrm)]))) %>%
+  dplyr::arrange(desc(unique)) 
 
 # ---- prepare-for-mplus ---------------------
 # define variable properties for long-to-wide conversion
 variables_static <- c("hhidpn", "male", "birthyr_rand", "birthmo_rand",
-                      "race", "hispanic", "cohort", "raedyrs", "raedegrm")
+                      "race_rand", "hispanic_rand", "cohort", "raedyrs", "raedegrm")
 
-variables_longitudinal <- setdiff(colnames(ds_long),variables_static)  # not static
+variables_longitudinal <- setdiff(colnames(ds_long2),variables_static)  # not static
 (variables_longitudinal <- variables_longitudinal[!variables_longitudinal=="year"]) # all except year
 # establish a wide format
-variables_longitudinal <- variables_longitudinal[1:5]
-variables_static <- variables_static[1]
+#variables_longitudinal <- variables_longitudinal[1:5]
+#variables_static <- variables_static[1]
 
-dplyr::glimpse(ds_long)
+dplyr::glimpse(ds_long2)
 
-ds_wide <- ds_long %>%
+ds_wide <- ds_long2 %>%
+  dplyr::select_(.dots = c(variables_static,  "year", variables_longitudinal))  %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal)  %>%
+  # dplyr::mutate(wave = as.character(seq_along(unique(year)))) %>%
+  # dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
+  dplyr::mutate(year=as.character(year)) %>%
+  dplyr::mutate(male=as.character(male)) %>%
+  dplyr::arrange(hhidpn) %>% 
+  dplyr::mutate(
+    # variable = gsub("^v","",variable),
+    temp = paste0(variable,"_",wave)) %>%
+  dplyr::select(-variable,-year,-wave) %>% 
+  tidyr::spread(temp, value)
+ds_wide
+
+# old
+ds_wide <- ds_long2 %>%
   dplyr::select_(.dots = c(variables_static, "year", variables_longitudinal))  %>%
   tidyr::gather_(key="variable", value="value", variables_longitudinal)  %>%
   # dplyr::mutate(wave = as.character(seq_along(unique(year)))) %>%
@@ -198,68 +305,20 @@ ds_wide <- ds_long %>%
   dplyr::select(-variable,-year,-wave) %>% 
   tidyr::spread(temp, value)
 ds_wide
-
-# define variable properties for long-to-wide conversion
-variables_static <- c("id", "sex")
-variables_longitudinal <- setdiff(colnames(ds_long),variables_static)  # not static
-(variables_longitudinal <- variables_longitudinal[!variables_longitudinal=="time"]) # all except wave
-# establish a wide format
-ds_wide <- ds_long %>%
-  dplyr::select_(.dots=c(variables_static, "time", variables_longitudinal)) %>%
-  tidyr::gather_(key="variable", value="value", variables_longitudinal) %>%
-  dplyr::mutate(wave = as.character(time)) %>%
-  dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
-  dplyr::arrange(id) %>% 
-  dplyr::mutate(
-    # variable = gsub("^v","",variable),
-    temp = paste0(variable,"_",wave)
-  ) %>% 
-  dplyr::select(-time,-variable,-wave) %>% 
-  tidyr::spread(temp, value)
-ds_wide
-
-
-ds_long <- ds_long %>%
-  dplyr::select_(.dots=c(variables_static, "year", variables_longitudinal))
-
-# establish a wide format
-ds_wide <- ds_long %>% 
-  tidyr::spread_(key_col = "year", variables_longitudinal)
-  
-# dplyr::select(id, wave, animals, word_recall_de ) %>%
-  # gather(variable, value, -(id:wave)) %>%
-  dplyr::select_(.dots=c(variables_static, "wave", variables_longitudinal)) %>%
-  tidyr::gather_(key="variable", value="value", variables_longitudinal) %>%
-  dplyr::mutate(wave = as.character(wave)) %>%
-  dplyr::mutate(wave = ifelse( wave %in% paste0(0:9), paste0("0",wave),wave)) %>%
-  # dplyr::mutate(wave = paste0("t", wave)) %>%
-  tidyr::unite(temp, variable, wave) %>%
-  tidyr::spread(temp, value)
-ds_wide %>% dplyr::glimpse()
 # prepare data to be read by MPlus
 ds_mplus <- sapply(ds_wide,as.numeric) %>% as.data.frame()
 ds_mplus[is.na(ds_mplus)] <- -9999 # replace NA with a numerical code
 ds_mplus %>% dplyr::glimpse()
 
-
-# prepare data to be read by MPlus
-ds_mplus <- sapply(ds_wide,as.numeric) %>% as.data.frame()
-ds_mplus[is.na(ds_mplus)] <- -9999 # replace NA with a numerical code
-ds_mplus %>% dplyr::glimpse()
-
-ds_wide <- ds %>%
-  # dplyr::select(id, wave, animals, word_recall_de ) %>%
-  # gather(variable, value, -(id:wave)) %>%
-  dplyr::select_(.dots=c(variables_static, "year", variables_longitudinal))
 # ---- save-r-data -------------------
 # tranformed data with supplementary variables
 saveRDS(ds,paste0(generic_path,"data-long-plus.rds"))
 # only variables used in analysis
 saveRDS(ds_long,paste0(generic_path,"data-long.rds"))
-saveRDS(ds_wide,paste0(generic_path,"data-wide.rds"))
+saveRDS(dto, file="./data-unshared/derived/data-wide.rds")
 # prepared for Mplus
-write.table(ds_mplus, paste0(generic_path,"/wide-dataset.dat"), row.names=F, col.names=F)
-write(names(ds_mplus), paste0(generic_path,"/wide-variable-names.txt"), sep=" ")
+write.table(ds_mplus, "./data-unshared/derived/wide-dataset.dat", row.names=F, col.names=F)
+write(names(ds_mplus), "./data-unshared/derived/wide-variable-names.txt", sep=" ")
 
 data <- readRDS(paste0(generic_path,"data-wide.rds"))
 
