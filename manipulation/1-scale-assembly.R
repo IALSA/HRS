@@ -891,12 +891,131 @@ dto[["chronic-stressors"]] <- ds_long
 
 
 
-# ---- save-to-disk ------------------------------------------------------------
-names(dto)
-lapply(dto, names)
-dto %>% object.size() %>% utils:::format.object_size("auto")
-# Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
-saveRDS(dto, file="./data-unshared/derived/dto.rds", compress="xz")
+# # ---- save-to-disk ------------------------------------------------------------
+# names(dto)
+# lapply(dto, names)
+# dto %>% object.size() %>% utils:::format.object_size("auto")
+# # Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
+# saveRDS(dto, file="./data-unshared/derived/dto.rds", compress="xz")
+
+
+# merge multiple datasets that are stored as elements of a list
+merge_mulitple_files <- function(list, by_columns){
+  Reduce(function( d_1, d_2 ) dplyr::full_join(d_1, d_2, by=by_columns), list)
+}
+
+#convert to factor for join
+class(dto$rand$year)
+head(dto$rand$year)
+dto$rand$year <- as.factor(dto$rand$year)
+
+ds_long <- merge_mulitple_files(dto, by_columns = c("year","hhidpn"))
+
+# A list of the psychosocial variables to use to test for lb wave completion.
+ds_lbvars <- ds_long %>% 
+  dplyr::select(score_loneliness_3, score_loneliness_11, socialnetwork_total, snspouse, snchild, 
+                snfamily, snfriends,support_spouse_total, support_child_total, support_fam_total, 
+                support_friend_total, strain_spouse_total, strain_child_total, strain_family_total, 
+                strain_friends_total, children_contact_mean, family_contact_mean, friend_contact_mean,
+                activity_mean, activity_sum)
+
+ds_long$lbvars <- rowSums(!is.na(ds_lbvars))
+head(ds_long)
+
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+for(i in unique(ds_long$hhidpn)){
+  #id <- 3020
+  id <- i
+  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+  wavecount <- 0
+  wave_04 <- 0
+  
+  for(y in unique(dsyear$year)){
+    #year <- 2014
+    year <- y
+    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+    cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
+    if(cond_2004==TRUE){
+      wave_04 <- wave_04+1
+      ds_long[current_row,"lbwave"] <- wave_04
+      next}
+    wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "Eligible for leave behind"
+    if(wave_cond==TRUE){
+      wavecount <- wavecount+1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+    }else{
+      ds_long[current_row,"lbwave"] <- 0 
+    }
+    wave_2014 <- ds_long[current_row,"lbvars"] > 0 & year == "2014"
+    if(wave_2014==TRUE){
+      wavecount2014 <- 1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount + wavecount2014
+    }
+  }}
+ds_long %>% dplyr::filter(hhidpn== "3020")
+
+if(ds_long$lbvars>0 & ds_long$lbwave==0)
+  
+  # ----- Creates a variable lbwave that designates wave number based on whether or not there are any
+  # non-missing leave-behind questionnaire items. 
+  for(i in unique(ds_long$hhidpn)){
+    #id <- 3020
+    id <- i
+    dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+    wavecount <- 0
+    
+    for(y in unique(dsyear$year)){
+      #year <- 2012
+      year <- y
+      current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+      
+      wave_cond <- ds_long[current_row,"lbvars"] > 0
+      if(wave_cond==TRUE){
+        wavecount <- wavecount+1
+        ds_long[current_row,"lbwave2"] <- wavecount
+      }else{
+        ds_long[current_row,"lbwave2"] <- 0 
+      }
+    }}
+
+
+saveRDS(ds_long, file="./data-unshared/derived/data-long.rds")
+# Examine distribution of lb waves
+table(ds_long$lbwave2, ds_long$year)
+
+(ds_long$lbwave2)
+
+ds_long[which(ds_long$lbwave2==5),]
+
+examine <- ds_long %>% dplyr::filter(hhidpn==500172010)
+
+
+# select only cases where the participant belongs to one of the HRS cohorts.
+# examine the descriptives over waves
+over_waves <- function(ds, measure_name, exclude_values="") {
+  ds <- as.data.frame(ds)
+  testit::assert("No such measure in the dataset", measure_name %in% unique(names(ds)))
+  # measure_name = "htval"; wave_name = "wave"; exclude_values = c(-99999, -1)
+  cat("Measure : ", measure_name,"\n", sep="")
+  t <- table( ds[,measure_name], ds[,"year"], useNA = "always"); t[t==0] <- ".";t
+  print(t)
+  cat("\n")
+  ds[,measure_name] <- as.numeric(ds[,measure_name])
+  
+  d <- ds[!(ds[,measure_name] %in% exclude_values), ]
+  a <- lazyeval::interp(~ round(mean(var),2) , var = as.name(measure_name))
+  b <- lazyeval::interp(~ round(sd(var),3),   var = as.name(measure_name))
+  c <- lazyeval::interp(~ n())
+  dots <- list(a,b,c)
+  t <- d %>%
+    dplyr::select_("hhidpn","year", measure_name) %>%
+    na.omit() %>%
+    # dplyr::mutate_(measure_name = as.numeric(measure_name)) %>%
+    dplyr::group_by_("year") %>%
+    dplyr::summarize_(.dots = setNames(dots, c("mean","sd","count")))
+  return(as.data.frame(t))
+  
+}
 
 
 # ---- object-verification ------------------------------------------------

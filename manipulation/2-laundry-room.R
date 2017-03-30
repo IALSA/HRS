@@ -26,6 +26,7 @@ requireNamespace("testit")# For asserting conditions meet expected patterns.
 # ---- load-data ---------------------------------------------------------------
 # load the product of 0-ellis-island.R,  a list object containing data and metadata
 dto <- readRDS("./data-unshared/derived/dto.rds")
+ds <- readRDS("./data-unshared/derived/data-long.rds")
 
 # ---- inspect-data -------------------------------------------------------------
 names(dto)
@@ -85,10 +86,11 @@ over_waves <- function(ds, measure_name, exclude_values="") {
 # ---- basic-table --------------------------------------------------------------
 
 # ---- basic-graph --------------------------------------------------------------
-ds<- dto$demographics
+ds<- dto
 
 # examine basic descriptives
-table(ds$year, ds$male)
+table(ds$year, ds$male.y)
+
 
 # basic histogram
 dto$demographics %>% histogram_discrete("male")
@@ -114,38 +116,38 @@ ds <- ds %>%
 ds %>% over_waves("male")
 ds %>% view_temporal_pattern("male", 2) # sex
 
-dto[["demographics"]] <- ds
+#dto[["demographics"]] <- ds
 
 # -------- force-to-static-race -----------
-dsR <- dto$rand
+#dsR <- ds
 
-dsR %>% view_temporal_pattern("race_rand", 2) # race
+ds %>% view_temporal_pattern("race_rand", 2) # race
 
-dsR %>%
+ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::summarize(unique = length(unique(race_rand[!is.na(race_rand)]))) %>%
   dplyr::count(unique>1) # unique > 1 indicates change over wave
 
 # grab the value for the first wave and forces it to all waves 
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     race_rand = dplyr::first(race_rand) # grabs the value for the first wave and forces it to all waves
   ) %>%
   dplyr::ungroup()
 # examine the difference
-dsR %>% over_waves("race_rand")
-dsR %>% view_temporal_pattern("race_rand", 2) # sex
+ds %>% over_waves("race_rand")
+ds %>% view_temporal_pattern("race_rand", 2) # sex
 
 # grab the value for the first wave and forces it to all waves (hispanic) 
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     hispanic_rand = dplyr::first(hispanic_rand) # grabs the value for the first wave and forces it to all waves
   ) %>%
   dplyr::ungroup()
 
-dto[["rand"]] <- dsR
+#dto[["rand"]] <- dsR
 
 # ---- force-to-static-birthyr ---------------------------
 # Note that in the RAND files used here that birthyr is the saved birthyr from the tracker file for each year
@@ -156,11 +158,10 @@ dto[["rand"]] <- dsR
 
 
 # example of a case with different birth dates in the RAND fat files versus the RAND longitudinal files
-dsR %>% dplyr::filter(hhidpn== "35258020")
 ds %>% dplyr::filter(hhidpn== "35258020")
 
 # check that values are the same across waves (they are for birthyr_rand)
-dsR %>%
+ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::summarize(unique = length(unique(birthyr_rand[!is.na(birthyr_rand)]))) %>%
   dplyr::arrange(desc(unique)) # unique > 1 indicates change over wave
@@ -172,7 +173,7 @@ ds %>%
   dplyr::count(unique>1) # unique > 1 indicates change over wave
 
 # grab the value for the first wave and forces it to all waves (birth year)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     birthyr_rand = dplyr::first(birthyr_rand) # grabs the value for the first wave and forces it to all waves
@@ -180,7 +181,7 @@ dsR <- dsR %>%
   dplyr::ungroup()
 
 # grab the value for the first wave and forces it to all waves (birth month)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     birthmo_rand = dplyr::first(birthmo_rand) # grabs the value for the first wave and forces it to all waves
@@ -193,7 +194,7 @@ dsR <- dsR %>%
 dsR %>% over_waves("cohort")
 
 # grab the value for the first wave and forces it to all waves (cohort)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     cohort = dplyr::first(cohort) # grabs the value for the first wave and forces it to all waves
@@ -292,10 +293,10 @@ dsR <- dsR %>%
 
 # ---- RAND education values -------
 
-dsR %>% over_waves("raedyrs")
+ds %>% over_waves("raedyrs")
 
 # grab the value for the first wave and forces it to all waves (raedyrs)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     raedyrs = dplyr::first(raedyrs) # grabs the value for the first wave and forces it to all waves
@@ -304,10 +305,10 @@ dsR <- dsR %>%
 
 # ----- RAND degree ----------
 
-dsR %>% over_waves("raedegrm")
+ds %>% over_waves("raedegrm")
 
 # grab the value for the first wave and forces it to all waves (raedyrs)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     raedegrm = dplyr::first(raedegrm) # grabs the value for the first wave and forces it to all waves
@@ -316,17 +317,18 @@ dsR <- dsR %>%
 
 # ------- RAND education ---------
 
-dsR %>% over_waves("raeduc")
+ds %>% over_waves("raeduc")
 
 # grab the value for the first wave and forces it to all waves (raedyrs)
-dsR <- dsR %>%
+ds <- ds %>%
   dplyr::group_by(hhidpn) %>%
   dplyr::mutate(
     raeduc = dplyr::first(raeduc) # grabs the value for the first wave and forces it to all waves
   ) %>%
   dplyr::ungroup()
 
-dto[["rand"]] <- dsR
+#dto[["rand"]] <- dsR
+#ds <-dsR
 
 # ----- loneliness --------
 ds_lone <- dto$loneliness
@@ -352,14 +354,19 @@ describeBy(ds, list(year=ds$year))
 boxplot(socialnetwork_total  ~ year, ds)
 
 # -----closechild-------
-ds<-dto$social_network
+ds_old<-dto$social_network
 boxplot(closechild ~ year, ds)
 boxplot.stats(ds$closechild, coef = 5)$out
 which(ds$closechild==99)
 which(ds$closechild==98) # None
+which(ds$closechild==66)
+
+class(ds)
 
 # Recode the don't know and RF responses so that they are not considered
-ds[,"closechild"] <- plyr::mapvalues(ds[,"closechild"], from=99, to=NA) 
+ds[,"closechild"] <- plyr::mapvalues(ds[,"closechild"], from= c(66,99), to= c(NA, NA)) 
+
+ds$closechild <- plyr::mapvalues(ds$closechild, from= c(66,99), to= c(NA, NA)) 
  
 check <- which(ds$closechild >20)
 for (i in check){
@@ -368,21 +375,58 @@ for (i in check){
 
 ds %>% dplyr::filter(hhidpn==12274010)
 
-ds <- cbind(ds, digit1=substr(ds[, "closechild"],1,1), digit=substr(ds[, "closechild"],2,3))
+ds <- cbind(ds, digit1=substr(ds[, "closechild"],1,1), digit2=substr(ds[, "closechild"],2,3))
 
-ds$digit <- plyr::mapvalues(ds[,"digit"], from=c("aN"), to=c(NA))
 ds$digit1 <- plyr::mapvalues(ds[,"digit1"], from=c("N"), to=c(NA))
-ds$digit <-as.character(ds$digit)
+ds$digit2 <- plyr::mapvalues(ds[,"digit2"], from=c("aN"), to=c(NA))
 ds$digit1 <-as.character(ds$digit1)
-ds$closechildr <- as.numeric(ifelse(ds$digit1 == ds$digit, ds$digit1, ds$closechild))
+ds$digit2 <-as.character(ds$digit2)
+ds$closechild <- as.numeric(ifelse(ds$digit1 == ds$digit2, ds$digit2, ds$closechild))
 
 # Print the data for the hhidpn's of those with remaining outlier values.
-check <- which(ds$closechildr>20)
+check <- which(ds$closechild>20)
 ids <- ds[check,"hhidpn"]
 for (i in ids){
     print(ds %>% dplyr::filter(hhidpn==i))
 }
 
+# test
+ds[178,"closechild"]
+
+ds[check,"closechild"] <- NA
+
+# test
+ds[178,"closechild"]
+
+check <- which(ds$closechild >10)
+for (i in check){
+  print(ds[i,])
+}
+
+ids <- ds[check,"hhidpn"]
+for (i in ids){
+  print(ds %>% dplyr::filter(hhidpn==i))
+}
+
+ds %>% dplyr::filter(hhidpn==919600010)
+
+
+# presubsetted cohort
+ds %>% over_waves("cohort")
+
+# subset the data frame to include only those belonging to a cohort.
+ds <- subset(ds, cohort!= 0)
+
+
+
+# check to see subsetting worked.
+ds %>% over_waves("cohort")
+
+# Select only hhidpn's that have at least one wave of LB completed.
+ds <- ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::filter(any(lbwave2>0))
+  dplyr::ungroup()
 
 
 
@@ -390,20 +434,47 @@ for (i in ids){
 boxplot(closefam ~ year, ds)
 boxplot.stats(ds$closefam, coef = 2)$out
 
+which(ds$closefam==99)
+which(ds$closefam==98)
+which(ds$closefam==66)
+
+# Recode the don't know and RF responses so that they are not considered
+ds$closefam <- plyr::mapvalues(ds$closefam, from=99, to=NA) 
+
+ds_old$closefam <- plyr::mapvalues(ds_old$closefam, from= c(99), to=c(NA)) 
 check <- which(ds$closefam >50)
 for (i in check){
   print(ds[i,])
 }
+ids <- ds[check,"hhidpn"]
+for (i in ids){
+  print(ds %>% dplyr::filter(hhidpn==i))
+}
+
+head(ds$hhidpn)
+ds_sub <- ds[ds$hhidpn %in% ids, ]
+
+
+
+# Create a line chart to examine growth over time
+
+ggplot(ds_sub, aes(x=lbwave2, y=closefam, color=hhidpn, group=hhidpn)) +geom_line()
+
+ds <- ds %>%
+  dplyr::group_by(hhidpn) %>%
+  dplyr::mutate(
+    raeduc = dplyr::first(raeduc) # grabs the value for the first wave and forces it to all waves
+  ) %>%
+  dplyr::ungroup()
 
 #There are some values that are suspiciously high. 
 # hhidpn 53871010 has a value of 115 for close family members in 2008 but in 2012 when re-interviewed the number of close family members is 2.
-# this same individual has some suspicious values for close children and close friends in 2008. 43 close children seems unlikely. 
-which.max(ds$closefam)
-ds[30631,]
-ds[30633,]
-ds[30635,]
 
 boxplot(closefri ~ year, ds)
+
+# The social network and close social network variables should correspond for example if an individual has NA or 0 for does not have children then they cannot have children with whom they
+# are in a close relationship. 
+
 
 # ------- social-support -------
 
