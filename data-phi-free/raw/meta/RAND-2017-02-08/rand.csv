@@ -43,6 +43,11 @@ year,old_name,new_name,reversed,note
 2008,r9bwc20,countb20r,NA,NA
 2010,r10bwc20,countb20r,NA,NA
 2012,r11bwc20,countb20r,NA,NA
+2004,r7mstot,mstot_r,NA,NA
+2006,r8mstot,mstot_r,NA,NA
+2008,r9mstot,mstot_r,NA,NA
+2010,r10mstot,mstot_r,NA,NA
+2012,r11mstot,mstot_r,NA,NA
 2004,r7agey_e,intage_r,NA,NA
 2006,r8agey_e,intage_r,NA,NA
 2008,r9agey_e,intage_r,NA,NA

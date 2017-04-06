@@ -1,10 +1,13 @@
-# The purpose of this script is to:
-  # Select and rename variables for analysis
-  # Calculate total scores and means to be used in analysis
-  # 
+# The purpose of this script is to create a data object (dto) which will hold all data and metadata.
+# Run the lines below to stitch a basic html output.
+# knitr::stitch_rmd(
+#   script="./manipulation/0-ellis-island.R",
+#   output="./manipulation/stitched-output/0-ellis-island.md"
+# )
+# The above lines are executed only when the file is run in RStudio, !! NOT when an Rmd/Rnw file calls it !!
 
 ############################
-##    ##
+##  Land on Ellis Island  ##
 ############################
 
 rm(list=ls(all=TRUE))  #Clear the variables from previous runs.
@@ -25,7 +28,9 @@ library(ggplot2) # Graphs
 requireNamespace("tidyr") #  data manipulation
 requireNamespace("dplyr") # f() names conflict with other packages (esp. base, stats, and plyr).
 requireNamespace("testit") # for asserting conditions meet expected patterns.
-requireNamespace("zoo")
+
+# ---- declare-globals ----------------------------------------------
+path_renaming_rules <- "./data-phi-free/raw/renaming-rules/renaming-rules.xlsx"
 
 # ---- load-data ------------------------------------------------
 ds_rand <- readRDS("./data-unshared/derived/rndhrs_p.rds")
@@ -36,8 +41,12 @@ ds_2010 <- readRDS("./data-unshared/derived/hd10f5c.rds")
 ds_2012 <- readRDS("./data-unshared/derived/h12f1a.rds")
 ds_2014 <- readRDS("./data-unshared/derived/h14e1a.rds")
 
-# make the variable names lowercase.
+
+
+# make the names lowercase. ??? This may be undesirable. New names only?
 for(i in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+    # create a string to be passed as command to the eval() function
+    # i <- 2004
     cstring <- paste0("colnames(ds_",i,") <- tolower(colnames(ds_",i,"))")
     eval(parse(text=cstring)) # evaluates the content of the command string
 } 
@@ -55,6 +64,11 @@ for(i in seq_along(path_meta)){
   attr(ls_meta[[section_name]],"spec") <- NULL
 }
 ls_meta %>%  names()
+
+# ----- dummy -----------------------
+# names_labels(ds04)
+# dim(ds04)
+
 
 # ---- define-utility-functions -------------------
 # these functions are used in all scale computations
@@ -76,6 +90,18 @@ subset_rename <- function(d,renaming_rules,year_){
   colnames(dnew) <- new_names 
   return(dnew) 
 }
+colnames(ds_2012)
+# standard computation of scale scores
+compute_scale_score <- function(d){
+  # d <- ds_long
+  (col_names <- setdiff(names(d),c("year","hhidpn")))
+  d[,'sum'] <-  apply(d[col_names],1,sum, na.rm = FALSE)
+  d[,'mean'] <-  apply(d[col_names],1,mean, na.rm = FALSE)
+  return(d)
+}
+# Usage:
+# ds_long <- ds_long %>% compute_scale_score()
+
 
 # reverse the coding on selected items
 # define function to reverse code a specified variable
@@ -93,28 +119,17 @@ reverse_coding <- function(d, variables){
 }
 # Usage:
 # ds_lone <- ds_lone %>% 
-# reverse_coding(reverse_these)
-
-# standard computation of scale scores
-compute_scale_score <- function(d){
-  # d <- ds_long
-  (col_names <- setdiff(names(d),c("year","hhidpn")))
-  d[,'sum'] <-  apply(d[col_names],1,sum, na.rm = FALSE)
-  d[,'mean'] <-  apply(d[col_names],1,mean, na.rm = FALSE)
-  return(d)
-}
-# Usage:
-# ds_long <- ds_long %>% compute_scale_score()
-
+  # reverse_coding(reverse_these)
 
 # ---- create-dto ---------------------
 dto <- list()
 
-# ------ RAND ----------------------------------------
-# Processes the variables from the RAND longitudinal data file. 
+# ------ RAND ------------------------
+#read in the renaming rules for this specific variables
+rename_rand   <-  ls_meta[["rand"]]
 
-# ----- RAND specific functions ---
-#renames and subsets the RAND data frame
+# now select the rand ds 
+ls_temp <- list()
 subset_rename_rand <- function(year_){ 
   # broswer()
   items <- rename_rand %>% 
@@ -132,28 +147,6 @@ subset_rename_rand <- function(year_){
   return(dnew) 
 }
 
-# For demographics variables that should not change over time use the available value to fill in NA values
-# in cases where there is only one value change all to the available value.
-replace_na <- function(x){
-  #x <- c(NA,1,1)
-  unique_values <- setdiff(unique(x),NA)
-  testit::assert("Error: The value is absent or not unique", length(unique_values)==1L)
-  if(length(unique_values)==1L){
-    x[is.na(x)] <- unique_values
-  }else{
-    x[] <- NA
-  }
-}
-
-
-#------
-
-#read in the renaming rules for the specific variables
-rename_rand   <-  ls_meta[["rand"]]
-
-# now select the rand ds 
-ls_temp <- list()
-
 ls_temp[[paste(2004)]] <- subset_rename_rand(2004)
 ls_temp[[paste(2006)]] <- subset_rename_rand(2006)
 ls_temp[[paste(2008)]] <- subset_rename_rand(2008)
@@ -169,83 +162,18 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-# Set birthyr_rand to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    birthyr_rand = replace_na(birthyr_rand)
-  )
-
-# Set birthmo_rand to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    birthmo_rand = replace_na(birthmo_rand)
-    )
-
-# Set cohort to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    cohort = replace_na(cohort)
-  )
-
-# Set reaedyrs to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    raedyrs = replace_na(raedyrs)
-  )
-
-# Set raedegrm to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    raedegrm = replace_na(raedegrm)
-  )
-
-# Set raeduc to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    raeduc = replace_na(raeduc)
-  )
-
-# Set race_rand to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    race_rand = replace_na(race_rand)
-  )
-
-# Set hispanic_rand to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    hispanic_rand = replace_na(hispanic_rand)
-  )
-
-# Set male to the available value for all years.
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    male = replace_na(male)
-  )
-
-#convert year to factor for later join
-ds_long$year <- as.factor(ds_long$year)
-
-
 dto[["rand"]] <- ds_long
 
 # ----- demographics ------------------
+# path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
 rename_demographics   <-  ls_meta[["demographics"]]
-
+str(rename_demographics)
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
   # create a string to be passed as command to the eval() function
+  # year <- 2006
   cstring <- paste0(
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_demographics,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
@@ -254,37 +182,50 @@ for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){
 # this creates a list in which each element is a dataset
 # each dataset contains items from target construct for that year
 lapply(ls_temp,names)
-
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
-tail(ds_long)
+head(ds_long)
 
-# convert marriage month and year to dates 
-ds_long$mardate1st <- zoo::as.yearmon(as.character(paste0(ds_long$first_marriage_yr,"-",ds_long$first_marriage_mth)))
-ds_long$mardate2nd <- zoo::as.yearmon(as.character(paste0(ds_long$second_marriage_yr,"-",ds_long$second_marriage_mth)))
-ds_long$mardate3rd <- zoo::as.yearmon(as.character(paste0(ds_long$third_marriage_yr,"-",ds_long$third_marriage_mth)))
-ds_long$mardate4th <- zoo::as.yearmon(as.character(paste0(ds_long$fourth_marriage_yr,"-",ds_long$forth_marriage_mth)))
-
-# convert interview month and year to dates
-ds_long$interviewdate <- zoo::as.yearmon(as.character(paste0(ds_long$interview_yr,"-",ds_long$interview_mth)))
-
-# a list of variables to drop
-drop_vars <- names(ds_long) %in% c("first_marriage_yr","first_marriage_mth","second_marriage_yr","second_marriage_mth","third_marriage_yr",
-                                   "third_marriage_mth","fourth_marriage_yr","fourth_marriage_mth")
-#drop vars
-ds_long <- ds_long[!drop_vars]
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+# for(i in unique(ds_long$hhidpn)){
+#   #id <- 10106010
+#   id <- i
+#   dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+#   wavecount <- 0
+#   wave_04 <- 0
+#   
+#   for(y in unique(dsyear$year)){
+#     #year <- 2012
+#     year <- y
+#     current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+#     cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "1"
+#     if(cond_2004==TRUE){
+#       wave_04 <- wave_04+1
+#       ds_long[current_row,"lbwave"] <- wave_04
+#       next}
+#     wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "1"
+#     if(wave_cond==TRUE){
+#       wavecount <- wavecount+1
+#       ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+#     }else{
+#       ds_long[current_row,"lbwave"] <- 0 
+#     }
+#     }}
+ds_long %>% dplyr::filter(hhidpn== "3020")
 
 dto[["demographics"]] <- ds_long
 
 
 # ----- loneliness -------------
+# path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
 rename_loneliness   <-  ls_meta[["loneliness"]]
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
+  # year <- 2006
   cstring <- paste0(
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_loneliness,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
@@ -296,15 +237,19 @@ lapply(ls_temp,names)
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
 
+ds_long %>% dplyr::filter(hhidpn==10001010)
+
 # create a vector with names of items to be reverse scored
 rename_meta <-rename_loneliness 
 # use meta data to provide the rules
-reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] ) %>% as.data.frame()
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
 reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
  
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 compute_loneliness_scale_score <- function(d){
+  # d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
   (col_names_11 <- setdiff(names(d),c("year","hhidpn")))
   (col_names_3 <- col_names_11[1:3])
   d[,"lonelysum_11"] <- apply(d[col_names_11],1,sum, na.rm = TRUE)
@@ -323,7 +268,9 @@ ds_long <- compute_loneliness_scale_score(ds_long)
 dto[["loneliness"]] <- ds_long
 
 
+
 # ----- life_satisfaction -------------
+#path_input_map <- "./data-shared/raw/mhsu-service-types/mhsu-service-type-mapping-2016-09-02.csv"
 #read in the renaming rules for this specific variables
 rename_life_satisfaction  <-  ls_meta[["life-satisfaction"]] %>% as.data.frame()
 
@@ -331,6 +278,7 @@ rename_life_satisfaction  <-  ls_meta[["life-satisfaction"]] %>% as.data.frame()
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
+  # year <- 2006
   cstring <- paste0(
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_life_satisfaction,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
@@ -341,18 +289,18 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
+head(ds_long)
 
-#compute sum and mean
+rename_meta <-rename_life_satisfaction 
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
+reverse_these <- reverse_these[!is.na(reverse_these)]
+testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
+
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_scale_score()
-
-# rename sum and mean
-ds_long <- ds_long %>%
-  dplyr::rename(
-  life_sat_sum  = sum
-  ,life_sat_mean = mean
-)
-
+head(ds_long)
 dto[["life_satisfaction"]] <- ds_long
+
 
 # ----- social-network -------------
 #read in the renaming rules for this specific variables
@@ -361,6 +309,7 @@ rename_social_network  <-  ls_meta[["social-network"]] %>% as.data.frame()
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
+  # year <- 2006
   cstring <- paste0(
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_social_network,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
@@ -377,13 +326,14 @@ head(ds_long)
 networkvars <- c("snspouse", "snchild", "snfamily","snfriends")
 closevars <-c("closespouse", "closechild", "closefam", "closefri")
 
-#The social network count items need to be reverse coded instead it was coded as 1 if yes 
+#The social network count items do not need to be reverse coded instead it was coded as 1 if yes 
 # (e.g., yes they have children) and 5 in no (e.g., no children). I wanted to recode this so that it was 1 and 0
 # this allows a social network total score to be calculated.
 
 reverse_coding_socialnetwork <- function(d, variables){
   # d <- ds_lone
   for(v in variables){
+    # v = "loneliness_1"
     (p <- unique(d[,v]) %>% as.numeric())
     (p <- p[!is.na(p)])
     d[,v] <- plyr::mapvalues(d[,v], from=5, to=0) 
@@ -392,21 +342,32 @@ reverse_coding_socialnetwork <- function(d, variables){
   return(d)
 }
 
-#recoding various codes to NA 
-recoding_closesocialvars <- function(d, variables){
-  for(v in variables){
-    (p <- unique(d[,v]) %>% as.numeric())
-    (p <- p[!is.na(p)])
-    d[,v] <- plyr::mapvalues(d[,v], from=c(66,98,99), to=c(NA,NA,NA))
-  }
+ds_long <- ds_long %>% 
+ reverse_coding_socialnetwork(networkvars)
+#Computes two scores socialnetwork_total a count of whether or not network members exist in each of the 
+# four possible categories and close_social_network a count of the total number of relationships the respondent
+# considers close relationships across all relational categories.
+compute_socialnetwork_scale_scores <- function(d){
+  #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+  d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
+  d[,"close_social_network"] <- apply(d[closevars],1,sum, na.rm = TRUE)
+  d$missing_count <- apply(d[networkvars], 1, function(z) sum(is.na(z)))
+  d <- d %>% 
+    dplyr::mutate( 
+      socialnetwork_total = ifelse(missing_count<4, 
+                                   socialnetwork_total,NA))
+  d$missing_count <- apply(d[closevars], 1, function(z) sum(is.na(z)))   
+   d <- d %>% 
+        dplyr::mutate( 
+          close_social_network = ifelse(missing_count<4, 
+                                        close_social_network,NA)
+    )
   return(d)
 }
 
-ds_long <- ds_long %>% recoding_closesocialvars(closevars)
-
-ds_long <- ds_long %>% reverse_coding_socialnetwork(networkvars)
-
-
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+ds_long <- ds_long %>% compute_socialnetwork_scale_scores()
+head(ds_long)
 dto[["social_network"]] <- ds_long
 
 # ----- social-support -------------
@@ -416,6 +377,7 @@ rename_social_support  <-  ls_meta[["social-support"]] %>% as.data.frame()
 ls_temp <- list()
 for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
   # create a string to be passed as command to the eval() function
+  # year <- 2006
   cstring <- paste0(
     "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_social_support,",year,")")
   eval(parse(text=cstring)) # evaluates the content of the command string
@@ -430,7 +392,7 @@ head(ds_long)
 
 #for perceived social support(or relationship quality) all positive items need to be reverse coded.
 rename_meta <-rename_social_support
-reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] )
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] )
 reverse_these <- reverse_these[!is.na(reverse_these)]
 testit::assert("The scale does not contained reverse coded items",reverse_these==0L)
 ds_long <- ds_long %>% 
@@ -469,7 +431,22 @@ ds_long[,"support_friend_mean"] <- apply(ds_long[positive_friends],1,mean, na.rm
 negative_friends <- c("ssup4fr","ssup5fr","ssup6fr","ssup7fr")
 ds_long[,"strain_friends_total"] <- apply(ds_long[negative_friends],1,sum, na.rm = FALSE)
 ds_long[,"strain_friends_mean"] <- apply(ds_long[negative_friends],1,mean, na.rm = FALSE)
+head(ds_long)
 
+#   d$missing_count <- apply(d[col_names_7], 1, function(z) sum(is.na(z)))
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       score_wellbeing_7 = ifelse(missing_count<3, 
+#                                  wellbeing_sum_7/(7- missing_count),NA))
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       wellbeing_sum_7 = ifelse(missing_count>0, NA, wellbeing_sum_7)
+#     )
+#   return(d)
+# }
+d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+#ds_long <- ds_long %>% compute_scale_score()
+head(ds_long)
 dto[["social_support"]] <- ds_long
 
 # ---------- social-contact --------
@@ -492,6 +469,7 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
+head(ds_long)
 
 # create a vector with names of items to be reverse scored 
 # All social contact items are reversed scored 1 = Three or more times a week to 6 = less than once a year or never
@@ -532,17 +510,53 @@ lapply(ls_temp,names)
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
 head(ds_long)
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_activity,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+# now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
+ls_temp <- list()
+for(year in c(2004, 2006, 2008, 2010, 2012, 2014)){ 
+  # create a string to be passed as command to the eval() function
+  cstring <- paste0(
+    "ls_temp[[paste(year)]] <- subset_rename(ds_",year,", rename_activity,",year,")")
+  eval(parse(text=cstring)) # evaluates the content of the command string
+}
+# this creates a list in which each element is a dataset
+# each dataset contains items from target construct for that year
+lapply(ls_temp,names)
+# now we combine datasets from all years into a single LONG dataset
+ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
+  dplyr::arrange(hhidpn)
+head(ds_long)
+
+ds_long %>% dplyr::filter(hhidpn==10001010)
 
 # create a vector with names of items to be reverse scored 
 # All activity items are reversed scored 1 = Daily to 7 = Never/not relevant recode all so that higher numbers indicate more activity
 rename_meta <-rename_activity
 # use meta data to provide the rules
-reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] ) %>% as.data.frame()
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
 reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
 
-# select the years with the full activity scale
+#Create activity summary scores
+# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
+
+# take a subject
 d_long <- ds_long %>% 
   dplyr::filter(year %in% c(2008, 2010, 2012, 2014)) %>%  # only these years
   dplyr::select(year, hhidpn, dplyr::matches("activity_")) # only these variables
@@ -574,15 +588,18 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
+ds_long %>% dplyr::filter(hhidpn==10001010)
+
 # create a vector with names of items to be reverse scored 
 rename_meta <-rename_wellbeing
 # use meta data to provide the rules
-reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] ) %>% as.data.frame()
+reverse_these <- unique( rename_meta[rename_meta$reversed==TRUE,"new_name"] ) %>% as.data.frame()
 reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
 
 compute_wellbeing_scale_score <- function(d){
+  # d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
   (col_names_7 <- setdiff(names(d),c("year","hhidpn")))
   (col_names_2 <- col_names_7[1:2])
   d[,"wellbeing_sum_7"] <- apply(d[col_names_7],1,sum, na.rm = TRUE)
@@ -601,7 +618,8 @@ compute_wellbeing_scale_score <- function(d){
 }
 
 ds_long <- ds_long %>% compute_wellbeing_scale_score()
-
+head(ds_long)
+# merge computed scales score to the general file
 
 dto[["wellbeing"]] <- ds_long
 
@@ -690,7 +708,7 @@ ds_long <- ds_long %>%
 
 # recode count backwards variable so that 5 (incorrect) is 0 and 9 (refused or NA) is NA.
 ds_long[,"countb"] <- plyr::mapvalues(ds_long[,"countb"], from = c(5,9), to =c(0,NA))
-ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,8,9), to =c(0,NA,NA))
+ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,9), to =c(0,NA))
 # if requested participants could start over if they requested this this should be used instead 
 # create a count variable to be used
 ds_long[,"count"] <- ifelse(ds_long[,"countb"]==6, ds_long[,"countb2"], ds_long[,"countb"])
@@ -826,8 +844,6 @@ ds_long[,"exercise"] <- apply(ds_long[exercise_vars],1,sum, na.rm = FALSE)
 dto[["health"]] <- ds_long
 
 # ------- serial-7's ---------
-# All years except 2014 will use the corrected serial 7's score from the RAND longitudinal file.
-# In this section a serial 7's score for 2014 will be created.
 rename_serial   <-  ls_meta[["serial7s"]]
 
 # now cycle through all ds for each year (must have ds_2004, ds_2006 objects)
@@ -846,41 +862,7 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-# create a list of serial 7 count variables then recode to NA various error codes.
-variables <- c("serial1","serial2","serial3","serial4","serial5")
-for(v in variables){
-  (p <- unique(ds_long[,v]) %>% as.numeric())
-  (p <- p[!is.na(p)])
-  ds_long[,v] <- plyr::mapvalues(ds_long[,v], from=c(999, 998, 66), to=c(NA, NA, 66)) 
-}
-
-#create a variable of the difference between serial responses
-ds_long$serial1d <- as.numeric(7 + ds_long[,"serial1"])
-ds_long$serial2d <- ds_long$serial1 - ds_long$serial2
-ds_long$serial3d <- ds_long$serial2 - ds_long$serial3
-ds_long$serial4d <- ds_long$serial3 - ds_long$serial4
-ds_long$serial5d <- ds_long$serial4 - ds_long$serial5
-
-# create an indicator score of whether the response was correct
-ds_long[,"serial1s"] <- ifelse(ds_long[,"serial1d"] == 100, 1, ifelse(is.na(ds_long[,"serial1d"]), NA, 0))
-ds_long[,"serial2s"] <- ifelse(ds_long[,"serial2d"] == 7, 1, ifelse(is.na(ds_long[,"serial2d"]), NA, 0))
-ds_long[,"serial3s"] <- ifelse(ds_long[,"serial3d"] == 7, 1, ifelse(is.na(ds_long[,"serial3d"]), NA, 0))
-ds_long[,"serial4s"] <- ifelse(ds_long[,"serial4d"] == 7, 1, ifelse(is.na(ds_long[,"serial4d"]), NA, 0))
-ds_long[,"serial5s"] <- ifelse(ds_long[,"serial5d"] == 7, 1, ifelse(is.na(ds_long[,"serial5d"]), NA, 0))
-
-serial7_scores <- c("serial1s","serial2s","serial3s","serial4s","serial5s")
-ds_long$serial7r_tot <- apply(ds_long[serial7_scores],1,sum, na.rm = FALSE)
-
-# these hhidpn's were identified as meeting criteria for correction according to data cleaning rules.
-# see (document when available) for details.
-recode_hhidpn <- c(501750010, 524648010, 905808010, 500201010)
-for (i in recode_hhidpn){
-  row <- which(ds_long$hhidpn== 501750010)
-  ds_long[row, "serial7r_tot"] <- 5 
-}
-
-
-dto[["serial7s"]] <- ds_long %>% dplyr::select(hhidpn, year, serial7r_tot)
+dto[["serial7s"]] <- ds_long
 
 # ----- chronic-stressors -----------------------
 rename_chronicstressors <- ls_meta[["chronic-stressors"]]
@@ -907,52 +889,142 @@ ds_long[,"stresstotal"] <- rowSums(ds_long[,chronicstress_vars])
 
 dto[["chronic-stressors"]] <- ds_long
 
-# Now that all scales are identified, variables renamed, and total/summary scores calculated merge dto a single long data frame.
+
+
+# # ---- save-to-disk ------------------------------------------------------------
+# names(dto)
+# lapply(dto, names)
+# dto %>% object.size() %>% utils:::format.object_size("auto")
+# # Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
+# saveRDS(dto, file="./data-unshared/derived/dto.rds", compress="xz")
+
 
 # merge multiple datasets that are stored as elements of a list
-merge_multiple_files <- function(list, by_columns){
+merge_mulitple_files <- function(list, by_columns){
   Reduce(function( d_1, d_2 ) dplyr::full_join(d_1, d_2, by=by_columns), list)
 }
 
-ds_long <- merge_multiple_files(dto, by_columns = c("year","hhidpn"))
+#convert to factor for join
+class(dto$rand$year)
+head(dto$rand$year)
+dto$rand$year <- as.factor(dto$rand$year)
 
-# correct serial7r_tot to merge the 2014 var with the rand serial 7 data
-ds_long$serial7r_tot <- ifelse(ds_long$year==2014, ds_long$serial7r_tot.y,ds_long$serial7r_tot.x)
+ds_long <- merge_mulitple_files(dto, by_columns = c("year","hhidpn"))
 
-# A list of the psychosocial variables to use to check for completion of the psychosocial variables.
+# A list of the psychosocial variables to use to test for lb wave completion.
 ds_lbvars <- ds_long %>% 
-  dplyr::select(score_loneliness_3, score_loneliness_11, snspouse, snchild, 
+  dplyr::select(score_loneliness_3, score_loneliness_11, socialnetwork_total, snspouse, snchild, 
                 snfamily, snfriends,support_spouse_total, support_child_total, support_fam_total, 
                 support_friend_total, strain_spouse_total, strain_child_total, strain_family_total, 
                 strain_friends_total, children_contact_mean, family_contact_mean, friend_contact_mean,
                 activity_mean, activity_sum)
 
-# an indicator variable of whether or not there are any psychosocial variables not NA for that wave.
-ds_long$lbqs <- ifelse(rowSums(!is.na(ds_lbvars)) >1 , 1, 0)
+ds_long$lbvars <- rowSums(!is.na(ds_lbvars))
+head(ds_long)
 
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn, lbqs) %>% 
-  dplyr::mutate(
-    lbwavecount =seq(n())) %>% 
-  dplyr::ungroup()
+# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
+for(i in unique(ds_long$hhidpn)){
+  #id <- 3020
+  id <- i
+  dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+  wavecount <- 0
+  wave_04 <- 0
+  
+  for(y in unique(dsyear$year)){
+    #year <- 2014
+    year <- y
+    current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+    cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "QUESTIONNAIRE LEFT WITH RESPONDENT"
+    if(cond_2004==TRUE){
+      wave_04 <- wave_04+1
+      ds_long[current_row,"lbwave"] <- wave_04
+      next}
+    wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "Eligible for leave behind"
+    if(wave_cond==TRUE){
+      wavecount <- wavecount+1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount
+    }else{
+      ds_long[current_row,"lbwave"] <- 0 
+    }
+    wave_2014 <- ds_long[current_row,"lbvars"] > 0 & year == "2014"
+    if(wave_2014==TRUE){
+      wavecount2014 <- 1
+      ds_long[current_row,"lbwave"] <- wave_04 + wavecount + wavecount2014
+    }
+  }}
+ds_long %>% dplyr::filter(hhidpn== "3020")
 
-# create an indicator only of waves  
-ds_long$lbwave <- ifelse(ds_long$lbqs==1, ds_long$lbwavecount, 0)
+if(ds_long$lbvars>0 & ds_long$lbwave==0)
+  
+  # ----- Creates a variable lbwave that designates wave number based on whether or not there are any
+  # non-missing leave-behind questionnaire items. 
+  for(i in unique(ds_long$hhidpn)){
+    #id <- 3020
+    id <- i
+    dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
+    wavecount <- 0
+    
+    for(y in unique(dsyear$year)){
+      #year <- 2012
+      year <- y
+      current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
+      
+      wave_cond <- ds_long[current_row,"lbvars"] > 0
+      if(wave_cond==TRUE){
+        wavecount <- wavecount+1
+        ds_long[current_row,"lbwave2"] <- wavecount
+      }else{
+        ds_long[current_row,"lbwave2"] <- 0 
+      }
+    }}
 
-# subset the data frame to include only those belonging to a cohort.
-ds_long <- subset(ds_long, cohort!= 0)
-
-
-# # ---- save-to-disk ------------------------------------------------------------
-names(ds_long)
 
 saveRDS(ds_long, file="./data-unshared/derived/data-long.rds")
+# Examine distribution of lb waves
+table(ds_long$lbwave2, ds_long$year)
+
+(ds_long$lbwave2)
+
+ds_long[which(ds_long$lbwave2==5),]
+
+examine <- ds_long %>% dplyr::filter(hhidpn==500172010)
+
+
+# select only cases where the participant belongs to one of the HRS cohorts.
+# examine the descriptives over waves
+over_waves <- function(ds, measure_name, exclude_values="") {
+  ds <- as.data.frame(ds)
+  testit::assert("No such measure in the dataset", measure_name %in% unique(names(ds)))
+  # measure_name = "htval"; wave_name = "wave"; exclude_values = c(-99999, -1)
+  cat("Measure : ", measure_name,"\n", sep="")
+  t <- table( ds[,measure_name], ds[,"year"], useNA = "always"); t[t==0] <- ".";t
+  print(t)
+  cat("\n")
+  ds[,measure_name] <- as.numeric(ds[,measure_name])
+  
+  d <- ds[!(ds[,measure_name] %in% exclude_values), ]
+  a <- lazyeval::interp(~ round(mean(var),2) , var = as.name(measure_name))
+  b <- lazyeval::interp(~ round(sd(var),3),   var = as.name(measure_name))
+  c <- lazyeval::interp(~ n())
+  dots <- list(a,b,c)
+  t <- d %>%
+    dplyr::select_("hhidpn","year", measure_name) %>%
+    na.omit() %>%
+    # dplyr::mutate_(measure_name = as.numeric(measure_name)) %>%
+    dplyr::group_by_("year") %>%
+    dplyr::summarize_(.dots = setNames(dots, c("mean","sd","count")))
+  return(as.data.frame(t))
+  
+}
+
 
 # ---- object-verification ------------------------------------------------
 # the production of the dto object is now complete
 # we verify its structure and content:
-ds <- readRDS("./data-unshared/derived/dto.rds")
-names(ds)
-# at this point the ds is a long data file
+dto <- readRDS("./data-unshared/derived/dto.rds")
+names(dto)
+# at this point the dto contains elements
+# each of which is a dataset with a subset of variables
+# united by type of items
 
 

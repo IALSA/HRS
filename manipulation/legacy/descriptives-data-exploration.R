@@ -33,6 +33,54 @@ ds <- readRDS("./data-unshared/derived/data-long.rds")
 # ---- inspect-data -------------------------------------------------------------
 names(ds)
 
+# ---- functions-to-examime-temporal-patterns -------------------
+view_temporal_pattern <- function(ds, measure, seed_value = 42){
+  set.seed(seed_value)
+  ds_long <- ds
+  (ids <- sample(unique(ds_long$hhidpn),1))
+  d <-ds_long %>%
+    dplyr::filter(hhidpn %in% ids ) %>%
+    dplyr::select_("hhidpn","year", measure)
+  print(d)
+}
+# ds %>%  view_temporal_pattern("male", 2)
+temporal_pattern <- function(ds, measure){
+  # set.seed(seed_value)
+  ds_long <- ds
+  (ids <- sample(unique(ds_long$hhidpn),1))
+  d <-ds_long %>%
+    dplyr::filter(hhidpn %in% ids ) %>%
+    dplyr::select_("hhidpn","year", measure)
+  print(d)
+}
+
+
+# examine the descriptives over waves
+over_waves <- function(ds, measure_name, exclude_values="") {
+  ds <- as.data.frame(ds)
+  testit::assert("No such measure in the dataset", measure_name %in% unique(names(ds)))
+  # measure_name = "htval"; wave_name = "wave"; exclude_values = c(-99999, -1)
+  cat("Measure : ", measure_name,"\n", sep="")
+  t <- table( ds[,measure_name], ds[,"year"], useNA = "always"); t[t==0] <- ".";t
+  print(t)
+  cat("\n")
+  ds[,measure_name] <- as.numeric(ds[,measure_name])
+  
+  d <- ds[!(ds[,measure_name] %in% exclude_values), ]
+  a <- lazyeval::interp(~ round(mean(var),2) , var = as.name(measure_name))
+  b <- lazyeval::interp(~ round(sd(var),3),   var = as.name(measure_name))
+  c <- lazyeval::interp(~ n())
+  dots <- list(a,b,c)
+  t <- d %>%
+    dplyr::select_("hhidpn","year", measure_name) %>%
+    na.omit() %>%
+    # dplyr::mutate_(measure_name = as.numeric(measure_name)) %>%
+    dplyr::group_by_("year") %>%
+    dplyr::summarize_(.dots = setNames(dots, c("mean","sd","count")))
+  return(as.data.frame(t))
+  
+}
+
 # --------------------------------------------------------------------------------------
 # Number of close children (closechild) data correction 
 
@@ -56,14 +104,42 @@ ds$closechild <- as.numeric(ifelse(ds$digit1 == ds$digit2, ds$digit2, ds$closech
 # Otherwise, recode closechild [number of children with whom one has a close relationship to NA if greater than]
 ds$closechild <- ifelse(ds$closechild>20, NA, ds$closechild)
 
-# ------ Number of close family members (closefam) data correction -------
-# Rule 1:
-# If the number of close family members is greater than 4 standard deviations above the mean (21) 
-# and the change in number of close family members is greater than 4 standard deviations above the 
-# mean change (21) then recode to NA. This is 112 cases. 
+ds_test <- subset(ds, hhidpn==10372010 |hhidpn==16706020, select = c(hhidpn,closespouse,closechild,digit1,digit2))
+ds_2 <- subset(ds, select = c(hhidpn,closespouse,closechild,digit1,digit2))
+# Print the data for the hhidpn's of those with remaining outlier values.
+check <- which(ds_2$closechild>20)
+ids <- ds_2[check,"hhidpn"]
+for (i in ids){
+  print(ds %>% dplyr::filter(hhidpn==i))
+}
+
+# test
+ds[178,"closechild"]
+
+ds[check,"closechild"] <- NA
+
+# test
+ds[178,"closechild"]
+
+check <- which(ds$closechild >10)
+for (i in check){
+  print(ds[i,])
+}
+
+ids <- ds[check,"hhidpn"]
+for (i in ids){
+  print(ds %>% dplyr::filter(hhidpn==i))
+}
+
+ds %>% dplyr::filter(hhidpn==919600010)
+
+# ------ closefam ----------------------------------------------------
+boxplot(closefam ~ year, ds)
+describe(ds$closefam)
+boxplot.stats(ds$closefam, coef = 2)$out
 
 # Create a temporary data frame including only waves with psychosocial variables.
-ds_temp <- subset(ds, lbwave>0)
+ds_temp <- subset(ds, lbwave>0, select=c(hhidpn, year, lbwave, closechild, closefam, closefri))
 
 # calculate the difference scores between close network member values
 ds_temp <- ds_temp %>% 
@@ -76,41 +152,62 @@ ds_temp <- ds_temp %>%
   )%>% 
   dplyr::ungroup()
 
+criteria <- ds_temp$lag_closefam > (4*sd(ds_temp$lag_closefam,na.rm = TRUE))
+criteria2 <- ds_temp$lead_closefam > (4*sd(ds_temp$lead_closefam,na.rm = TRUE))
+fullcriteria <- criteria==TRUE | criteria2==TRUE
 
-row_to_change <- which((ds2$closefam >(3.5*(5.47)) & ds2$diff_closefam>(5.27*3.5))==TRUE)
+ds_temp$famflag <- ifelse(fullcriteria==TRUE, 1, 0)
 
-check <- which(ds$closefam >50)
-for (i in check){
-  print(ds[i,])
-}
-ids <- ds[check,"hhidpn"]
-for (i in ids){
-  print(ds %>% dplyr::filter(hhidpn==i))
-}
+# check values over 20 
+check <- which(ds_temp$closefam >20 & ds_temp$famflag==1)
 
-head(ds$hhidpn)
-ds_sub <- ds[ds$hhidpn %in% ids, ]
+ids <- as.vector(ds_temp[check,"hhidpn"])
+ids <- as.vector(ids[["hhidpn"]])
+
+# a sub data frame to examine those with greater than 20 on closefam and a flag for change
+ds_sub <- ds_temp[ds_temp$hhidpn %in% ids, ]
+
+# Create a line chart to examine growth over time in those with more than 20 close family members and a flag for large discrepancy scores
+ggplot(ds_sub, aes(x=lbwave, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
+  scale_color_discrete(drop=TRUE, limits=levels(as.factor(ds_sub$hhidpn)))
+
+# a matrix of line graphs for individual participants.
+ids <- sample(unique(ds_sub$hhidpn), 20)
+g1 <- ds_sub %>%
+  filter(hhidpn %in% ids) %>%
+  ggplot(aes(x=lbwave, y=closefam))+
+  geom_line(aes(group=hhidpn)) +
+  facet_wrap("hhidpn") +
+  theme_minimal()
+g1
+#-------------------
+# check values over 20 that do not have a discrepancy flag
+check <- which(ds_temp$closefam >20 & ds_temp$famflag!=1)
+
+ids <- as.vector(ds_temp[check,"hhidpn"])
+ids <- as.vector(ids[["hhidpn"]])
+
+ds_sub <- ds_temp[ds_temp$hhidpn %in% ids, ]
+
+# a matrix of line graphs for individual participants.
+ids <- sample(unique(ds_sub$hhidpn), 20)
+g1 <- ds_sub %>%
+  filter(hhidpn %in% ids) %>%
+  ggplot(aes(x=lbwave, y=closefam))+
+  geom_line(aes(group=hhidpn)) +
+  facet_wrap("hhidpn") +
+  theme_minimal()
+g1
+
+# There are only 14 people in this group. From examination of the graphs is looks like a few are likely errors. 
+# hhidpn's 55720020,84298010, 205280010, 501588010
+
+# Graph the participants who have a close family score greater than 20 but not a flag indicating large discrepancy. 
+ggplot(ds_sub, aes(x=lbwave, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
+  scale_color_discrete(drop=TRUE, limits=levels(as.factor(ds_sub$hhidpn)))
 
 
-
-# Create a line chart to examine growth over time
-
-ggplot(ds_sub, aes(x=lbwave2, y=closefam, color=hhidpn, group=hhidpn)) +geom_line()
-
-
-
-ds_temp <- subset(ds, lbwave2>0)
-
-ds2 <- ds_test %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    diff_closefam = abs(closefam - lag(closefam)),
-    diff_closefri = abs(closefri - lag(closefri))
-    )%>% 
-  dplyr::ungroup()
-
-
-row_to_change <- which((ds2$closefam >(3.5*5.47) & ds2$diff_closefam>(5.27*3.5))==TRUE)
+row_to_change <- which(ds_temp$closefam>20 & ds_temp$famflag==1)
 row_to_change2 <- which((ds2$closefam >50 & is.na(ds2$diff_closefam))==TRUE)
 
 for (i in row_to_change){
@@ -171,7 +268,7 @@ test<- ds_diff[,"hhidpn"] %in% ids
 # The social network and close social network variables should correspond for example if an individual has NA or 0 for does not have children then they cannot have children with whom they
 # are in a close relationship. 
 
-#Computes two scores socialnetwork_total a count of whether or not network members exist in each of the 
+# When the data is cleaned compute two scores socialnetwork_total a count of whether or not network members exist in each of the 
 # four possible categories and close_social_network a count of the total number of relationships the respondent
 # considers close relationships across all relational categories.
 compute_socialnetwork_scale_scores <- function(d){
@@ -194,7 +291,7 @@ compute_socialnetwork_scale_scores <- function(d){
 # d <- ds_long %>% dplyr::filter(hhidpn==10001010)
 ds_long <- ds_long %>% compute_socialnetwork_scale_scores()
 
-# ------ serial-7s ------
+# --------------------- serial-7s ------------------------------------
 # ------ create a serial 7 score for 2014 as this was not available in the HRS RAND longitudinal file
 
 dsR %>% dplyr::filter(hhidpn==32181040)
@@ -344,35 +441,3 @@ ds %>% dplyr::filter(hhidpn==32181040)
 ds <- dto$health
 describeBy(ds, list(year=ds$year))
 
-
-
-
-
-# ---- save-to-disk ------------------------------------------------------------
-names(dto)
-lapply(dto, names)
-dto %>% object.size() %>% utils:::format.object_size("auto")
-# Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
-saveRDS(dto, file="./data-unshared/derived/dto3.rds", compress="xz")
-
-# ---- publisher ---------------------------------------
-path_report_1 <- "./reports/report.Rmd"
-allReports <- c(
-  path_report_1
-  # ,path_report_2
-  # , ...
-)
-pathFilesToBuild <- c(allReports) ##########
-testit::assert("The knitr Rmd files should exist.", base::file.exists(pathFilesToBuild))
-# Build the reports
-for( pathFile in pathFilesToBuild ) {
-  
-  rmarkdown::render(input = pathFile,
-                    output_format=c(
-                      "html_document" # set print_format <- "html" in seed-study.R
-                      # "pdf_document"
-                      # ,"md_document"
-                      # "word_document" # set print_format <- "pandoc" in seed-study.R
-                    ),
-                    clean=TRUE)
-}
