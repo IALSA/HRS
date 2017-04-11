@@ -62,6 +62,70 @@ ds$closechild <- ifelse(ds$closechild>20, NA, ds$closechild)
 # and the change in number of close family members is greater than 4 standard deviations above the 
 # mean change (21) then recode to NA. This is 112 cases. 
 
+ids <- sample(size = 200, x = unique(ds$hhidpn) )
+selected_variables <- c("id","year",'lbwave', "closechild", "closefam", "closefri")
+
+# remove the values we consider outliers
+# Here is our rules for defining an outlier
+# If 1)the number of close family members is greater than 4 standard deviations above the mean (21) 
+# and 2)the change in number of close family members is greater than 4 standard deviations above the 
+# mean change (21) then recode to NA. This is 112 cases. 
+
+# identify cases in which the criteria for outliers is broken
+d <- ds %>% 
+  dplyr::rename(id = hhidpn) %>% 
+  # dplyr::filter(id %in% ids) %>%
+  # filter(id == 22860010 ) %>% 
+  dplyr::filter(lbwave > 0) %>%
+  dplyr::select_(.dots = selected_variables) %>% 
+  dplyr::group_by(id) %>%
+  dplyr::mutate(
+    closefam_lag  = abs(             closefam - dplyr::lag(closefam)),
+    closefam_lead = abs(dplyr::lead(closefam) - closefam),
+    closefri_lag  = abs(             closefri - dplyr::lag(closefri)),
+    closefri_lead = abs(dplyr::lead(closefri) - closefri)
+  ) %>% 
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    closefam_mean     = mean(closefam, na.rm=T),
+    closefam_sd       = sd(closefam, na.rm=T),
+    closefam_lag_mean = mean(closefam_lag, na.rm=T),
+    closefam_lag_sd   = sd(closefam_lag, na.rm=T),
+    closefam_flag     = ifelse(closefam     > closefam_mean + 4*closefam_sd, TRUE, FALSE),
+    closefam_lag_flag = ifelse(closefam_lag > closefam_mean + 4*closefam_sd, TRUE, FALSE),
+
+    closefam_out      = ifelse( closefam_flag & closefam_lag_flag, TRUE, FALSE),
+    # TODO : Cassandra, please finish for the other two variables
+    # closefri_out      = ifelse( closefri_flag & closefri__lag_flag, TRUE, FALSE),
+    # closechild_out    = ifelse( closefri_flag & closefri__lag_flag, TRUE, FALSE),
+    # 
+    # flag_out = ifelse(closefam_out | closefri_out | closechild_out, TRUE, FALSE)
+    flag_out_obs = closefam_out # replace this when finsih for all three  
+  ) %>% 
+  dplyr::group_by(id) %>% 
+  dplyr::mutate(
+    flag_out_id  = ifelse(sum(flag_out_obs)>0L, TRUE, FALSE)
+  ) %>% 
+  dplyr::ungroup()
+
+d %>% group_by(closefam_out) %>% summarize(n=n())
+d %>% filter(closefam_out) %>% distinct(id)
+
+# let's identify individuals who had a presumed outlier
+# in at least one of the variables
+id_outliers <- d %>% 
+  dplyr::filter(flag_out_id) %>% 
+  # dplyr::select(id, closefam, flag_out) %>%
+  dplyr::select(id) %>% 
+  as.list() %>% unlist(use.names = F)
+id_outliers
+# now, the character vector id_outliers contians the list of individuals,
+# who, we suspect provided an outlier on one of the three measures: close family, frinds, children
+
+
+
+
+
 # compute_socialnetwork_scale_scores <- function(d){
 #   #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
 #   d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
