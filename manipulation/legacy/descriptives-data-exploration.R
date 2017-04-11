@@ -81,6 +81,9 @@ over_waves <- function(ds, measure_name, exclude_values="") {
   
 }
 
+ds %>% distinct(hhidpn)
+# -----Examine lbwaves -------------------------------------------------------------
+
 # --------------------------------------------------------------------------------------
 # Number of close children (closechild) data correction 
 
@@ -207,6 +210,7 @@ ggplot(ds_sub, aes(x=lbwave, y=closefam, color=as.factor(hhidpn), group=hhidpn))
   scale_color_discrete(drop=TRUE, limits=levels(as.factor(ds_sub$hhidpn)))
 
 
+# create a section of script to implement data changes.
 row_to_change <- which(ds_temp$closefam>20 & ds_temp$famflag==1)
 row_to_change2 <- which((ds2$closefam >50 & is.na(ds2$diff_closefam))==TRUE)
 
@@ -218,83 +222,13 @@ for (i in row_to_change2){
   ds2[row_to_change2,"closefam"] <- NA
 }
 
-describe(ds2$closefam)
-describe(ds_diff$diff_closefam)
-describe(ds_diff$diff_closefri)
-#There are some values that are suspiciously high. 
-# hhidpn 53871010 has a value of 115 for close family members in 2008 but in 2012 when re-interviewed the number of close family members is 2.
-
-boxplot(closefam ~ lbwave2, ds2)
-boxplot(diff_closefam ~ lbwave2, ds2)
-boxplot(diff_closefri ~ lbwave2, ds_diff)
-check <- which((ds2$closefam >(3.5*5.47) & ds2$diff_closefam>(5.27*3.5))==TRUE)
-check2 <- which(ds$diff_closefam>21)
-
-for (i in check2){
-  print(ds_diff[i,])
-}
-ids <- as.vector(ds2[check,"hhidpn"])
-ids <- as.vector(ids[["hhidpn"]])
-class(ids)
-id <- c(3010, 3020)
-
-
-check_greaterthan20 <- dplyr::filter(ds2, ds2$hhidpn %in% ids)
-
-class(ds_diff$hhidpn)
-for (i in ids){
-  ds_diff %>% dplyr::filter(hhidpn==i)
-}
-class(ds_diff)
-
-library(ggplot2)
 ggplot(data=check_greaterthan20, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
   scale_color_discrete(guide = guide_legend(ncol=2))
 
-new_diff <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-extreme_diff_cases <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-greater_than50_cases <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-ggplot(extreme_diff_cases, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(extreme_diff_cases$hhidpn)))
-ggplot(greater_than50_cases, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(greater_than50_cases$hhidpn)))
-
-ggplot(ds_diff, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(ds_diff$hhidpn)))
-
-which(ds_diff$hhidpn==12274010)
-
-test<- ds_diff[,"hhidpn"] %in% ids
-# The social network and close social network variables should correspond for example if an individual has NA or 0 for does not have children then they cannot have children with whom they
-# are in a close relationship. 
-
-# When the data is cleaned compute two scores socialnetwork_total a count of whether or not network members exist in each of the 
-# four possible categories and close_social_network a count of the total number of relationships the respondent
-# considers close relationships across all relational categories.
-compute_socialnetwork_scale_scores <- function(d){
-  #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
-  d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
-  d[,"close_social_network"] <- apply(d[closevars],1,sum, na.rm = TRUE)
-  d$missing_count <- apply(d[networkvars], 1, function(z) sum(is.na(z)))
-  d <- d %>% 
-    dplyr::mutate( 
-      socialnetwork_total = ifelse(missing_count<4, 
-                                   socialnetwork_total,NA))
-  d$missing_count <- apply(d[closevars], 1, function(z) sum(is.na(z)))   
-  d <- d %>% 
-    dplyr::mutate( 
-      close_social_network = ifelse(missing_count<4, 
-                                    close_social_network,NA)
-    )
-  return(d)
-}
-# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
-ds_long <- ds_long %>% compute_socialnetwork_scale_scores()
+# --------------- close friends ----------------------------------
 
 # --------------------- serial-7s ------------------------------------
 # ------ create a serial 7 score for 2014 as this was not available in the HRS RAND longitudinal file
-
-dsR %>% dplyr::filter(hhidpn==32181040)
 
 # describeBy(ds$serial1, list(year=ds$year))
 # variables <- c("serial1","serial2","serial3","serial4","serial5")
@@ -415,23 +349,68 @@ for (i in recode_hhidpn){
 ds_14 %>% dplyr::filter(hhidpn==501750010)
 ds_14 %>% dplyr::filter(hhidpn==10050010)
 
-# Need to add this serial7 total for 2014 to the rest of the serial7 totals from HRS RAND.
-#create dataset with only the needed variables
-ds_tojoin <- subset(ds_14, select = c(year,hhidpn,serial7r_tot))
-dsR$year <- as.factor(dsR$year)
-ds_join <- dplyr::full_join(dsR, ds_tojoin, by = c("hhidpn", "year"))
-
-
-
-ds_join %>% dplyr::filter(hhidpn==207281010)
-
-ds_join$serial7r_tot <- ifelse(ds_join$year==2014, ds_join$serial7r_tot.y,ds_join$serial7r_tot.x)
-
-# save to dto as rand
-dto[["rand"]] <- ds_join
-
 describeBy(ds_join$serial7r_tot, list(year=ds_join$year))
 boxplot(serial7r_tot  ~ year, dsR)
+
+# ------exploration with subset of relevant variables -----------
+ds_long <- readRDS("./data-unshared/derived/data-long.rds")
+
+# Create a data frame including only waves with psychosocial variables.
+ds_lb <- subset(ds_long, lbwave>0)
+
+ds_slice <- ds_lb %>%
+  dplyr::slice(100:1000)
+
+# loneliness
+ggplot(data=ds_slice, aes(x=lbwave, y=score_loneliness_11, color=as.factor(hhidpn), group=hhidpn,show.legend = FALSE)) +geom_line() +
+  scale_color_discrete(guide = guide_legend(ncol=2)) +
+  stat_summary(fun.y = mean, geom = "line", aes(group=1))
+
+# spouse support
+ggplot(data=ds_slice, aes(x=lbwave, y=support_spouse_total, color=as.factor(hhidpn), group=hhidpn,show.legend = FALSE)) +geom_line() +
+  scale_color_discrete(guide = guide_legend(ncol=2)) +
+  stat_summary(fun.y = mean, geom = "line", aes(group=1))
+
+# friends support
+ggplot(data=ds_slice, aes(x=lbwave, y=support_fam_total, color=as.factor(hhidpn), group=hhidpn,show.legend = FALSE)) +geom_line() +
+  scale_color_discrete(guide = guide_legend(ncol=2)) +
+  stat_summary(fun.y = mean, geom = "line", aes(group=1))
+
+# word recall delayed memory 
+ggplot(data=ds_slice, aes(x=lbwave, y=wrectotd, color=as.factor(hhidpn), group=hhidpn,show.legend = FALSE)) +geom_line() +
+  scale_color_discrete(guide = guide_legend(ncol=2)) +
+  stat_summary(fun.y = mean, geom = "line", aes(group=1))
+
+psych::describeBy(ds_lb$wrectotd, list(year=ds_lb$lbwave))
+
+ds_wide<- readRDS("./data-unshared/derived/lb-data-wide.rds")
+
+ds_wide$male <- factor(ds_wide$male, levels= c("1","2"), labels = c("MALE", "FEMALE"))
+
+table(ds_wide$male)
+
+class(ds_wide$intage_r_1)
+mean(as.numeric(ds_wide$intage_r_1), na.rm = TRUE)
+range(ds_wide$intage_r_1, na.rm=TRUE)
+
+psych::describe(as.numeric(ds_wide$intage_r_1), na.rm = TRUE)
+psych::describe(as.numeric(ds_wide$intage_r_2), na.rm = TRUE)
+vars <- c("int","activity_mean_2","activity_mean_3","activity_mean_4")
+psych::describe(ds_wide[vars])
+
+vars <- c("activity_mean_1","activity_mean_2","activity_mean_3","activity_mean_4")
+psych::describe(ds_wide[vars])
+
+
+vars <- c("score_loneliness_11_1","score_loneliness_11_2","score_loneliness_11_3","score_loneliness_11_4")
+psych::describe(ds_wide[vars])
+
+
+vars <- c("wrectotd_1","wrectotd_2","wrectotd_3","wrectotd_4")
+psych::describe(ds_wide[vars])
+
+table(ds_wide$year_1)
+table(ds_wide$year_2)
 # ------ depression -------------
 ds <- dto$depression
 describeBy(ds, list(year=ds$year))

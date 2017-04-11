@@ -62,298 +62,97 @@ ds$closechild <- ifelse(ds$closechild>20, NA, ds$closechild)
 # and the change in number of close family members is greater than 4 standard deviations above the 
 # mean change (21) then recode to NA. This is 112 cases. 
 
-# Create a temporary data frame including only waves with psychosocial variables.
-ds_temp <- subset(ds, lbwave>0)
-
-# calculate the difference scores between close network member values
-ds_temp <- ds_temp %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    lag_closefam = abs(closefam - lag(closefam)),
-    lead_closefam = abs(lead(closefam)-closefam),
-    lag_closefri = abs(closefri - lag(closefri)),
-    lead_closefri = abs(lead(closefri)- closefri)
-  )%>% 
-  dplyr::ungroup()
-
-
-row_to_change <- which((ds2$closefam >(3.5*(5.47)) & ds2$diff_closefam>(5.27*3.5))==TRUE)
-
-check <- which(ds$closefam >50)
-for (i in check){
-  print(ds[i,])
-}
-ids <- ds[check,"hhidpn"]
-for (i in ids){
-  print(ds %>% dplyr::filter(hhidpn==i))
-}
-
-head(ds$hhidpn)
-ds_sub <- ds[ds$hhidpn %in% ids, ]
-
-
-
-# Create a line chart to examine growth over time
-
-ggplot(ds_sub, aes(x=lbwave2, y=closefam, color=hhidpn, group=hhidpn)) +geom_line()
-
-
-
-ds_temp <- subset(ds, lbwave2>0)
-
-ds2 <- ds_test %>% 
-  dplyr::group_by(hhidpn) %>% 
-  dplyr::mutate(
-    diff_closefam = abs(closefam - lag(closefam)),
-    diff_closefri = abs(closefri - lag(closefri))
-    )%>% 
-  dplyr::ungroup()
-
-
-row_to_change <- which((ds2$closefam >(3.5*5.47) & ds2$diff_closefam>(5.27*3.5))==TRUE)
-row_to_change2 <- which((ds2$closefam >50 & is.na(ds2$diff_closefam))==TRUE)
-
-for (i in row_to_change){
-  ds2[row_to_change,"closefam"] <- NA
-}
-
-for (i in row_to_change2){
-  ds2[row_to_change2,"closefam"] <- NA
-}
-
-describe(ds2$closefam)
-describe(ds_diff$diff_closefam)
-describe(ds_diff$diff_closefri)
-#There are some values that are suspiciously high. 
-# hhidpn 53871010 has a value of 115 for close family members in 2008 but in 2012 when re-interviewed the number of close family members is 2.
-
-boxplot(closefam ~ lbwave2, ds2)
-boxplot(diff_closefam ~ lbwave2, ds2)
-boxplot(diff_closefri ~ lbwave2, ds_diff)
-check <- which((ds2$closefam >(3.5*5.47) & ds2$diff_closefam>(5.27*3.5))==TRUE)
-check2 <- which(ds$diff_closefam>21)
-
-for (i in check2){
-  print(ds_diff[i,])
-}
-ids <- as.vector(ds2[check,"hhidpn"])
-ids <- as.vector(ids[["hhidpn"]])
-class(ids)
-id <- c(3010, 3020)
-
-
-check_greaterthan20 <- dplyr::filter(ds2, ds2$hhidpn %in% ids)
-
-class(ds_diff$hhidpn)
-for (i in ids){
-  ds_diff %>% dplyr::filter(hhidpn==i)
-}
-class(ds_diff)
-
-library(ggplot2)
-ggplot(data=check_greaterthan20, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(guide = guide_legend(ncol=2))
-
-new_diff <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-extreme_diff_cases <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-greater_than50_cases <- dplyr::filter(ds_diff, ds_diff$hhidpn %in% ids)
-ggplot(extreme_diff_cases, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(extreme_diff_cases$hhidpn)))
-ggplot(greater_than50_cases, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(greater_than50_cases$hhidpn)))
-
-ggplot(ds_diff, aes(x=lbwave2, y=closefam, color=as.factor(hhidpn), group=hhidpn)) +geom_line() +
-  scale_color_discrete(drop=TRUE, limits=levels(as.factor(ds_diff$hhidpn)))
-
-which(ds_diff$hhidpn==12274010)
-
-test<- ds_diff[,"hhidpn"] %in% ids
-# The social network and close social network variables should correspond for example if an individual has NA or 0 for does not have children then they cannot have children with whom they
-# are in a close relationship. 
-
-#Computes two scores socialnetwork_total a count of whether or not network members exist in each of the 
-# four possible categories and close_social_network a count of the total number of relationships the respondent
-# considers close relationships across all relational categories.
-compute_socialnetwork_scale_scores <- function(d){
-  #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
-  d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
-  d[,"close_social_network"] <- apply(d[closevars],1,sum, na.rm = TRUE)
-  d$missing_count <- apply(d[networkvars], 1, function(z) sum(is.na(z)))
-  d <- d %>% 
-    dplyr::mutate( 
-      socialnetwork_total = ifelse(missing_count<4, 
-                                   socialnetwork_total,NA))
-  d$missing_count <- apply(d[closevars], 1, function(z) sum(is.na(z)))   
-  d <- d %>% 
-    dplyr::mutate( 
-      close_social_network = ifelse(missing_count<4, 
-                                    close_social_network,NA)
-    )
-  return(d)
-}
-# d <- ds_long %>% dplyr::filter(hhidpn==10001010)
-ds_long <- ds_long %>% compute_socialnetwork_scale_scores()
-
-# ------ serial-7s ------
-# ------ create a serial 7 score for 2014 as this was not available in the HRS RAND longitudinal file
-
-dsR %>% dplyr::filter(hhidpn==32181040)
-
-# describeBy(ds$serial1, list(year=ds$year))
-# variables <- c("serial1","serial2","serial3","serial4","serial5")
-# for(v in variables){
-#   (p <- unique(ds[,v]) %>% as.numeric())
-#   (p <- p[!is.na(p)])
-#   ds[,v] <- plyr::mapvalues(ds[,v], from=c(999, 998, 993, 66), to=c(NA, NA, NA, 66)) 
+# compute_socialnetwork_scale_scores <- function(d){
+#   #d <- ds_long %>% dplyr::filter(hhidpn %in% c(3010,10281010))
+#   d[,"socialnetwork_total"] <- apply(d[networkvars],1,sum, na.rm = TRUE)
+#   d[,"close_social_network"] <- apply(d[closevars],1,sum, na.rm = TRUE)
+#   d$missing_count <- apply(d[networkvars], 1, function(z) sum(is.na(z)))
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       socialnetwork_total = ifelse(missing_count<4, 
+#                                    socialnetwork_total,NA))
+#   d$missing_count <- apply(d[closevars], 1, function(z) sum(is.na(z)))   
+#   d <- d %>% 
+#     dplyr::mutate( 
+#       close_social_network = ifelse(missing_count<4, 
+#                                     close_social_network,NA)
+#     )
+#   return(d)
 # }
 # 
-# check <- which(ds$serial1 == 992)
-# for (i in check){
-#   print(ds[i,])
-# }
-ds_14<- ds %>%
-  dplyr::filter(year==2014)
+# ds <- ds %>% compute_socialnetwork_scale_scores()
 
-sum(ds_14$serial1==93, na.rm = TRUE)
-# count instances of refused (refused coded as 999)
-sum(ds_14$serial1==999, na.rm=TRUE)
-# count instances of don't know or NA (coded as 998)
-sum(ds_14$serial1==998, na.rm = TRUE)
-sum(ds_14$serial1==66, na.rm = TRUE)
-# Returns the number of Don't Know or Not Ascertained responses
-sum(ds_14$serial2=="998")
-# Returns the number of Refused responses
-sum(ds_14$serial2=="999")
+# - select only those who are older than 65 for the analysis
 
-#Then recodes these so that they are NA
-variables <- c("serial1","serial2","serial3","serial4","serial5")
-for(v in variables){
-  (p <- unique(ds_14[,v]) %>% as.numeric())
-  (p <- p[!is.na(p)])
-  ds_14[,v] <- plyr::mapvalues(ds_14[,v], from=c(999, 998, 66), to=c(NA, NA, 66)) 
-}
+ds <- subset(ds, intage_r > 64)
 
+#-Select only relevant demographic variables and total scores for analysis----------
 
-#create a variable of the difference between serial 1 response and serial 2 response
-ds_14$serial1d <- as.numeric(7 + ds_14[,"serial1"])
-ds_14$serial2d <- ds_14$serial1 - ds_14$serial2
-ds_14$serial3d <- ds_14$serial2 - ds_14$serial3
-ds_14$serial4d <- ds_14$serial3 - ds_14$serial4
-ds_14$serial5d <- ds_14$serial4 - ds_14$serial5
+# list variables to keep separated for long to wide conversion
+variables_static <- c("hhidpn", "male", "birthyr_rand", "birthmo_rand", "race_rand", "hispanic_rand", "cohort", "raedyrs","raedegrm")
 
-
-sum(ds_14$serial1d == 100, na.rm = TRUE)
-sum(ds_14$serial1d != 100, na.rm = TRUE)
-sum(is.na(ds_14$serial1d))
-sum(ds_14$serial1d==200,na.rm = TRUE)
-sum(ds_14$serial1d==1000,na.rm = TRUE)
-sum(ds_14$serial1d > 100, na.rm = TRUE)
-
-
-ds_14[,"serial1s"] <- ifelse(ds_14[,"serial1d"] == 100, 1, ifelse(is.na(ds_14[,"serial1d"]), NA, 0))
-ds_14[,"serial2s"] <- ifelse(ds_14[,"serial2d"] == 7, 1, ifelse(is.na(ds_14[,"serial2d"]), NA, 0))
-ds_14[,"serial3s"] <- ifelse(ds_14[,"serial3d"] == 7, 1, ifelse(is.na(ds_14[,"serial3d"]), NA, 0))
-ds_14[,"serial4s"] <- ifelse(ds_14[,"serial4d"] == 7, 1, ifelse(is.na(ds_14[,"serial4d"]), NA, 0))
-ds_14[,"serial5s"] <- ifelse(ds_14[,"serial5d"] == 7, 1, ifelse(is.na(ds_14[,"serial5d"]), NA, 0))
-
-serial7_scores <- c("serial1s","serial2s","serial3s","serial4s","serial5s")
-ds_14$serial7r_tot <- apply(ds_14[serial7_scores],1,sum, na.rm = FALSE)
-
-
-psych::describe(ds_14[,"serial1s"])
-psych::describe(ds_14$serial7r_tot)
-
-# Checking for conditions to implement data cleaning rules
-
-# Rule 1 Case has four correct codes and one code that is the transposition of a correct answer is recoded to correct
-# Transposition of serial1 correct answer would be 39.
-which(ds_14$serial1 == 39 & ds_14$serial7r_tot == 4)
-
-# Transposition of serial 2 correct answer (86) would be 68. 
-which(ds_14$serial2 == 68 & ds_14$serial7r_tot == 4)
-ds_14[17558,]
-#none need to be recoded
-# Transposition of serial3 correcct answer (79) would be 97.
-#check for cases
-which(ds_14$serial3 == 97 & ds_14$serial7r_tot == 4)
-# examine the data for this case
-ds_14[7061,] # Do not change
-
-# Transposition of serial4 correct answer (72) would be 27.
-which(ds_14$serial4 == 27 & ds_14$serial7r_tot == 4)
-
-# Transposition of serial5 correct answer (65) would be 56.
-check <- which(ds_14$serial5 == 56 & ds_14$serial7r_tot == 4)
-for (i in check){
-  print(ds_14[i,])
-}
-# Recode the serial7r_tot for hhidpn 501750010, 524648010, & 905808010 to 5 as these meet the data cleaning criteria.
-
-
-# Check last data cleaning rule 
-# Case has four correct codes and one code that contains one of the single digits of a correct answer is recoded.
-# Serial1.
-which((ds_14$serial1 == 3 | ds_14$serial1 == 9) & ds_14$serial7r_tot == 4)
-# Serial 2 
-which((ds_14$serial2 == 8 | ds_14$serial2 == 6) & ds_14$serial7r_tot == 4)
-# Serial 3
-which((ds_14$serial3 == 7 | ds_14$serial3 == 9) & ds_14$serial7r_tot == 4)
-# Serial 4 
-which((ds_14$serial4 == 7 | ds_14$serial4 == 2) & ds_14$serial7r_tot == 4)
-# Serial 5
-which((ds_14$serial5 == 6 | ds_14$serial5 == 5)  & ds_14$serial7r_tot == 4)
-check <- which((ds_14$serial5 == 6 | ds_14$serial5 == 5)  & ds_14$serial7r_tot == 4)
-for (i in check){
-  print(ds_14[i,])
-}
-# hhidpn 500201010 meets change criteria.
-
-recode_hhidpn <- c(501750010, 524648010, 905808010, 500201010)
-for (i in recode_hhidpn){
-  row <- which(ds_14$hhidpn== 501750010)
-  ds_14[row, "serial7r_tot"] <- 5 
-}
-
-# examine two cases to check for accuracy of change
-ds_14 %>% dplyr::filter(hhidpn==501750010)
-ds_14 %>% dplyr::filter(hhidpn==10050010)
-
-# Need to add this serial7 total for 2014 to the rest of the serial7 totals from HRS RAND.
-#create dataset with only the needed variables
-ds_tojoin <- subset(ds_14, select = c(year,hhidpn,serial7r_tot))
-dsR$year <- as.factor(dsR$year)
-ds_join <- dplyr::full_join(dsR, ds_tojoin, by = c("hhidpn", "year"))
+variables_longitudinal <- c("year","lbwave","responded","proxy","countb20r","shhidpnr","rmaritalst","intage_r","rpartst","score_loneliness_3", "score_loneliness_11",
+                            "snspouse", "snchild", "snfamily", "snfriends",
+                            "support_spouse_total", "support_child_total", "support_fam_total", "support_friend_total",
+                            "strain_spouse_total", "strain_child_total", "strain_family_total", "strain_friends_total",
+                            "children_contact_mean", "family_contact_mean", "friend_contact_mean",
+                            "activity_mean", "activity_sum","srmemory", "srmemoryp","wrectoti", "wrectotd","mentalstatus_tot","vocab_total",
+                            "dep_total","healthcond", "exercise")  # not static
 
 
 
-ds_join %>% dplyr::filter(hhidpn==207281010)
+# a year based wide data set
+d_wide <- ds %>%
+  dplyr::select_(.dots = c(variables_static,  "year", variables_longitudinal))  %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal)  %>%
+  dplyr::mutate(year=as.character(year)) %>%
+  dplyr::mutate(male=as.character(male)) %>%
+  dplyr::arrange(hhidpn) %>% 
+  dplyr::mutate(
+    # variable = gsub("^v","",variable),
+    temp = paste0(variable,"_",year)) %>%
+  dplyr::select(-variable,-year) %>% 
+  tidyr::spread(temp, value)
 
-ds_join$serial7r_tot <- ifelse(ds_join$year==2014, ds_join$serial7r_tot.y,ds_join$serial7r_tot.x)
-
-# save to dto as rand
-dto[["rand"]] <- ds_join
-
-describeBy(ds_join$serial7r_tot, list(year=ds_join$year))
-boxplot(serial7r_tot  ~ year, dsR)
-# ------ depression -------------
-ds <- dto$depression
-describeBy(ds, list(year=ds$year))
-ds %>% dplyr::filter(hhidpn==32181040)
-
-# ----- health --------
-ds <- dto$health
-describeBy(ds, list(year=ds$year))
+d_long <- ds %>%
+  dplyr::select_(.dots = c(variables_static,  "lbwave", variables_longitudinal)) 
 
 
 
 
+ds_lb <- subset(d_long, lbwave>0 & lbwave!=5)
+# define variable properties for long-to-wide conversion
+(variables_longitudinal <- variables_longitudinal[!variables_longitudinal=="lbwave"]) # all except year
 
-# ---- save-to-disk ------------------------------------------------------------
-names(dto)
-lapply(dto, names)
-dto %>% object.size() %>% utils:::format.object_size("auto")
-# Save as a compress, binary R dataset.  It's no longer readable with a text editor, but it saves metadata (eg, factor information).
-saveRDS(dto, file="./data-unshared/derived/dto3.rds", compress="xz")
+# an lb wave based wide data set
+dlb_wide <- ds_lb %>%
+  dplyr::select_(.dots = c(variables_static,  "lbwave", variables_longitudinal))  %>%
+  tidyr::gather_(key="variable", value="value", variables_longitudinal)  %>%
+  dplyr::mutate(lbwave=as.character(lbwave)) %>%
+  dplyr::mutate(male=as.character(male)) %>%
+  dplyr::arrange(hhidpn) %>% 
+  dplyr::mutate(
+    # variable = gsub("^v","",variable),
+    temp = paste0(variable,"_",lbwave)) %>%
+  dplyr::select(-variable,-lbwave) %>% 
+  tidyr::spread(temp, value)
+
+
+# ---- save-r-data -------------------
+# tranformed data with supplementary variables
+#saveRDS(ds,"./data-unshared/derived/data-long-select.rds")
+
+saveRDS(d_wide, file="./data-unshared/derived/data-wide.rds")
+# lb wave based wide file
+saveRDS(dlb_wide, file="./data-unshared/derived/lb-data-wide.rds")
+
+# convert NA and NaN to 9999 for Mplus.
+dlb_wide[is.na(dlb_wide)] <- 9999
+d_long[is.nan(d_long)]<- 9999
+dlb_wide <- rapply(dlb_wide, f=function(dlb_wide[,"activity_mean_1"]) ifelse(is.nan(dlb_wide[,"activity_mean_1"]),9999,dlb_wide[,"activity_mean_1"]), how="replace")
+# prepared for Mplus
+write.table(dlb_wide, "./data-unshared/derived/wide-dataset.dat", row.names=F, col.names=F)
+write(names(dlb_wide), "./data-unshared/derived/wide-variable-names.txt", sep=" ")
 
 # ---- publisher ---------------------------------------
 path_report_1 <- "./reports/report.Rmd"
