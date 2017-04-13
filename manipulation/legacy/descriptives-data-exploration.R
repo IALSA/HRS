@@ -183,6 +183,8 @@ g1 <- ds_sub %>%
   facet_wrap("hhidpn") +
   theme_minimal()
 g1
+
+
 #-------------------
 # check values over 20 that do not have a discrepancy flag
 check <- which(ds_temp$closefam >20 & ds_temp$famflag!=1)

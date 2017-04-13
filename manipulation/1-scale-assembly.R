@@ -533,6 +533,15 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
+# for years 2010 and later there is a 1 to 7 scale but in 2008 it was a 1 to 6 scale 
+# recode the activity variable for years 2010 and later with the 6 and 7 response options binned together. 
+for(i in 1:20){
+  v = paste0("activity_",i)
+  vold = paste0("activityorig_",i)
+  ds_long[,vold] <- ds_long[,v]
+  ds_long[,v] <- plyr::mapvalues(ds_long[,v], from=7, to=6) 
+}
+
 # create a vector with names of items to be reverse scored 
 # All activity items are reversed scored 1 = Daily to 7 = Never/not relevant recode all so that higher numbers indicate more activity
 rename_meta <-rename_activity
@@ -541,6 +550,7 @@ reverse_these <- unique( rename_meta[rename_meta$reversed==1,"new_name"] ) %>% a
 reverse_these <- reverse_these[!is.na(reverse_these)]
 ds_long <- ds_long %>% 
   reverse_coding(reverse_these)
+
 
 # select the years with the full activity scale
 d_long <- ds_long %>% 
@@ -552,6 +562,7 @@ d_long <- compute_scale_score(d_long) %>%
   dplyr::select(year, hhidpn, activity_mean, activity_sum)
 # merge computed scales score to the general file
 ds_long <- ds_long %>% dplyr::left_join(d_long)
+head(ds_long)
 dto[["activity"]] <- ds_long
 
 #---------wellbeing------------
