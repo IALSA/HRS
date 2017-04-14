@@ -927,42 +927,15 @@ merge_multiple_files <- function(list, by_columns){
 
 ds_long <- merge_multiple_files(dto, by_columns = c("year","hhidpn"))
 
-# correct serial7r_tot to merge the 2014 var with the rand serial 7 data
-ds_long$serial7r_tot <- ifelse(ds_long$year==2014, ds_long$serial7r_tot.y,ds_long$serial7r_tot.x)
-
-# A list of the psychosocial variables to use to check for completion of the psychosocial variables.
-ds_lbvars <- ds_long %>% 
-  dplyr::select(score_loneliness_3, score_loneliness_11, snspouse, snchild, 
-                snfamily, snfriends,support_spouse_total, support_child_total, support_fam_total, 
-                support_friend_total, strain_spouse_total, strain_child_total, strain_family_total, 
-                strain_friends_total, children_contact_mean, family_contact_mean, friend_contact_mean,
-                activity_mean, activity_sum)
-
-# an indicator variable of whether or not there are any psychosocial variables not NA for that wave.
-ds_long$lbqs <- ifelse(rowSums(!is.na(ds_lbvars)) >1 , 1, 0)
-
-ds_long <- ds_long %>% 
-  dplyr::group_by(hhidpn, lbqs) %>% 
-  dplyr::mutate(
-    lbwavecount =seq(n())) %>% 
-  dplyr::ungroup()
-
-# create an indicator only of waves  
-ds_long$lbwave <- ifelse(ds_long$lbqs==1, ds_long$lbwavecount, 0)
-
-# subset the data frame to include only those belonging to a cohort.
-ds_long <- subset(ds_long, cohort!= 0)
-
-
 # # ---- save-to-disk ------------------------------------------------------------
 names(ds_long)
 
-saveRDS(ds_long, file="./data-unshared/derived/data-long.rds")
+saveRDS(ds_long, file="./data-unshared/derived/dto_raw.rds")
 
 # ---- object-verification ------------------------------------------------
 # the production of the dto object is now complete
 # we verify its structure and content:
-ds <- readRDS("./data-unshared/derived/dto.rds")
+ds <- readRDS("./data-unshared/derived/dto_raw.rds")
 names(ds)
 # at this point the ds is a long data file
 
