@@ -55,6 +55,44 @@ dto_new %>%
 dto_new <- dto_new %>% 
   dplyr::select(-serial7r_tot, -serial7r_tot_2014)
 
+# Two chunks below are taken from 
+# https://github.com/IALSA/MAP/blob/master/manipulation/1-transformations.R#L85
+# ---- temporal-traingulation --------------------
+ds <- ds %>% 
+  dplyr::mutate(
+    age_in_days_visit = round(age_at_visit * 365, 0),
+    age_in_days_bl    = round(age_at_bl * 365, 0),
+    birth_date        = date_at_bl - age_in_days_bl, 
+    birth_year        = lubridate::year(birth_date), 
+    date_at_visit     = birth_date + age_in_days_visit 
+  ) %>% 
+  dplyr::select(-age_in_days_visit, - age_in_days_bl)
+
+ds %>% 
+  dplyr::select(id,birth_date,birth_year,date_at_bl,age_at_bl, fu_year, date_at_visit, age_at_visit) %>%
+  dplyr::slice(1:10) %>% print() 
+
+
+# names_labels(ds) %>% head()
+# ---- compute-death-indicator --------------------
+ds <- ds %>% 
+  dplyr::group_by(id) %>%  
+  dplyr::mutate(   
+    died           = ifelse(any(!is.na(age_death)),1,0)
+  ) %>% 
+  dplyr::ungroup()
+# names_labels(ds) %>% head()
+
+# inspect transformation
+set.seed(49)
+ids <- sample(unique(ds$id), 3)
+ids <- 33027
+ds %>% 
+  dplyr::filter(id %in% ids) %>% 
+  dplyr::select(id, birth_date,age_at_bl,fu_year,age_at_visit,age_death, died  ) %>% 
+  print()
+
+
 
 # ---- create-leave-behind-indicator -----------------------------
 leave_behind_measures <- c(
