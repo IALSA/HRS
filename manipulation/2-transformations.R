@@ -50,10 +50,88 @@ dto_new <- dto_new %>%
 # Demonstration for a single case
 dto_new %>% 
   dplyr::select(id, year, starts_with("serial7r")) %>% 
-  dplry::filter(id == "3020") 
+  dplyr::filter(id == "3020") 
 # remove unnecessary columns
 dto_new <- dto_new %>% 
   dplyr::select(-serial7r_tot, -serial7r_tot_2014)
+
+
+# ---- create-leave-behind-indicator -----------------------------
+leave_behind_measures <- c(
+   "score_loneliness_3"    # label   
+  ,"score_loneliness_11"   # label 
+  ,"snspouse"              # label      
+  ,"snchild"               # label      
+  ,"snfamily"              # label  
+  ,"snfriends"             # label     
+  ,"support_spouse_total"  # label   
+  ,"support_child_total"   # label
+  ,"support_fam_total"     # label    
+  ,"support_friend_total"  # label       
+  ,"strain_spouse_total"   # label     
+  ,"strain_child_total"    # label     
+  ,"strain_family_total"   # label     
+  ,"strain_friends_total"  # label       
+  ,"children_contact_mean" # label      
+  ,"family_contact_mean"   # label  
+  ,"friend_contact_mean"   # label          
+  ,"activity_mean"         # label    
+  ,"activity_sum"          # label       
+)
+# 
+
+# What needs to be done
+# if a person-wave ( 1 row in dto_raw), on the variables `leave_behind_measures`
+# does not have at least a single valid value (in other words all values are NA or NaN)
+# then this person-wave row does not belong to the questionnaire 
+# TODO design algorithmic method of removing observations that do not belong
+# more specifically, create a tag variables, which would allow quick removal of irrelevant cases
+
+# dto_new %>% dplyr::glimpse()
+# a <- dto_new[dto_new$id==3020, c("id",leave_behind_measures) ]
+# b <- as.data.frame(a)[3,]
+# b %>% t()
+
+# # Demonstrate for a single person
+dto_new %>%
+  dplyr::filter(id == "3020") %>%
+  dplyr::select_(.dots = c("id","year",leave_behind_measures)) %>%
+  dplyr::mutate(
+    # add_valid_values = rowSums(.[leave_behind_measures],na.rm = T),
+    # add_valid_values = sum(is.na(.[leave_behind_measures])),  
+    
+    leave_behind_flag = ifelse(add_valid_values , TRUE, FALSE )
+  ) %>%
+  as.data.frame()
+
+
+  dplyr::group_by(id, leave_behind_flag) %>%
+  dplyr::mutate(
+    lb_wave_count = seq(n())
+  ) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    lb_wave = leave_behind_flag * lb_wave_count
+  ) %>%
+  as.data.frame()
+
+# implement for the entire data set
+dto <- dto_new %>% 
+  # dplyr::filter(id == "1010") %>%
+  dplyr::select_(.dots = c("id","year",leave_behind_measures)) %>%
+  dplyr::mutate(
+    add_valid_values = rowSums(.[leave_behind_measures],na.rm = T),
+    leave_behind_flag = ifelse(add_valid_values , TRUE, FALSE )
+  ) %>% 
+  dplyr::group_by(id, leave_behind_flag) %>% 
+  dplyr::mutate(
+    lb_wave_count = seq(n())
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(
+    lb_wave = leave_behind_flag * lb_wave_count
+  ) %>% 
+  as.data.frame() 
 
 
 # ---- basic-table ------------------------------------------------
