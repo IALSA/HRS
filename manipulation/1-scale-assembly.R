@@ -879,7 +879,10 @@ ds_long[,"serial4s"] <- ifelse(ds_long[,"serial4d"] == 7, 1, ifelse(is.na(ds_lon
 ds_long[,"serial5s"] <- ifelse(ds_long[,"serial5d"] == 7, 1, ifelse(is.na(ds_long[,"serial5d"]), NA, 0))
 
 serial7_scores <- c("serial1s","serial2s","serial3s","serial4s","serial5s")
-ds_long$serial7r_tot <- apply(ds_long[serial7_scores],1,sum, na.rm = FALSE)
+
+# serial7r_tot_2014 is created because RAND does not yet contain 2014 it must be added manually.
+# expect to modify in the future.
+ds_long$serial7r_tot_2014 <- apply(ds_long[serial7_scores],1,sum, na.rm = FALSE)
 
 # these hhidpn's were identified as meeting criteria for correction according to data cleaning rules.
 # see (document when available) for details.
@@ -890,7 +893,7 @@ for (i in recode_hhidpn){
 }
 
 
-dto[["serial7s"]] <- ds_long %>% dplyr::select(hhidpn, year, serial7r_tot)
+dto[["serial7s"]] <- ds_long %>% dplyr::select(hhidpn, year, serial7r_tot_2014)
 
 # ----- chronic-stressors -----------------------
 rename_chronicstressors <- ls_meta[["chronic-stressors"]]
