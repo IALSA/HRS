@@ -12,6 +12,7 @@ source("./scripts/functions-common.R") # used in multiple reports
 # See more : http://r-pkgs.had.co.nz/namespace.html#search-path
 library(magrittr) # Pipes
 library(ggplot2) # Graphs
+library(dplyr)
 # Functions of these packages will need to be qualified when used
 # See more: http://r-pkgs.had.co.nz/namespace.html#search-path
 requireNamespace("tidyr") #  data manipulation
@@ -23,21 +24,47 @@ path_dto_output <- "./data-unshared/derived/dto.rds"
 
 # ---- load-data ------------------------------------------------
 dto_raw <- readRDS(path_dto_input)
-ds <- dto_raw
+
 
 # ---- inspect-data ------------------------------------------------
+dto_raw %>% glimpse()
+
+
+# ---- tweak-data -------------------------------------------------
+dto_new <- dto_raw %>% 
+  dplyr::rename(
+    id = hhidpn
+  ) 
+
+dto_new %>% glimpse()
+
+# ---- correct-serial7 ------------------------------------------
+# RAND pull does not contain data for 2014 at the time of grooming (April 2017)
+# serial7r_tot_2014 is created to track the measure for serial7 in a separate column
+# expect to be modified in the future
+# implement correction
+dto_new <- dto_new %>% 
+  dplyr::mutate(
+    serial7_total = ifelse(year==2014, serial7r_tot_2014, serial7r_tot)
+  )
+# Demonstration for a single case
+dto_new %>% 
+  dplyr::select(id, year, starts_with("serial7r")) %>% 
+  dplry::filter(id == "3020") 
+# remove unnecessary columns
+dto_new <- dto_new %>% 
+  dplyr::select(-serial7r_tot, -serial7r_tot_2014)
+
+
 # ---- basic-table ------------------------------------------------
 # ---- basic-graph ------------------------------------------------
 
 # ----  ------------------------------------------------
 # ---- save-to-disk ------------------------------------------------
-saveRDS(dto, file = path_dto_output)
+# saveRDS(dto_new, file = path_dto_output)
 
 
 # DEVELOPMENTAL SCRIPT AFTER THIS LINE
-
-# correct serial7r_tot to merge the 2014 var with the rand serial 7 data
-ds_long$serial7r_tot <- ifelse(ds_long$year==2014, ds_long$serial7r_tot.y,ds_long$serial7r_tot.x)
 
 # A list of the psychosocial variables to use to check for completion of the psychosocial variables.
 ds_lbvars <- ds_long %>% 
