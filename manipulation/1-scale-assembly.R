@@ -110,8 +110,6 @@ compute_scale_score <- function(d){
 # ---- create-dto ---------------------
 dto <- list()
 
-# ------ RAND ----------------------------------------
-# Processes the variables from the RAND longitudinal data file. 
 
 # ----- RAND specific functions ---
 #renames and subsets the RAND data frame
@@ -146,7 +144,8 @@ replace_na <- function(x){
 }
 
 
-#------
+# ------ RAND ----------------------------------------
+# Processes the variables from the RAND longitudinal data file. 
 
 #read in the renaming rules for the specific variables
 rename_rand   <-  ls_meta[["rand"]]
@@ -920,6 +919,7 @@ dto[["chronic-stressors"]] <- ds_long
 
 # Now that all scales are identified, variables renamed, and total/summary scores calculated merge dto a single long data frame.
 
+# ---- merge-assembles-scales ----------------------------------
 # merge multiple datasets that are stored as elements of a list
 merge_multiple_files <- function(list, by_columns){
   Reduce(function( d_1, d_2 ) dplyr::full_join(d_1, d_2, by=by_columns), list)
