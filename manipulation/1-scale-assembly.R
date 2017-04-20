@@ -936,7 +936,7 @@ names(ds_long)
 saveRDS(ds_long, file="./data-unshared/derived/1-dto.rds")
 
 # ---- object-verification ------------------------------------------------
-# the production of the dto object is now complete
+# the production of the 1-dto object is now complete
 # we verify its structure and content:
 ds <- readRDS("./data-unshared/derived/1-dto.rds")
 names(ds)
