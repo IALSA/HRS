@@ -187,31 +187,6 @@ ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>%
   dplyr::arrange(hhidpn)
 head(ds_long)
 
-# ----- Creates a variable lbwave that designates wave number based on eligibility for the leave-behind questionnaire
-# for(i in unique(ds_long$hhidpn)){
-#   #id <- 10106010
-#   id <- i
-#   dsyear <- ds_long %>% dplyr::filter(hhidpn==id)
-#   wavecount <- 0
-#   wave_04 <- 0
-#   
-#   for(y in unique(dsyear$year)){
-#     #year <- 2012
-#     year <- y
-#     current_row <- which(ds_long$hhidpn==id & ds_long$year==year)
-#     cond_2004 <- !is.na(ds_long[current_row,"lbgiven"]) & ds_long[current_row,"lbgiven"] == "1"
-#     if(cond_2004==TRUE){
-#       wave_04 <- wave_04+1
-#       ds_long[current_row,"lbwave"] <- wave_04
-#       next}
-#     wave_cond <- !is.na(ds_long[current_row,"lbeligibility"]) & ds_long[current_row,"lbeligibility"] == "1"
-#     if(wave_cond==TRUE){
-#       wavecount <- wavecount+1
-#       ds_long[current_row,"lbwave"] <- wave_04 + wavecount
-#     }else{
-#       ds_long[current_row,"lbwave"] <- 0 
-#     }
-#     }}
 ds_long %>% dplyr::filter(hhidpn== "3020")
 
 dto[["demographics"]] <- ds_long
@@ -689,23 +664,23 @@ lapply(ls_temp,names)
 # now we combine datasets from all years into a single LONG dataset
 ds_long <- plyr::ldply(ls_temp, data.frame,.id = "year" ) %>% 
   dplyr::arrange(hhidpn)
-head(ds_long)
 
 mentalstatus_recode_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp")
 recoding_mentalstatus <- function(d, variables){
   for(v in variables){
     (p <- unique(d[,v]) %>% as.numeric())
     (p <- p[!is.na(p)])
-    d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,NA,NA)) 
+    d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,0,NA)) 
   }
   return(d)
 }
 
 # mental status items need to be recoded so that wrong answers are 0 (currently 5)
-# and 8 means Don't know or Not Ascertained and 9 means Refused
+# and 8 means Don't know or Not Ascertained and is recoded as 0 (consistent with Ofstedal et al. 2005)
+# 9 means Refused and is recoded as missing
 ds_long <- ds_long %>% 
   recoding_mentalstatus(mentalstatus_recode_vars)
-
+head(ds_long)
 # recode count backwards variable so that 5 (incorrect) is 0 and 9 (refused or NA) is NA.
 ds_long[,"countb"] <- plyr::mapvalues(ds_long[,"countb"], from = c(5,9), to =c(0,NA))
 ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,9), to =c(0,NA))
@@ -715,8 +690,11 @@ ds_long[,"count"] <- ifelse(ds_long[,"countb"]==6, ds_long[,"countb2"], ds_long[
 
 mentalstatus_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp","count")
 # Calculate a mental status total score by summing the items
-ds_long[,"mentalstatus_tot"] <- apply(ds_long[mentalstatus_vars],1,sum, na.rm = TRUE)
+ds_long[,"mentalstatus_tot"] <- apply(ds_long[mentalstatus_vars],1,sum, na.rm = F)
 
+tail(ds_long)
+
+table(ds_long$mentalstatus_tot)
 
 dto[["mentalstatus"]] <- ds_long
 
