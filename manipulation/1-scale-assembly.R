@@ -688,7 +688,7 @@ recoding_mentalstatus <- function(d, variables){
   for(v in variables){
     (p <- unique(d[,v]) %>% as.numeric())
     (p <- p[!is.na(p)])
-    d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,NA,NA)) 
+    d[,v] <- plyr::mapvalues(d[,v], from=c(5,8,9), to=c(0,0,NA)) 
   }
   return(d)
 }
@@ -700,14 +700,14 @@ ds_long <- ds_long %>%
 
 # recode count backwards variable so that 5 (incorrect) is 0 and 9 (refused or NA) is NA.
 ds_long[,"countb"] <- plyr::mapvalues(ds_long[,"countb"], from = c(5,9), to =c(0,NA))
-ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,8,9), to =c(0,NA,NA))
+ds_long[,"countb2"] <- plyr::mapvalues(ds_long[,"countb2"], from = c(5,8,9), to =c(0,0,NA))
 # if requested participants could start over if they requested this this should be used instead 
 # create a count variable to be used
 ds_long[,"count"] <- ifelse(ds_long[,"countb"]==6, ds_long[,"countb2"], ds_long[,"countb"])
 
 mentalstatus_vars <- c("msmonth", "msdate","msyear","msday","msnaming1","msnaming2","mspresident","msvp","count")
 # Calculate a mental status total score by summing the items
-ds_long[,"mentalstatus_tot"] <- apply(ds_long[mentalstatus_vars],1,sum, na.rm = TRUE)
+ds_long[,"mentalstatus_tot"] <- apply(ds_long[mentalstatus_vars],1,sum, na.rm = F)
 
 
 dto[["mentalstatus"]] <- ds_long
